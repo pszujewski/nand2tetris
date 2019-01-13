@@ -1,0 +1,14 @@
+/**
+ * Adds two 4-bit values.
+ */
+
+CHIP Add4 {
+    IN a[4], b[4];
+    OUT out[4], carry;
+
+    PARTS:
+    HalfAdder(a=a[0], b=b[0], sum=out[0], carry=carry0);
+    FullAdder(a=a[1], b=b[1], c=carry0, sum=out[1], carry=carry1);
+    FullAdder(a=a[2], b=b[2], c=carry1, sum=out[2], carry=carry2);
+    FullAdder(a=a[3], b=b[3], c=carry2, sum=out[3], carry=carry);
+}

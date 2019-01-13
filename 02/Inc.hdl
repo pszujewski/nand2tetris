@@ -1,0 +1,20 @@
+/**
+ * 1-bit incrementer:
+ * out = in + 1 (arithmetic addition)
+ * Depending on sel
+ */
+
+CHIP Inc {
+    IN in, sel;
+    OUT out, selout;
+
+    PARTS:
+    Not(in=in, out=notin);
+    Not(in=sel, out=notsel);
+    // out
+    Xor(a=in, b=sel, out=xorInSel);
+    Not(in=xorInSel, out=out);
+    // next sel
+    And(a=notin, b=notsel, out=notinAndnotsel);
+    Or(a=sel, b=notinAndnotsel, out=selout);
+}
