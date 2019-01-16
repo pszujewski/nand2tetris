@@ -1,0 +1,12 @@
+/**
+ * 16-bit checker for negative number:
+ * The in[15] (last bit should be 1 to indicate is a '2s complement')s
+ */
+
+CHIP IsNegative16 {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+      And(a=in[15], b=in[15], out=out);
+}

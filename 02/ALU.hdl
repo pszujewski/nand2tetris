@@ -26,6 +26,15 @@
 // if (out == 0) set zr = 1
 // if (out < 0) set ng = 1
 
+/**
+ * If in[16] is zero we have 0000000000000000
+ * If we not that, we get 1111111111111111
+ * If we AND together each bit, we should end up with '1' -> true
+ * then the number is indeed 0
+ * We are basically reducing each bit down to 1, applying AND operation each time against
+ * a current bit and an accumulator.
+ */
+
 CHIP ALU {
     IN  
         x[16], y[16],  // 16-bit inputs        
@@ -42,5 +51,25 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+        // Apply presets to both 16-bit inputs
+        PresetALUInput16(in=x, zin=zx, nin=nx, out=xpreset);
+        PresetALUInput16(in=y, zin=zy, nin=ny, out=ypreset);
+        // Select the added or 'And' bit-wise results
+        And16(a=xpreset, b=ypreset, out=xandySet);
+        Add16(a=xpreset, b=ypreset, out=xAddySet);
+        Mux16(a=xandySet, b=xAddySet, sel=f, out=fout);
+        // Select either out or !out
+        Not16(in=fout, out=notFout);
+        Mux16(a=fout, b=notFout, sel=no, out=noOut);
+        // Assign the zr and ng outputs:
+        // if the last (left most) bit is 1, the we are working with a 2s complement
+        // value, which signifies the bus represents a negative number in decimal notation
+        // so we 'AND' together the bit -> if 1, that operation will produce 1 as ng
+        IsNegative16(in=noOut, out=ng);
+        // Convert to NOT and then input -> if 000... then we will get 1111...
+        // Reducing together each bit in 1111... should produce 1, indicating true that it is 0 
+        Not16(in=noOut, out=notNoOut);
+        Reduce16(in=notNoOut, out=zr);
+        // Produce out
+        Add16(a=noOut, b=false, out=out);
 }

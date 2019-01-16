@@ -1,0 +1,13 @@
+/**
+ * Preset the ALU input  
+ */
+
+CHIP PresetALUInput16 {
+    IN in[16], zin, nin;
+    OUT out[16];
+
+    PARTS:
+    Mux16(a=in, b=false, sel=zin, out=zout);
+    Not16(in=zout, out=notzOut);
+    Mux16(a=zout, b=notzOut, sel=nin, out=out);
+}
