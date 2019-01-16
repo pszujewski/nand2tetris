@@ -1,4 +1,4 @@
-# Week 2: Boolean Arithmetic and ALU chip
+# Week 2: Boolean Arithmetic, the ALU chip and Combinational Boolean Logic
 
 To convert from decimal to binary, take the largest power of 2 and continue until you get the number expressed in decimal notation. For example, 87: write out 87 as the sum of powers of 2.
 
@@ -76,3 +76,7 @@ Some of the functions are arithmetic and some are logical. It might perform bit-
 Designing the ALU introduces the 'classical' hardware/ software trade-off question. Is you don't implement something in the hardware, sometimes you can implement it in the software (i.e operating system) that lies on top of the ALU. Which operations should the ALU perform?
 
 The ALU executes a function that is one out of a family of 18 "functions of interest."
+
+A note on addition and in particular the halfadder chip, which is basically a composition of an AND gate and a XOR gate. What's interesting here is that we are using two logical devices to do something that is semantically an addition operation. We derived the use of these chips from the HalfAdder's truth table (see HalfAdder.cmp)
+
+Another note: the significance ladder for chips, goes from right to left. So the most significant bit is the bit at the 16th position (i.e `a[16]`)
