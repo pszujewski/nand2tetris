@@ -12,3 +12,53 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+(INFINITELOOP)
+    // Initialize key variables
+    @SCREEN
+    D=A                         // Save address of first screen register
+    @registerTracker            // create var to track each register to clear or blacken
+    M=D                         //Init registerTracker to be first address for screen block
+
+    // Read Keyboard state
+    @KBD
+    D=M
+    @CLEARSCREEN
+    D;JEQ
+    @BLACKENSCREEN
+    D;JGT
+
+    (CLEARSCREEN)
+        @setTo
+        M=0
+        @SETSCREEN
+        0;JMP
+    
+    (BLACKENSCREEN)
+        @setTo
+        M=-1
+        @SETSCREEN
+        0;JMP
+    
+    (SETSCREEN)
+        @registerTracker
+        D=M                     // Get Mem[registerTracker] in D
+        @8192                   // Constant in A; totsl number of address in Screen memory map
+        D=A-D
+        // Check if we need to start over
+        @INFINITELOOP
+        D;JEQ
+        // Add 1 to registerTracker
+        @1
+        D=A
+        @registerTracker
+        M=M+D
+        @setTo
+        D=M
+        @registerTracker
+        A=M
+        M=D
+        @SETSCREEN
+        0;JMP
+
+
