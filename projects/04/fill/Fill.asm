@@ -41,23 +41,27 @@
         0;JMP
     
     (SETSCREEN)
-        @registerTracker
-        D=M                     // Get Mem[registerTracker] in D
-        @8192                   // Constant in A; totsl number of address in Screen memory map
-        D=A-D
-        // Check if we need to start over
-        @INFINITELOOP
-        D;JEQ
-        // Add 1 to registerTracker
-        @1
-        D=A
-        @registerTracker
-        M=M+D
+        // Set mem[regTracker] = setTo
         @setTo
         D=M
         @registerTracker
         A=M
         M=D
+
+        // Check if we need to start over
+        @registerTracker
+        D=M                      // Get Mem[registerTracker] in D
+        @24575                   // Constant in A; totsl number of address in Screen memory map
+        D=D-A
+        @INFINITELOOP
+        D;JEQ
+        
+        // Add 1 to registerTracker
+        @1
+        D=A
+        @registerTracker
+        M=M+D
+        
         @SETSCREEN
         0;JMP
 
