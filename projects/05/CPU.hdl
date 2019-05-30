@@ -39,5 +39,54 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // instruction[15] is the i-bit: 1 for C-instruction
+    Mux16(a=instruction, b=aluOutput, sel=instruction[15], out=toAReg);
+    // instruction[5] is the d1 "dest" bit for the A-Register
+    // If c-instrucition and dest is A-Register, this will be true
+    And(a=instruction[5], b=instruction[15], out=isD1CInstruction);
+    // Determine the load bit for the A-Register
+    Or(a=isD1CInstruction, b=instruction[15], out=loadARegister);
+    // Emit from the A-Register
+    ARegister(in=toAReg, load=loadARegister, out=aRegisterEmitted);
+
+    // Next, we determine the y-input for the ALU. It will be either A or M
+    // Is it the M value? Check the i-bit and C-instruction a-bit to determine
+    // instruction[12] is the a-bit in the C-instruction
+    And(a=instruction[12], b=instruction[15], out=loadYWithMValue);
+    // Get the y-input for the ALU
+    Mux16(a=aRegisterEmitted, b=inM, sel=loadYWithMValue, out=aluInY);
+
+    // The "load bit" (write to D register) is d2 field which is instruction[4] 
+    And(a=instruction[4], b=instruction[15], out=shouldLoadDRegister);
+    // Now we get the X-input for the ALU, which is always the D-register 
+    DRegister(in=aluOutput, load=shouldLoadDRegister, out=aluInX);
+
+    // Input into the ALU
+    ALU(x=aluInX, y=aluInY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOutput, zr=isZero, ng=isNegative);
+    Not(in=isNegative, out=isPositive);
+
+    // Determine the jump state for the instruction address counter. instruction[2] is j1 (aluOut < 0) 
+    And(a=instruction[2], b=instruction[15], out=hasJ1);
+    And(a=hasJ1, b=isNegative, out=isJ1Active);
+
+    // Evaluate for j2 field (aluOut === 0)
+    And(a=instruction[1], b=instruction[15], out=hasJ2);
+    And(a=hasJ2, b=isZero, out=isJ2Active);
+
+    // Evaluate for j3 field (aluOut > 0)
+    And(a=instruction[0], b=instruction[15], out=hasJ3);
+    And(a=hasJ3, b=isPositive, out=isJ3Active);
+
+    // Get the load (write-to) bit for the counter by evaluating jump conditions
+    Or(a=isJ1Active, b=isJ2Active, out=isJ1OrJ2);
+    Or(a=isJ1OrJ2, b=isJ3Active, out=shouldOverridePCInstruction);
+
+    // Advance the counter
+    // out(16) and pc(15) have different bus widths...
+    PC(in=aRegisterEmitted, load=shouldOverridePCInstruction, inc=true, reset=reset, out=pc);
+
+    // Set other CPU OUT variables
+    And(a=instruction[3], b=instruction[15], out=writeM);
+    outM=aluOutput;
+    addressM=aRegisterEmitted;
 }
