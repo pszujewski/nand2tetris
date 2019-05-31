@@ -39,15 +39,19 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // instruction[15] is the i-bit: 1 for C-instruction
+    // instruction[15] is the i-bit: 1 for C-instruction and 0 for A-Instruction. A-Instruction is a constant or a memory address
+    Not(in=instruction[15], out=isAInstruction);
+
+    // If C-instruction, pipe aluOut to A-Register; else pipe instruction (A) to A-Register
     Mux16(a=instruction, b=aluOutput, sel=instruction[15], out=toAReg);
     // instruction[5] is the d1 "dest" bit for the A-Register
     // If c-instrucition and dest is A-Register, this will be true
     And(a=instruction[5], b=instruction[15], out=isD1CInstruction);
+
     // Determine the load bit for the A-Register
-    Or(a=isD1CInstruction, b=instruction[15], out=loadARegister);
+    Or(a=isD1CInstruction, b=isAInstruction, out=loadARegister);
     // Emit from the A-Register
-    ARegister(in=toAReg, load=loadARegister, out=aRegisterEmitted);
+    ARegister(in=toAReg, load=loadARegister, out=aRegisterEmitted, out[0..14]=addressM);
 
     // Next, we determine the y-input for the ALU. It will be either A or M
     // Is it the M value? Check the i-bit and C-instruction a-bit to determine
@@ -62,8 +66,12 @@ CHIP CPU {
     DRegister(in=aluOutput, load=shouldLoadDRegister, out=aluInX);
 
     // Input into the ALU
-    ALU(x=aluInX, y=aluInY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOutput, zr=isZero, ng=isNegative);
-    Not(in=isNegative, out=isPositive);
+    ALU(x=aluInX, y=aluInY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOutput, out=outM, zr=isZero, ng=isNegative);
+    
+    // zr and ng tell us if ALU out is zero or negative. Determine if out is positive too.
+    Not(in=isZero, out=isNotZero);
+    Not(in=isNegative, out=isNotNegative);
+    And(a=isNotZero, b=isNotNegative, out=isPositive);
 
     // Determine the jump state for the instruction address counter. instruction[2] is j1 (aluOut < 0) 
     And(a=instruction[2], b=instruction[15], out=hasJ1);
@@ -82,11 +90,9 @@ CHIP CPU {
     Or(a=isJ1OrJ2, b=isJ3Active, out=shouldOverridePCInstruction);
 
     // Advance the counter
-    // out(16) and pc(15) have different bus widths...
-    PC(in=aRegisterEmitted, load=shouldOverridePCInstruction, inc=true, reset=reset, out=pc);
+    Not(in=shouldOverridePCInstruction, out=shouldInc);
+    PC(in=aRegisterEmitted, load=shouldOverridePCInstruction, inc=shouldInc, reset=reset, out[0..14]=pc);
 
     // Set other CPU OUT variables
     And(a=instruction[3], b=instruction[15], out=writeM);
-    outM=aluOutput;
-    addressM=aRegisterEmitted;
 }
