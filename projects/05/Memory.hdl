@@ -27,5 +27,19 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Pipe load bit into Memory chips, using address bits as the selectors
+    // for the DMux and Mux combinational chips
+    DMux(in=load, sel=address[14], a=toRam, b=toScreen);
+
+    // Memory chips all receive address and in; load is based on combinational logic
+    RAM16K(in=in, load=toRam, address=address[0..13], out=ramOut);
+    Screen(in=in, load=toScreen, address=address[0..12], out=ScreenOut);
+    Keyboard(out=keyBoardOut);
+
+    // Evaluate if address[13] is true or false
+    Mux16(a=ScreenOut, b=keyBoardOut, sel=address[13], out=address13Out);
+
+    // Address 14 bit must be asserted for the address to correspond to either
+    // the Screen or Keyboard memory maps
+    Mux16(a=ramOut, b=address13Out, sel=address[14], out=out);
 }
