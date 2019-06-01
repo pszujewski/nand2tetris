@@ -19,5 +19,11 @@ CHIP Computer {
     IN reset;
 
     PARTS:
-    // Put your code here:
+    // Instruction read-only memory; programs are loaded into ROM
+    ROM32K(address=pcOut, out=instruction);
+    
+    CPU(inM=memOut, instruction=instruction, reset=reset, outM=outM, writeM=writeM, addressM=addressM, pc=pcOut);
+
+    // Data memory
+    Memory(in=outM, load=writeM, address=addressM, out=memOut);
 }
