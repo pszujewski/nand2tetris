@@ -1,0 +1,98 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // instruction[15] is the i-bit: 1 for C-instruction and 0 for A-Instruction. A-Instruction is a constant or a memory address
+    Not(in=instruction[15], out=isAInstruction);
+
+    // If C-instruction, pipe aluOut to A-Register; else pipe instruction (A) to A-Register
+    Mux16(a=instruction, b=aluOutput, sel=instruction[15], out=toAReg);
+    // instruction[5] is the d1 "dest" bit for the A-Register
+    // If c-instrucition and dest is A-Register, this will be true
+    And(a=instruction[5], b=instruction[15], out=isD1CInstruction);
+
+    // Determine the load bit for the A-Register
+    Or(a=isD1CInstruction, b=isAInstruction, out=loadARegister);
+    // Emit from the A-Register
+    ARegister(in=toAReg, load=loadARegister, out=aRegisterEmitted, out[0..14]=addressM);
+
+    // Next, we determine the y-input for the ALU. It will be either A or M
+    // Is it the M value? Check the i-bit and C-instruction a-bit to determine
+    // instruction[12] is the a-bit in the C-instruction
+    And(a=instruction[12], b=instruction[15], out=loadYWithMValue);
+    // Get the y-input for the ALU
+    Mux16(a=aRegisterEmitted, b=inM, sel=loadYWithMValue, out=aluInY);
+
+    // The "load bit" (write to D register) is d2 field which is instruction[4] 
+    And(a=instruction[4], b=instruction[15], out=shouldLoadDRegister);
+    // Now we get the X-input for the ALU, which is always the D-register 
+    DRegister(in=aluOutput, load=shouldLoadDRegister, out=aluInX);
+
+    // Input into the ALU
+    ALU(x=aluInX, y=aluInY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOutput, out=outM, zr=isZero, ng=isNegative);
+    
+    // zr and ng tell us if ALU out is zero or negative. Determine if out is positive too.
+    Not(in=isZero, out=isNotZero);
+    Not(in=isNegative, out=isNotNegative);
+    And(a=isNotZero, b=isNotNegative, out=isPositive);
+
+    // Determine the jump state for the instruction address counter. instruction[2] is j1 (aluOut < 0) 
+    And(a=instruction[2], b=instruction[15], out=hasJ1);
+    And(a=hasJ1, b=isNegative, out=isJ1Active);
+
+    // Evaluate for j2 field (aluOut === 0)
+    And(a=instruction[1], b=instruction[15], out=hasJ2);
+    And(a=hasJ2, b=isZero, out=isJ2Active);
+
+    // Evaluate for j3 field (aluOut > 0)
+    And(a=instruction[0], b=instruction[15], out=hasJ3);
+    And(a=hasJ3, b=isPositive, out=isJ3Active);
+
+    // Get the load (write-to) bit for the counter by evaluating jump conditions
+    Or(a=isJ1Active, b=isJ2Active, out=isJ1OrJ2);
+    Or(a=isJ1OrJ2, b=isJ3Active, out=shouldOverridePCInstruction);
+
+    // Advance the counter
+    Not(in=shouldOverridePCInstruction, out=shouldInc);
+    PC(in=aRegisterEmitted, load=shouldOverridePCInstruction, inc=shouldInc, reset=reset, out[0..14]=pc);
+
+    // Set other CPU OUT variables
+    And(a=instruction[3], b=instruction[15], out=writeM);
+}

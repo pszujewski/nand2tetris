@@ -6,7 +6,6 @@
   "scripts": {
     "clean": "rimraf ./node_modules",
     "build": "tsc && eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "postinstall": "npm build",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "start": "node src/App.js"
   },
