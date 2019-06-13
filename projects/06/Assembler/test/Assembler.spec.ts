@@ -50,7 +50,7 @@ describe("Assembler getASMTokens for a source ASM file", () => {
             } catch (err) {
                 result = err;
             }
-            expect(result).to.equal(asmTest.expectedTokens);
+            expect(result).to.deep.equal(asmTest.expectedTokens);
         }
     });
 });

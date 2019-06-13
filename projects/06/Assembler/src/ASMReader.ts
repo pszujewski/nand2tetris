@@ -2,18 +2,20 @@ import * as fs from "fs";
 
 export default class ASMReader {
     public async getTokens(path: string): Promise<string[]> {
-        //let tokens: string[];
-        let source: Buffer;
-        let rawFile: string;
+        let tokens: string[];
 
         try {
-            source = await this.readFileAsync(path);
-            rawFile = source.toString();
-            const tokens: string[] = rawFile.split("\n");
+            const source: Buffer = await this.readFileAsync(path);
+            const rawFile: string = source.toString();
+
+            tokens = rawFile.replace(/\r/g, "").split("\n");
+            tokens = tokens
+                .map(t => t.trim())
+                .filter(t => t && t.length > 0 && t.indexOf("//") !== 0);
         } catch (err) {
             throw err;
         }
-        return [];
+        return tokens;
     }
 
     private readFileAsync(path: string): Promise<Buffer> {
