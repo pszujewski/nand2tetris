@@ -11,7 +11,14 @@ export default class ASMReader {
             tokens = rawFile.replace(/\r/g, "").split("\n");
             tokens = tokens
                 .map(t => t.trim())
-                .filter(t => t && t.length > 0 && t.indexOf("//") !== 0);
+                .filter(t => t && t.length > 0 && t.indexOf("//") !== 0)
+                .map(t => {
+                    const idx: number = t.indexOf("//");
+                    if (idx > -1) {
+                        return t.replace(/\/\/.+/g, "").trim();
+                    }
+                    return t;
+                });
         } catch (err) {
             throw err;
         }
