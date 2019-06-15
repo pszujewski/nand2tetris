@@ -40,7 +40,11 @@ export default class Parser {
     };
 
     private isLCommand(instruction: string): boolean {
-        return instruction.match(/^\([\w\d]*\)$/g).length > 0;
+        const matches: RegExpMatchArray = instruction.match(/^\([\w\d]*\)$/g);
+        if (Array.isArray(matches)) {
+            return matches.length > 0;
+        }
+        return false;
     }
 
     private isACommand(instruction: string): boolean {
@@ -78,18 +82,40 @@ export default class Parser {
     }
 
     private getCCommand(instruction: string): Command {
-        // const dest =
+        const dest: string = this.getCDest(instruction);
+        const isJump: boolean = instruction.indexOf(";J") > -1;
+        const comp: string = this.getCompField(instruction);
 
         return {
             commandType: CommandType.CCommand,
             tokens: {
                 symbol: null,
-                value: 0,
-                dest: null,
-                comp: null,
-                jump: null,
+                value: null,
+                dest,
+                comp,
+                jump: isJump ? this.getCJump(instruction) : null,
             },
         };
+    }
+
+    private getCompField(instruction: string): string {
+        let comp: string;
+        comp = instruction.replace(/(;J\w+)/g, "").trim();
+        comp = comp.replace(/(\w=)/g, "").trim();
+        return comp;
+    }
+
+    private getCJump(instruction: string): string {
+        const idx: number = instruction.indexOf("J");
+        return instruction.substring(idx).trim();
+    }
+
+    private getCDest(instruction: string): string {
+        const idx: number = instruction.indexOf("=");
+        if (idx > -1) {
+            return instruction.substring(0, idx).trim();
+        }
+        return null;
     }
 
     private getLCommand(instruction: string, idx: number): Command {

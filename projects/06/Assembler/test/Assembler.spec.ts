@@ -1,6 +1,24 @@
 import { expect } from "chai";
 import Assembler from "../src/Assembler";
-import { Command, CommandType } from "../src/types";
+
+interface Command {
+    commandType: CommandType;
+    tokens: CommandTokens;
+}
+
+interface CommandTokens {
+    symbol: string;
+    value: number;
+    dest: string;
+    comp: string;
+    jump: string;
+}
+
+enum CommandType {
+    ACommand = "ACommand",
+    CCommand = "CCommand",
+    LCommand = "LCommand",
+}
 
 interface ASMInputTest {
     path: string;
@@ -38,151 +56,153 @@ const asmTests: ASMInputTest[] = [
     },
 ];
 
-describe("Assembler getASMTokens for a source ASM file", () => {
-    const assembler: Assembler = new Assembler();
-    let asmTest: ASMInputTest;
+describe("Assember", () => {
+    describe("Assembler getASMTokens for a source ASM file", () => {
+        const assembler: Assembler = new Assembler();
+        let asmTest: ASMInputTest;
 
-    it("Should parse asm file input into its tokens", async () => {
-        let result: string[];
+        it("Should parse asm file input into its tokens", async () => {
+            let result: string[];
 
-        for (asmTest of asmTests) {
-            try {
-                result = await assembler.getASMTokens(asmTest.path);
-            } catch (err) {
-                result = err;
+            for (asmTest of asmTests) {
+                try {
+                    result = await assembler.getASMTokens(asmTest.path);
+                } catch (err) {
+                    result = err;
+                }
+                expect(result).to.deep.equal(asmTest.expectedTokens);
             }
-            expect(result).to.deep.equal(asmTest.expectedTokens);
-        }
+        });
     });
-});
 
-describe("Assember::parseASMInstructions to get the Commands", () => {
-    const assembler: Assembler = new Assembler();
+    describe("Assember::parseASMInstructions to get the Commands", () => {
+        const assembler: Assembler = new Assembler();
 
-    it("Should parse the tokens from Add.asm into commands", () => {
-        let commands: Command[];
-        const exTokens: string[] = [
-            "@2",
-            "D=A",
-            "@3",
-            "D=D+A",
-            "@0",
-            "M=D",
-            "@100",
-            "D=A",
-            "D;JEQ",
-            "0;JMP",
-        ];
+        it("Should parse the tokens from Add.asm into commands", () => {
+            let commands: Command[];
+            const exTokens: string[] = [
+                "@2",
+                "D=A",
+                "@3",
+                "D=D+A",
+                "@0",
+                "M=D",
+                "@100",
+                "D=A",
+                "D;JEQ",
+                "0;JMP",
+            ];
 
-        const expected: Command[] = [
-            {
-                commandType: CommandType.ACommand,
-                tokens: {
-                    symbol: null,
-                    value: 2,
-                    dest: null,
-                    comp: null,
-                    jump: null,
+            const expected: Command[] = [
+                {
+                    commandType: CommandType.ACommand,
+                    tokens: {
+                        symbol: null,
+                        value: 2,
+                        dest: null,
+                        comp: null,
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: "D",
-                    comp: "A",
-                    jump: null,
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: "D",
+                        comp: "A",
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.ACommand,
-                tokens: {
-                    symbol: null,
-                    value: 3,
-                    dest: null,
-                    comp: null,
-                    jump: null,
+                {
+                    commandType: CommandType.ACommand,
+                    tokens: {
+                        symbol: null,
+                        value: 3,
+                        dest: null,
+                        comp: null,
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: "D",
-                    comp: "D+A",
-                    jump: null,
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: "D",
+                        comp: "D+A",
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.ACommand,
-                tokens: {
-                    symbol: null,
-                    value: 0,
-                    dest: null,
-                    comp: null,
-                    jump: null,
+                {
+                    commandType: CommandType.ACommand,
+                    tokens: {
+                        symbol: null,
+                        value: 0,
+                        dest: null,
+                        comp: null,
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: "M",
-                    comp: "D",
-                    jump: null,
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: "M",
+                        comp: "D",
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.ACommand,
-                tokens: {
-                    symbol: null,
-                    value: 100,
-                    dest: null,
-                    comp: null,
-                    jump: null,
+                {
+                    commandType: CommandType.ACommand,
+                    tokens: {
+                        symbol: null,
+                        value: 100,
+                        dest: null,
+                        comp: null,
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: "D",
-                    comp: "A",
-                    jump: null,
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: "D",
+                        comp: "A",
+                        jump: null,
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: null,
-                    comp: "D",
-                    jump: "JEQ",
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: null,
+                        comp: "D",
+                        jump: "JEQ",
+                    },
                 },
-            },
-            {
-                commandType: CommandType.CCommand,
-                tokens: {
-                    symbol: null,
-                    value: null,
-                    dest: null,
-                    comp: "0",
-                    jump: "JMP",
+                {
+                    commandType: CommandType.CCommand,
+                    tokens: {
+                        symbol: null,
+                        value: null,
+                        dest: null,
+                        comp: "0",
+                        jump: "JMP",
+                    },
                 },
-            },
-        ];
+            ];
 
-        try {
-            commands = assembler.parseASMInstructions(exTokens);
-        } catch (err) {
-            commands = err;
-        }
+            try {
+                commands = assembler.parseASMInstructions(exTokens);
+            } catch (err) {
+                commands = err;
+            }
 
-        expect(commands).to.deep.equal(expected);
+            expect(commands).to.deep.equal(expected);
+        });
     });
 });
