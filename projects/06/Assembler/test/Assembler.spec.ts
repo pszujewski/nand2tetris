@@ -56,6 +56,111 @@ const asmTests: ASMInputTest[] = [
     },
 ];
 
+const commandsExample: Command[] = [
+    {
+        commandType: CommandType.ACommand,
+        tokens: {
+            symbol: null,
+            value: 2,
+            dest: null,
+            comp: null,
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: "D",
+            comp: "A",
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.ACommand,
+        tokens: {
+            symbol: null,
+            value: 3,
+            dest: null,
+            comp: null,
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: "D",
+            comp: "D+A",
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.ACommand,
+        tokens: {
+            symbol: null,
+            value: 0,
+            dest: null,
+            comp: null,
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: "M",
+            comp: "D",
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.ACommand,
+        tokens: {
+            symbol: null,
+            value: 100,
+            dest: null,
+            comp: null,
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: "D",
+            comp: "A",
+            jump: null,
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: null,
+            comp: "D",
+            jump: "JEQ",
+        },
+    },
+    {
+        commandType: CommandType.CCommand,
+        tokens: {
+            symbol: null,
+            value: null,
+            dest: null,
+            comp: "0",
+            jump: "JMP",
+        },
+    },
+];
+
+const binaryCodesExample = ["0000000000000010"];
+
 describe("Assember", () => {
     describe("Assembler getASMTokens for a source ASM file", () => {
         const assembler: Assembler = new Assembler();
@@ -93,116 +198,29 @@ describe("Assember", () => {
                 "0;JMP",
             ];
 
-            const expected: Command[] = [
-                {
-                    commandType: CommandType.ACommand,
-                    tokens: {
-                        symbol: null,
-                        value: 2,
-                        dest: null,
-                        comp: null,
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: "D",
-                        comp: "A",
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.ACommand,
-                    tokens: {
-                        symbol: null,
-                        value: 3,
-                        dest: null,
-                        comp: null,
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: "D",
-                        comp: "D+A",
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.ACommand,
-                    tokens: {
-                        symbol: null,
-                        value: 0,
-                        dest: null,
-                        comp: null,
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: "M",
-                        comp: "D",
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.ACommand,
-                    tokens: {
-                        symbol: null,
-                        value: 100,
-                        dest: null,
-                        comp: null,
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: "D",
-                        comp: "A",
-                        jump: null,
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: null,
-                        comp: "D",
-                        jump: "JEQ",
-                    },
-                },
-                {
-                    commandType: CommandType.CCommand,
-                    tokens: {
-                        symbol: null,
-                        value: null,
-                        dest: null,
-                        comp: "0",
-                        jump: "JMP",
-                    },
-                },
-            ];
-
             try {
                 commands = assembler.parseASMInstructions(exTokens);
             } catch (err) {
                 commands = err;
             }
 
-            expect(commands).to.deep.equal(expected);
+            expect(commands).to.deep.equal(commandsExample);
+        });
+    });
+
+    describe("Assembler::translateToMachineCode", () => {
+        const assembler: Assembler = new Assembler();
+
+        it("Should parse commands array into array of binary codes", () => {
+            let result: string[];
+
+            try {
+                result = assembler.translateToMachineCode(commandsExample);
+            } catch (err) {
+                result = err;
+            }
+
+            expect(result).to.deep.equal(binaryCodesExample);
         });
     });
 });
