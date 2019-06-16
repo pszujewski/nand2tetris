@@ -29,6 +29,7 @@ class Main {
             tokens = await assembler.getASMTokens(pathToFile);
             commands = assembler.parseASMInstructions(tokens);
             machineCodes = assembler.translateToMachineCode(commands);
+            await assembler.write(machineCodes, "test.asm");
         } catch (err) {
             Log.error(err.message);
         }
