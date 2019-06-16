@@ -5,14 +5,14 @@ import Log from "./Util";
 import { Command } from "./types";
 
 export default class Assembler {
-    private asmReader: ASMReader;
-    private parser: Parser;
     private code: Code;
+    private parser: Parser;
+    private asmReader: ASMReader;
 
     public constructor() {
-        this.asmReader = new ASMReader();
-        this.parser = new Parser();
         this.code = new Code();
+        this.parser = new Parser();
+        this.asmReader = new ASMReader();
     }
 
     public async getASMTokens(pathToFile: string): Promise<string[]> {

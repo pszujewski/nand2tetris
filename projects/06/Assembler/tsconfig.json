@@ -7,7 +7,8 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "lib": ["es7", "es2017.object", "dom"],
-        "typeRoots": ["./node_modules/@types", "./src/types"]
+        "typeRoots": ["./node_modules/@types", "./src/types"],
+        "outDir": "./out"
     },
     "filesGlob": ["/src/**/*.ts", "/test/**/*.ts"],
     "exclude": ["node_modules"]
