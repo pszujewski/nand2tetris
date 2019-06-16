@@ -234,4 +234,25 @@ describe("Assember", () => {
             expect(result).to.deep.equal(binaryCodesExample);
         });
     });
+
+    describe("Assembler", () => {
+        const assembler: Assembler = new Assembler();
+
+        it("Should read commands from a file and parse them into binary machine code", async () => {
+            let result: string[];
+            let tokens: string[];
+            let commands: Command[];
+            const asmTest: ASMInputTest = asmTests[1];
+
+            try {
+                tokens = await assembler.getASMTokens(asmTest.path);
+                commands = assembler.parseASMInstructions(tokens);
+                result = assembler.translateToMachineCode(commands);
+            } catch (err) {
+                result = err;
+            }
+
+            expect(result).to.deep.equal([]);
+        });
+    });
 });
