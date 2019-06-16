@@ -9,8 +9,13 @@ export default class Assembler {
     private parser: Parser;
     private code: Code;
 
-    public async getASMTokens(pathToFile: string): Promise<string[]> {
+    public constructor() {
         this.asmReader = new ASMReader();
+        this.parser = new Parser();
+        this.code = new Code();
+    }
+
+    public async getASMTokens(pathToFile: string): Promise<string[]> {
         let tokens: string[];
 
         try {
@@ -22,11 +27,10 @@ export default class Assembler {
     }
 
     public parseASMInstructions(asmTokens: string[]) {
-        this.parser = new Parser(asmTokens);
         let commands: Command[];
 
         try {
-            commands = this.parser.parse();
+            commands = this.parser.parse(asmTokens);
         } catch (err) {
             Log.error(err.message);
         }
@@ -35,7 +39,6 @@ export default class Assembler {
     }
 
     public translateToMachineCode(commands: Command[]): string[] {
-        this.code = new Code();
         let binaryCodes: string[];
 
         try {

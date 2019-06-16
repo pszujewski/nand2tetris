@@ -1,4 +1,6 @@
+import SymbolTable from "./SymbolTable";
 import { Command, CommandType } from "./types";
+
 /**
  * Breaks each assembly command into its underlying components (fields and symbols)
  * Parser receives an array of assembly code instructions. Each index in the array contains
@@ -6,17 +8,17 @@ import { Command, CommandType } from "./types";
  */
 
 export default class Parser {
-    private asmInstructions: string[] = null;
+    private symbolTable: SymbolTable;
 
-    public constructor(asmInstructions: string[]) {
-        this.asmInstructions = asmInstructions;
+    public constructor() {
+        this.symbolTable = new SymbolTable();
     }
 
-    public parse(): Command[] {
+    public parse(asmInstructions: string[]): Command[] {
         let commands: Command[];
 
         try {
-            commands = this.asmInstructions.map(this.parseOneInstruction);
+            commands = asmInstructions.map(this.parseOneInstruction);
         } catch (err) {
             throw err;
         }
@@ -77,8 +79,7 @@ export default class Parser {
      * the symbol table
      */
     private resolveSymbol(asmSymbol: string): number {
-        console.log(asmSymbol);
-        return null;
+        return this.symbolTable.resolveSymbol(asmSymbol);
     }
 
     private getCCommand(instruction: string): Command {
