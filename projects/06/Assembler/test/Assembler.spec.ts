@@ -252,7 +252,7 @@ describe("Assember", () => {
                 result = err;
             }
 
-            expect(result).to.deep.equal([]);
+            expect(result[0]).to.equal("0000000000000000");
         });
     });
 });

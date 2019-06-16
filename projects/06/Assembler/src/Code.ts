@@ -6,7 +6,8 @@ export default class Code {
         let machineCodes: string[];
 
         try {
-            machineCodes = commands.map(this.translate);
+            const codes: string[] = commands.map(this.translate);
+            machineCodes = codes.filter((c: string) => c !== "L_COMMAND");
         } catch (err) {
             throw err;
         }
@@ -18,6 +19,11 @@ export default class Code {
         if (c.commandType === CommandType.ACommand) {
             return this.translateA(c);
         }
+
+        if (c.commandType === CommandType.LCommand) {
+            return "L_COMMAND";
+        }
+
         return this.translateC(c);
     };
 

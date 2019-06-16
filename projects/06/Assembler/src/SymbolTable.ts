@@ -7,6 +7,10 @@ export default class SymbolTable {
         this.setInitialMap();
     }
 
+    public add(symbolKey: string, address: number): void {
+        this.symbolsMap[symbolKey] = address;
+    }
+
     public resolveSymbol(symbolKey: string): number {
         let address: number;
 

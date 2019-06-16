@@ -18,6 +18,7 @@ export default class Parser {
         let commands: Command[];
 
         try {
+            asmInstructions.forEach(this.handleLCommands);
             commands = asmInstructions.map(this.parseOneInstruction);
         } catch (err) {
             throw err;
@@ -25,6 +26,13 @@ export default class Parser {
 
         return commands;
     }
+
+    private handleLCommands = (instruction: string, idx: number) => {
+        if (this.isLCommand(instruction)) {
+            const c: Command = this.getLCommand(instruction, idx);
+            this.symbolTable.add(c.tokens.symbol, idx);
+        }
+    };
 
     private parseOneInstruction = (
         instruction: string,
