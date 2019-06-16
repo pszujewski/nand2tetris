@@ -4,6 +4,7 @@ export default class SymbolTable {
 
     public constructor() {
         this.nextAvailableAddress = 16;
+        this.setInitialMap();
     }
 
     public resolveSymbol(symbolKey: string): number {
@@ -22,7 +23,7 @@ export default class SymbolTable {
         const address: number = this.nextAvailableAddress;
         this.symbolsMap[symbolKey] = address;
 
-        this.nextAvailableAddress += 1;
+        this.nextAvailableAddress++;
         return address;
     }
 
