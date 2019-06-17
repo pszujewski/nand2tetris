@@ -18,8 +18,9 @@ export default class Parser {
         let commands: Command[];
 
         try {
-            asmInstructions.forEach(this.handleLCommands);
-            commands = asmInstructions.map(this.parseOneInstruction);
+            commands = asmInstructions
+                .filter(this.removeLCommands)
+                .map(this.parseOneInstruction);
         } catch (err) {
             throw err;
         }
@@ -27,11 +28,13 @@ export default class Parser {
         return commands;
     }
 
-    private handleLCommands = (instruction: string, idx: number) => {
+    private removeLCommands = (instruction: string, idx: number): boolean => {
         if (this.isLCommand(instruction)) {
             const c: Command = this.getLCommand(instruction, idx);
             this.symbolTable.add(c.tokens.symbol, idx);
+            return false;
         }
+        return true;
     };
 
     private parseOneInstruction = (
@@ -110,7 +113,7 @@ export default class Parser {
     private getCompField(instruction: string): string {
         let comp: string;
         comp = instruction.replace(/(;J\w+)/g, "").trim();
-        comp = comp.replace(/(\w=)/g, "").trim();
+        comp = comp.replace(/(\w+=)/g, "").trim();
         return comp;
     }
 
@@ -137,7 +140,7 @@ export default class Parser {
             commandType: CommandType.LCommand,
             tokens: {
                 symbol,
-                value: idx + 1, //just the next instruction location idx. Add this to the symbol table
+                value: idx,
                 dest: null,
                 comp: null,
                 jump: null,

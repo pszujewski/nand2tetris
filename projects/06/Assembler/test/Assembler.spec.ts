@@ -242,12 +242,15 @@ describe("Assember", () => {
             let result: string[];
             let tokens: string[];
             let commands: Command[];
-            const asmTest: ASMInputTest = asmTests[1];
+            // const asmTest: ASMInputTest = asmTests[1];
 
             try {
-                tokens = await assembler.getASMTokens(asmTest.path);
+                tokens = await assembler.getASMTokens(
+                    `${__dirname}/asmExamples/Rect.asm`
+                );
                 commands = assembler.parseASMInstructions(tokens);
                 result = assembler.translateToMachineCode(commands);
+                await assembler.write(result, "testing.asm");
             } catch (err) {
                 result = err;
             }
