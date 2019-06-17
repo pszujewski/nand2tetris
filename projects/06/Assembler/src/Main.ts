@@ -24,12 +24,17 @@ class Main {
         let tokens: string[];
         let commands: Command[];
         let machineCodes: string[];
+        let fileName: string;
 
         try {
             tokens = await assembler.getASMTokens(pathToFile);
             commands = assembler.parseASMInstructions(tokens);
+
             machineCodes = assembler.translateToMachineCode(commands);
-            await assembler.write(machineCodes, "test.asm");
+            const pathTokens: string[] = pathToFile.split("/");
+
+            fileName = pathTokens[pathTokens.length - 1];
+            await assembler.write(machineCodes, fileName);
         } catch (err) {
             Log.error(err.message);
         }

@@ -1,31 +1,22 @@
-import { expect } from "chai";
-import Assembler from "../src/Assembler";
-
-interface Command {
-    commandType: CommandType;
-    tokens: CommandTokens;
-}
-
-interface CommandTokens {
-    symbol: string;
-    value: number;
-    dest: string;
-    comp: string;
-    jump: string;
-}
-
-enum CommandType {
-    ACommand = "ACommand",
-    CCommand = "CCommand",
-    LCommand = "LCommand",
-}
-
-interface ASMInputTest {
-    path: string;
-    expectedTokens: string[];
-}
-
-const asmTests: ASMInputTest[] = [
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const chai_1 = require("chai");
+const Assembler_1 = require("../src/Assembler");
+var CommandType;
+(function (CommandType) {
+    CommandType["ACommand"] = "ACommand";
+    CommandType["CCommand"] = "CCommand";
+    CommandType["LCommand"] = "LCommand";
+})(CommandType || (CommandType = {}));
+const asmTests = [
     {
         path: `${__dirname}/asmExamples/Add.asm`,
         expectedTokens: ["@2", "D=A", "@3", "D=D+A", "@0", "M=D"],
@@ -55,8 +46,7 @@ const asmTests: ASMInputTest[] = [
         ],
     },
 ];
-
-const commandsExample: Command[] = [
+const commandsExample = [
     {
         commandType: CommandType.ACommand,
         tokens: {
@@ -158,7 +148,6 @@ const commandsExample: Command[] = [
         },
     },
 ];
-
 const binaryCodesExample = [
     "0000000000000010",
     "1110110000010000",
@@ -171,32 +160,28 @@ const binaryCodesExample = [
     "1110001100000010",
     "1110101010000111",
 ];
-
 describe("Assember", () => {
     describe("Assembler getASMTokens for a source ASM file", () => {
-        const assembler: Assembler = new Assembler();
-        let asmTest: ASMInputTest;
-
-        it("Should parse asm file input into its tokens", async () => {
-            let result: string[];
-
+        const assembler = new Assembler_1.default();
+        let asmTest;
+        it("Should parse asm file input into its tokens", () => __awaiter(this, void 0, void 0, function* () {
+            let result;
             for (asmTest of asmTests) {
                 try {
-                    result = await assembler.getASMTokens(asmTest.path);
-                } catch (err) {
+                    result = yield assembler.getASMTokens(asmTest.path);
+                }
+                catch (err) {
                     result = err;
                 }
-                expect(result).to.deep.equal(asmTest.expectedTokens);
+                chai_1.expect(result).to.deep.equal(asmTest.expectedTokens);
             }
-        });
+        }));
     });
-
     describe("Assember::parseASMInstructions to get the Commands", () => {
-        const assembler: Assembler = new Assembler();
-
+        const assembler = new Assembler_1.default();
         it("Should parse the tokens from Add.asm into commands", () => {
-            let commands: Command[];
-            const exTokens: string[] = [
+            let commands;
+            const exTokens = [
                 "@2",
                 "D=A",
                 "@3",
@@ -208,53 +193,45 @@ describe("Assember", () => {
                 "D;JEQ",
                 "0;JMP",
             ];
-
             try {
                 commands = assembler.parseASMInstructions(exTokens);
-            } catch (err) {
+            }
+            catch (err) {
                 commands = err;
             }
-
-            expect(commands).to.deep.equal(commandsExample);
+            chai_1.expect(commands).to.deep.equal(commandsExample);
         });
     });
-
     describe("Assembler::translateToMachineCode", () => {
-        const assembler: Assembler = new Assembler();
-
+        const assembler = new Assembler_1.default();
         it("Should parse commands array into array of binary codes", () => {
-            let result: string[];
-
+            let result;
             try {
                 result = assembler.translateToMachineCode(commandsExample);
-            } catch (err) {
+            }
+            catch (err) {
                 result = err;
             }
-
-            expect(result).to.deep.equal(binaryCodesExample);
+            chai_1.expect(result).to.deep.equal(binaryCodesExample);
         });
     });
-
     describe("Assembler", () => {
-        const assembler: Assembler = new Assembler();
-
-        it("Should read commands from a file and parse them into binary machine code", async () => {
-            let result: string[];
-            let tokens: string[];
-            let commands: Command[];
-            const asmTest: ASMInputTest = asmTests[1];
-
+        const assembler = new Assembler_1.default();
+        it("Should read commands from a file and parse them into binary machine code", () => __awaiter(this, void 0, void 0, function* () {
+            let result;
+            let tokens;
+            let commands;
             try {
-                tokens = await assembler.getASMTokens(asmTest.path);
+                tokens = yield assembler.getASMTokens(`${__dirname}/asmExamples/Rect.asm`);
                 commands = assembler.parseASMInstructions(tokens);
-
                 result = assembler.translateToMachineCode(commands);
-                await assembler.write(result, "testing.asm");
-            } catch (err) {
+                yield assembler.write(result, "testing.asm");
+            }
+            catch (err) {
                 result = err;
             }
-
-            expect(result[0]).to.equal("0000000000000000");
-        });
+            chai_1.expect(result[0]).to.equal("0000000000000000");
+        }));
     });
 });
+//# sourceMappingURL=Assembler.spec.js.map
