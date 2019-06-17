@@ -40,7 +40,7 @@ class Parser {
         return commands;
     }
     isLCommand(instruction) {
-        const matches = instruction.match(/^\([\w\d]*\)$/g);
+        const matches = instruction.match(/^\([\w\d\W]*\)$/g);
         if (Array.isArray(matches)) {
             return matches.length > 0;
         }

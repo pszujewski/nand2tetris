@@ -59,7 +59,7 @@ export default class Parser {
     };
 
     private isLCommand(instruction: string): boolean {
-        const matches: RegExpMatchArray = instruction.match(/^\([\w\d]*\)$/g);
+        const matches: RegExpMatchArray = instruction.match(/^\([\w\d\W]*\)$/g);
         if (Array.isArray(matches)) {
             return matches.length > 0;
         }
