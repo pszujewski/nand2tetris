@@ -6,8 +6,10 @@ class Parser {
     constructor() {
         this.removeLCommands = (instruction, idx) => {
             if (this.isLCommand(instruction)) {
-                const c = this.getLCommand(instruction, idx);
-                this.symbolTable.add(c.tokens.symbol, idx);
+                const ct = this.lCommands.length;
+                const c = this.getLCommand(instruction, idx - ct);
+                this.symbolTable.add(c.tokens.symbol, c.tokens.value);
+                this.lCommands.push(c.tokens.symbol);
                 return false;
             }
             return true;
@@ -22,6 +24,7 @@ class Parser {
             return this.getCCommand(instruction);
         };
         this.symbolTable = new SymbolTable_1.default();
+        this.lCommands = [];
     }
     parse(asmInstructions) {
         let commands;
@@ -29,6 +32,7 @@ class Parser {
             commands = asmInstructions
                 .filter(this.removeLCommands)
                 .map(this.parseOneInstruction);
+            this.lCommands = [];
         }
         catch (err) {
             throw err;

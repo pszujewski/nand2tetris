@@ -221,8 +221,9 @@ describe("Assember", () => {
             let result;
             let tokens;
             let commands;
+            const asmTest = asmTests[1];
             try {
-                tokens = yield assembler.getASMTokens(`${__dirname}/asmExamples/Rect.asm`);
+                tokens = yield assembler.getASMTokens(asmTest.path);
                 commands = assembler.parseASMInstructions(tokens);
                 result = assembler.translateToMachineCode(commands);
                 yield assembler.write(result, "testing.asm");

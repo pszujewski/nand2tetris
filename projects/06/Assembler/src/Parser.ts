@@ -9,9 +9,11 @@ import { Command, CommandType } from "./types";
 
 export default class Parser {
     private symbolTable: SymbolTable;
+    private lCommands: string[];
 
     public constructor() {
         this.symbolTable = new SymbolTable();
+        this.lCommands = [];
     }
 
     public parse(asmInstructions: string[]): Command[] {
@@ -21,6 +23,7 @@ export default class Parser {
             commands = asmInstructions
                 .filter(this.removeLCommands)
                 .map(this.parseOneInstruction);
+            this.lCommands = [];
         } catch (err) {
             throw err;
         }
@@ -30,8 +33,11 @@ export default class Parser {
 
     private removeLCommands = (instruction: string, idx: number): boolean => {
         if (this.isLCommand(instruction)) {
-            const c: Command = this.getLCommand(instruction, idx);
-            this.symbolTable.add(c.tokens.symbol, idx);
+            const ct: number = this.lCommands.length;
+            const c: Command = this.getLCommand(instruction, idx - ct);
+
+            this.symbolTable.add(c.tokens.symbol, c.tokens.value);
+            this.lCommands.push(c.tokens.symbol);
             return false;
         }
         return true;
