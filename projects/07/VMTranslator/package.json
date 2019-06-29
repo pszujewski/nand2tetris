@@ -4,12 +4,17 @@
 	"description": "translates intermediate vm code into Hack assembly code",
 	"main": "src/index.js",
 	"scripts": {
-		"test": "mocha -r test/**/*.js",
-		"start": "node src/index.js"
+		"test": "mocha --require @babel/register test/**/*.spec.js",
+		"start": "node ./node_modules/.bin/babel-node src/index.js"
 	},
 	"author": "Peter Szujewski",
 	"license": "MIT",
 	"devDependencies": {
+		"@babel/cli": "^7.4.4",
+		"@babel/core": "^7.4.5",
+		"@babel/node": "^7.4.5",
+		"@babel/preset-env": "^7.4.5",
+		"@babel/register": "^7.4.4",
 		"chai": "^4.2.0",
 		"eslint": "^6.0.1",
 		"eslint-config-prettier": "^6.0.0",
