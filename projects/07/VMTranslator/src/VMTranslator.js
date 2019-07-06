@@ -1,5 +1,7 @@
 import ArithmeticCommands, { ACommands } from "./ArithmeticCommands";
 import MemoryCommands from "./MemoryCommands";
+import VMTokenizer from "./VMTokenizer";
+import * as util from "./util";
 
 export default class VMTranslator {
 	constructor() {
@@ -7,14 +9,12 @@ export default class VMTranslator {
 		this.memory = new MemoryCommands();
 	}
 
-	tokenize() {
-		return null;
+	tokenize(sourceVMCode) {
+		return VMTokenizer.getTokens(sourceVMCode);
 	}
 
 	translateToHackASM(vmTokens) {
-		return vmTokens.map(this.translateCommandToHack).reduce((acc, curr) => {
-			return [...acc, ...curr];
-		}, []);
+		return util.flatten(vmTokens.map(this.translateCommandToHack));
 	}
 
 	translateCommandToHack = (vmCommand, statementIdx) => {

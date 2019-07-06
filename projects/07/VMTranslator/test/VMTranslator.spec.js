@@ -12,14 +12,12 @@ import File from "../src/File";
 describe("VMTranslator", () => {
 	const vm = new VMTranslator();
 
-	it("Should parse raw VM Intermediate source code into string tokens", async done => {
+	it("Should parse raw VM Intermediate source code into string tokens", async () => {
 		const path = "../../StackArithmetic/SimpleAdd/SimpleAdd.vm";
 		const source = await File.read(path);
 
 		const expected = ["push constant 7", "push constant 8", "add"];
-
 		expect(vm.tokenize(source)).to.deep.equal(expected);
-		done();
 	});
 
 	it("Should translate the 'push constant' command successfully", () => {
