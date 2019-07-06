@@ -5,6 +5,7 @@
 	"main": "src/index.js",
 	"scripts": {
 		"test": "mocha --require @babel/register test/**/*.spec.js",
+		"build": "node ./node_modules/.bin/babel src --out-dir out -w --source-maps",
 		"start": "node ./node_modules/.bin/babel-node src/index.js"
 	},
 	"author": "Peter Szujewski",

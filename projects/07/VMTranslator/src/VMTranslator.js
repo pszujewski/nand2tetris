@@ -9,6 +9,10 @@ export default class VMTranslator {
 		this.memory = new MemoryCommands();
 	}
 
+	translate(sourceVMCode) {
+		return this.translateToHackASM(this.tokenize(sourceVMCode));
+	}
+
 	tokenize(sourceVMCode) {
 		return VMTokenizer.getTokens(sourceVMCode);
 	}

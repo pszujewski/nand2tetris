@@ -1,5 +1,19 @@
 import VMTranslator from "./VMTranslator";
+import File from "./File";
 
-const vm = new VMTranslator();
+async function Main() {
+	const relPathToVmFile = process.argv[2];
 
-console.log("Hello node");
+	const vm = new VMTranslator();
+	const file = new File(relPathToVmFile);
+
+	const rawVMCode = await file.read();
+	const hackASMTokens = vm.translate(rawVMCode);
+
+	return Promise.all([
+		file.writeJSON(hackASMTokens),
+		file.writeASM(hackASMTokens),
+	]);
+}
+
+Main().then(() => console.log("ASM written to disk!"));

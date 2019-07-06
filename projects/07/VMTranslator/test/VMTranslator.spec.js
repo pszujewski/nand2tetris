@@ -14,7 +14,9 @@ describe("VMTranslator", () => {
 
 	it("Should parse raw VM Intermediate source code into string tokens", async () => {
 		const path = "../../StackArithmetic/SimpleAdd/SimpleAdd.vm";
-		const source = await File.read(path);
+		const file = new File(path);
+
+		const source = await file.read(path);
 
 		const expected = ["push constant 7", "push constant 8", "add"];
 		expect(vm.tokenize(source)).to.deep.equal(expected);

@@ -1,1 +1,0 @@
-{"version":3,"sources":["../src/index.js"],"names":["vm","VMTranslator","console","log"],"mappings":"kGAAA;;AAEA,IAAMA,EAAE,GAAG,IAAIC,wBAAJ,EAAX;;AAEAC,OAAO,CAACC,GAAR,CAAY,YAAZ","sourcesContent":["import VMTranslator from \"./VMTranslator\";\n\nconst vm = new VMTranslator();\n\nconsole.log(\"Hello node\");\n"],"file":"index.js"}
