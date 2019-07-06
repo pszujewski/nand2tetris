@@ -249,4 +249,24 @@ describe("VMTranslator", () => {
 			"M=M+1",
 		]);
 	});
+
+	it("Should translate the 'pop local' command (pop from the stack onto the 'local' memory segment)", () => {
+		const tokens = vm.translateCommandToHack("pop local 0", 0);
+
+		expect(tokens).to.deep.equal([
+			"@LCL", // "ARegister = LCL address integer"
+			"D=M", // Now M & D === RAM[LCL]. The value of LCL is the RAM address that corresponds to the base of the 'local' memory segment for the VM
+			"@0", // The index of the 'local' memory segment to access from 0. Here it is just 0.
+			"D=D+A", // Get the address of the memory segment we need to access.
+			"@R5", // Temp memory
+			"M=D", // Save address to access at RAM[R5]
+			"@SP", // POP from the stack
+			"M=M-1",
+			"A=M",
+			"D=M", // 'D' holds value from the top of the stack
+			"@R5",
+			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"M=D", // Set segment[idx] = value popped off stack
+		]);
+	});
 });

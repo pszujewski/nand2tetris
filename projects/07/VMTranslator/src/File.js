@@ -32,7 +32,7 @@ export default class File {
 	write(content, extension) {
 		const name = this.relPath.replace(".vm", extension);
 
-		const path = fspath.resolve(__dirname, `./${name}`);
+		const path = fspath.resolve(__dirname, `../asm/${name}`);
 
 		return new Promise(resolve => {
 			fs.writeFile(path, content, err => {
