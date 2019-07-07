@@ -269,4 +269,90 @@ describe("VMTranslator", () => {
 			"M=D", // Set segment[idx] = value popped off stack
 		]);
 	});
+
+	it("Should translate 'pop' to the 'argument' virtual memory segment", () => {
+		const tokens = vm.translateCommandToHack("pop argument 2", 0);
+
+		expect(tokens).to.deep.equal([
+			"@ARG", // Points to base of 'argument' segment
+			"D=M", // M is the integer address of the base of the 'argument' segment
+			"@2",
+			"D=D+A",
+			"@R5",
+			"M=D",
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M", // 'D' holds value from the top of the stack
+			"@R5",
+			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"M=D", // Set segment[idx] = value popped off stack
+		]);
+	});
+
+	it("Should translate 'pop' to the 'this' virtual memory segment", () => {
+		const tokens = vm.translateCommandToHack("pop this 6", 0);
+
+		expect(tokens).to.deep.equal([
+			"@THIS",
+			"D=M",
+			"@6",
+			"D=D+A",
+			"@R5",
+			"M=D",
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M", // 'D' holds value from the top of the stack
+			"@R5",
+			"A=M",
+			"M=D",
+		]);
+	});
+
+	it("Should translate 'pop' to the 'that' virtual memory segment", () => {
+		const tokens = vm.translateCommandToHack("pop that 5", 0);
+
+		expect(tokens).to.deep.equal([
+			"@THAT",
+			"D=M",
+			"@5",
+			"D=D+A",
+			"@R5",
+			"M=D",
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M", // 'D' holds value from the top of the stack
+			"@R5",
+			"A=M",
+			"M=D",
+		]);
+	});
+
+	it("Should translate 'push' from the argument segment to the stack top", () => {
+		const tokens = vm.translateCommandToHack("push argument 1", 0);
+
+		expect(tokens).to.deep.equal([
+			"@ARG", // Address to the base address of 'argument'
+			"D=M", // D = RAM[ARG], which is the base address to 'argument' segment
+			"@1",
+			"D=D+A",
+			"A=D",
+			"D=M", // The value of argument[index] is in 'D'
+			"@SP",
+			"A=M",
+			"M=D", // pushed to stack now
+			"@SP",
+			"M=M+1", // Since we pushed to the stack we must advance teh stack pointer value
+		]);
+	});
+
+	it("Should translate 'push' to temp segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("push temp 6", 0);
+
+		expect(tokens).to.deep.equal([]);
+	});
+
+	// Get more tests from PointerTest and StaticTest
 });
