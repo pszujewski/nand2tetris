@@ -1,54 +1,47 @@
-import BinaryConverter from "./BinaryConverter";
-import { Command, CommandType } from "./types";
-
-export default class Code {
-    public translateAsm(commands: Command[]): string[] {
-        let machineCodes: string[];
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const BinaryConverter_1 = require("./BinaryConverter");
+const types_1 = require("./types");
+class Code {
+    constructor() {
+        this.translate = (c) => {
+            if (c.commandType === types_1.CommandType.ACommand) {
+                return this.translateA(c);
+            }
+            if (c.commandType === types_1.CommandType.LCommand) {
+                return "L_COMMAND";
+            }
+            return this.translateC(c);
+        };
+        this.translateA = (c) => {
+            const converter = new BinaryConverter_1.default();
+            const asStr = c.tokens.value.toString();
+            const asBinary = converter.getBitsFromDecimalNumber(asStr);
+            return `0${asBinary}`;
+        };
+        this.translateC = (c) => {
+            let id = ["1", "1", "1"];
+            const comp = this.getCompFields(c.tokens.comp);
+            const dest = this.getDestFields(c.tokens.dest);
+            const jump = this.getJumpFields(c.tokens.jump);
+            return [...id, ...comp, ...dest, ...jump].join("");
+        };
+    }
+    translateAsm(commands) {
+        let machineCodes;
         try {
-            const codes: string[] = commands.map(this.translate);
-            machineCodes = codes.filter((c: string) => c !== "L_COMMAND");
-        } catch (err) {
+            const codes = commands.map(this.translate);
+            machineCodes = codes.filter((c) => c !== "L_COMMAND");
+        }
+        catch (err) {
             throw err;
         }
-
         return machineCodes;
     }
-
-    private translate = (c: Command): string => {
-        if (c.commandType === CommandType.ACommand) {
-            return this.translateA(c);
-        }
-
-        if (c.commandType === CommandType.LCommand) {
-            return "L_COMMAND";
-        }
-
-        return this.translateC(c);
-    };
-
-    private translateA = (c: Command): string => {
-        const converter = new BinaryConverter();
-        const asStr = c.tokens.value.toString();
-
-        const asBinary: string = converter.getBitsFromDecimalNumber(asStr);
-        return `0${asBinary}`;
-    };
-
-    private translateC = (c: Command): string => {
-        let id: string[] = ["1", "1", "1"];
-        const comp: string[] = this.getCompFields(c.tokens.comp);
-
-        const dest: string[] = this.getDestFields(c.tokens.dest);
-        const jump: string[] = this.getJumpFields(c.tokens.jump);
-
-        return [...id, ...comp, ...dest, ...jump].join("");
-    };
-
-    private getJumpFields(jumpToken: string): string[] {
-        if (!jumpToken) return ["0", "0", "0"];
-
-        const jumpMap: any = {
+    getJumpFields(jumpToken) {
+        if (!jumpToken)
+            return ["0", "0", "0"];
+        const jumpMap = {
             JGT: ["0", "0", "1"],
             JEQ: ["0", "1", "0"],
             JGE: ["0", "1", "1"],
@@ -57,14 +50,12 @@ export default class Code {
             JLE: ["1", "1", "0"],
             JMP: ["1", "1", "1"],
         };
-
         if (jumpMap[jumpToken]) {
             return jumpMap[jumpToken];
         }
         throw new Error(`Failed to match jump mnemonic ${jumpToken} to code.`);
     }
-
-    private getDestFields(destToken: string): string[] {
+    getDestFields(destToken) {
         switch (destToken) {
             case "M":
                 return ["0", "0", "1"];
@@ -85,8 +76,7 @@ export default class Code {
                 return ["0", "0", "0"];
         }
     }
-
-    private getCompFields(compToken: string): string[] {
+    getCompFields(compToken) {
         switch (compToken) {
             case "0":
                 return ["0", "1", "0", "1", "0", "1", "0"];
@@ -145,9 +135,9 @@ export default class Code {
             case "D|M":
                 return ["1", "0", "1", "0", "1", "0", "1"];
             default:
-                throw new Error(
-                    `Failed to match comp mnemonic ${compToken} to binary code.`
-                );
+                throw new Error(`Failed to match comp mnemonic ${compToken} to binary code.`);
         }
     }
 }
+exports.default = Code;
+//# sourceMappingURL=Code.js.map

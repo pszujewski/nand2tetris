@@ -1,5 +1,6 @@
 import ASMReader from "./ASMReader";
 import Parser from "./Parser";
+import HackFile from "./HackFile";
 import Code from "./Code";
 import Log from "./Util";
 import { Command } from "./types";
@@ -7,6 +8,7 @@ import { Command } from "./types";
 export default class Assembler {
     private code: Code;
     private parser: Parser;
+    private hackFile: HackFile;
     private asmReader: ASMReader;
 
     public constructor() {
@@ -48,5 +50,20 @@ export default class Assembler {
         }
 
         return binaryCodes;
+    }
+
+    public async write(
+        machineCodes: string[],
+        fileName: string
+    ): Promise<boolean> {
+        this.hackFile = new HackFile(fileName);
+
+        try {
+            await this.hackFile.write(machineCodes);
+        } catch (err) {
+            Log.error(err.message);
+        }
+
+        return Promise.resolve(true);
     }
 }

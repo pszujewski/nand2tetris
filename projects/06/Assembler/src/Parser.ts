@@ -9,22 +9,39 @@ import { Command, CommandType } from "./types";
 
 export default class Parser {
     private symbolTable: SymbolTable;
+    private lCommands: string[];
 
     public constructor() {
         this.symbolTable = new SymbolTable();
+        this.lCommands = [];
     }
 
     public parse(asmInstructions: string[]): Command[] {
         let commands: Command[];
 
         try {
-            commands = asmInstructions.map(this.parseOneInstruction);
+            commands = asmInstructions
+                .filter(this.removeLCommands)
+                .map(this.parseOneInstruction);
+            this.lCommands = [];
         } catch (err) {
             throw err;
         }
 
         return commands;
     }
+
+    private removeLCommands = (instruction: string, idx: number): boolean => {
+        if (this.isLCommand(instruction)) {
+            const ct: number = this.lCommands.length;
+            const c: Command = this.getLCommand(instruction, idx - ct);
+
+            this.symbolTable.add(c.tokens.symbol, c.tokens.value);
+            this.lCommands.push(c.tokens.symbol);
+            return false;
+        }
+        return true;
+    };
 
     private parseOneInstruction = (
         instruction: string,
@@ -42,7 +59,7 @@ export default class Parser {
     };
 
     private isLCommand(instruction: string): boolean {
-        const matches: RegExpMatchArray = instruction.match(/^\([\w\d]*\)$/g);
+        const matches: RegExpMatchArray = instruction.match(/^\([\w\d\W]*\)$/g);
         if (Array.isArray(matches)) {
             return matches.length > 0;
         }
@@ -102,7 +119,7 @@ export default class Parser {
     private getCompField(instruction: string): string {
         let comp: string;
         comp = instruction.replace(/(;J\w+)/g, "").trim();
-        comp = comp.replace(/(\w=)/g, "").trim();
+        comp = comp.replace(/(\w+=)/g, "").trim();
         return comp;
     }
 
@@ -129,7 +146,7 @@ export default class Parser {
             commandType: CommandType.LCommand,
             tokens: {
                 symbol,
-                value: idx + 1, //just the next instruction location idx. Add this to the symbol table
+                value: idx,
                 dest: null,
                 comp: null,
                 jump: null,
