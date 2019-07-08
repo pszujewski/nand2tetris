@@ -348,11 +348,38 @@ describe("VMTranslator", () => {
 		]);
 	});
 
+	// TODO
 	it("Should translate 'push' to temp segment at a certain index", () => {
 		const tokens = vm.translateCommandToHack("push temp 6", 0);
 
 		expect(tokens).to.deep.equal([]);
 	});
 
-	// Get more tests from PointerTest and StaticTest
+	// TODO
+	it("Should translate 'pop' to pointer segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("pop pointer 1", 7);
+
+		expect(tokens).to.deep.equal([]);
+	});
+
+	// TODO
+	it("Should translate 'push' to stack from pointer segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("push pointer 1", 7);
+
+		expect(tokens).to.deep.equal([]);
+	});
+
+	// TODO
+	it("Should translate 'pop' from stack to static segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("pop static 8", 1);
+
+		expect(tokens).to.deep.equal([]);
+	});
+
+	// TODO
+	it("Should translate 'push' to stack from static segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("push static 3", 2);
+
+		expect(tokens).to.deep.equal([]);
+	});
 });
