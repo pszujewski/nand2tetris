@@ -338,28 +338,52 @@ describe("VMTranslator", () => {
 			"D=M", // D = RAM[ARG], which is the base address to 'argument' segment
 			"@1",
 			"D=D+A",
-			"A=D",
+			"A=D", // After adding the constant to the 'argument' address base, we set it to the A register
 			"D=M", // The value of argument[index] is in 'D'
 			"@SP",
 			"A=M",
 			"M=D", // pushed to stack now
 			"@SP",
-			"M=M+1", // Since we pushed to the stack we must advance teh stack pointer value
+			"M=M+1", // Since we pushed to the stack we must advance the stack pointer value
 		]);
 	});
 
-	// TODO
-	it("Should translate 'push' to temp segment at a certain index", () => {
+	it("Should translate 'push' to stack from temp segment at a certain index", () => {
 		const tokens = vm.translateCommandToHack("push temp 6", 0);
 
-		expect(tokens).to.deep.equal([]);
+		expect(tokens).to.deep.equal([
+			"@R5",
+			"D=M",
+			"@6",
+			"D=D+A",
+			"A=D",
+			"D=M",
+			"@SP",
+			"A=M",
+			"M=D", // pushed to stack now
+			"@SP",
+			"M=M+1", // Advance the pointer
+		]);
 	});
 
-	// TODO
 	it("Should translate 'pop' to pointer segment at a certain index", () => {
 		const tokens = vm.translateCommandToHack("pop pointer 1", 7);
 
-		expect(tokens).to.deep.equal([]);
+		expect(tokens).to.deep.equal([
+			"@THIS",
+			"D=A", // The address of the base of the 'pointer' segment
+			"@1",
+			"D=D+A", // Adding to the address
+			"@R5",
+			"M=D", // Save the computed address in temp memory
+			"@SP",
+			"M=M-1", // Reduce the value of the stack pointer
+			"A=M",
+			"D=M", // Top stack value is in the 'D' register
+			"@R5", // Get computed address
+			"A=M",
+			"M=D",
+		]);
 	});
 
 	// TODO
@@ -369,17 +393,32 @@ describe("VMTranslator", () => {
 		expect(tokens).to.deep.equal([]);
 	});
 
-	// TODO
 	it("Should translate 'pop' from stack to static segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("pop static 8", 1);
+		const vmTest = new VMTranslator("./test/Test.vm");
+		const tokens = vmTest.translateCommandToHack("pop static 8", 1);
 
-		expect(tokens).to.deep.equal([]);
+		expect(tokens).to.deep.equal([
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M", // top of the stack value is in D
+			"@Test.8",
+			"M=D",
+		]);
 	});
 
-	// TODO
-	it("Should translate 'push' to stack from static segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("push static 3", 2);
+	it("Should translate 'push' to stack from static segment at a certain index of the segment", () => {
+		const vmTest = new VMTranslator("../test/Test.vm");
+		const tokens = vmTest.translateCommandToHack("push static 3", 2);
 
-		expect(tokens).to.deep.equal([]);
+		expect(tokens).to.deep.equal([
+			"@Test.3",
+			"D=M",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+		]);
 	});
 });

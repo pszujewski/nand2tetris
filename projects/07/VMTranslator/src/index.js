@@ -4,7 +4,7 @@ import File from "./File";
 async function Main() {
 	const relPathToVmFile = process.argv[2];
 
-	const vm = new VMTranslator();
+	const vm = new VMTranslator(relPathToVmFile);
 	const file = new File(relPathToVmFile);
 
 	const rawVMCode = await file.read();

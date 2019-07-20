@@ -4,9 +4,14 @@ import VMTokenizer from "./VMTokenizer";
 import * as util from "./util";
 
 export default class VMTranslator {
-	constructor() {
+	constructor(relPathToVmFile) {
 		this.arithmetic = new ArithmeticCommands();
 		this.memory = new MemoryCommands();
+		this.relPathToVmFile = relPathToVmFile;
+	}
+
+	getVMFileName() {
+		this.relPathToVmFile;
 	}
 
 	translate(sourceVMCode) {
