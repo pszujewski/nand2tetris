@@ -33,7 +33,7 @@ export default class VMTranslator {
 			return this.translateArithmeticCommand(vmCommand, idx);
 		}
 
-		return this.memory.pushConstant(vmCommand);
+		return this.translateMemoryCommand(vmCommand);
 	};
 
 	translateArithmeticCommand = (vmCommand, statementIdx) => {
@@ -59,5 +59,26 @@ export default class VMTranslator {
 			default:
 				return "";
 		}
+	};
+
+	translateMemoryCommand = vmCommand => {
+		const isMemoryCommand = this.isMemoryCommandInit(vmCommand);
+
+		if (isMemoryCommand("push constant")) {
+			return this.memory.pushConstant(vmCommand);
+		}
+		if (isMemoryCommand("pop local")) {
+			return this.memory.popLocal(vmCommand);
+		}
+		if (isMemoryCommand("pop argument")) {
+			return this.memory.popArgument(vmCommand);
+		}
+		if (isMemoryCommand("pop this")) {
+			return;
+		}
+	};
+
+	isMemoryCommandInit = vmCommand => matcher => {
+		return vmCommand.indexOf(matcher) > -1;
 	};
 }
