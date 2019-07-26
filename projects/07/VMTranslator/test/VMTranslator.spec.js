@@ -386,11 +386,21 @@ describe("VMTranslator", () => {
 		]);
 	});
 
-	// TODO
 	it("Should translate 'push' to stack from pointer segment at a certain index", () => {
 		const tokens = vm.translateCommandToHack("push pointer 1", 7);
 
-		expect(tokens).to.deep.equal([]);
+		expect(tokens).to.deep.equal([
+			"@THIS",
+			"D=A",
+			"@1",
+			"A=D+A",
+			"D=M",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+		]);
 	});
 
 	it("Should translate 'pop' from stack to static segment at a certain index", () => {
