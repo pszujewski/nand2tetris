@@ -11,7 +11,8 @@ export default class VMTranslator {
 	}
 
 	getVMFileName() {
-		this.relPathToVmFile;
+		const tokens = this.relPathToVmFile.split("/");
+		return tokens[tokens.length - 1].replace(".vm", "").trim();
 	}
 
 	translate(sourceVMCode) {
@@ -74,8 +75,30 @@ export default class VMTranslator {
 			return this.memory.popArgument(vmCommand);
 		}
 		if (isMemoryCommand("pop this")) {
-			return;
+			return this.memory.popThis(vmCommand);
 		}
+		if (isMemoryCommand("pop that")) {
+			return this.memory.popThat(vmCommand);
+		}
+		if (isMemoryCommand("push argument")) {
+			return this.memory.pushArgument(vmCommand);
+		}
+		if (isMemoryCommand("push temp")) {
+			return this.memory.pushTemp(vmCommand);
+		}
+		if (isMemoryCommand("pop pointer")) {
+			return this.memory.popPointer(vmCommand);
+		}
+		if (isMemoryCommand("push pointer")) {
+			return this.memory.pushPointer(vmCommand);
+		}
+		if (isMemoryCommand("pop static")) {
+			return this.memory.popStatic(vmCommand, this.getVMFileName());
+		}
+		if (isMemoryCommand("push static")) {
+			return this.memory.pushStatic(vmCommand, this.getVMFileName());
+		}
+		throw new Error("Failed to identify command");
 	};
 
 	isMemoryCommandInit = vmCommand => matcher => {
