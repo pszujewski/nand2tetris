@@ -142,9 +142,35 @@ export default class MemoryCommands {
 		]);
 	}
 
+	pushToStackGeneric(vmCommand) {
+		return util.flatten([
+			`${this.getSegmentBasePointer(vmCommand)}`,
+			"D=M",
+			`@${this.getSegmentIndex(vmCommand)}`,
+			"D=D+A",
+			"A=D",
+			"D=M",
+			this.arithmetic.pushDToStack(),
+			this.arithmetic.advanceSP(),
+		]);
+	}
+
 	getSegmentIndex(vmCommand) {
 		const tokens = vmCommand.split(" ");
 		return tokens[tokens.length - 1];
+	}
+
+	getSegmentBasePointer(vmCommand) {
+		const hasToken = lookFor => vmCommand.indexOf(lookFor) > -1;
+
+		if (hasToken("this")) {
+			return "@THIS";
+		}
+		if (hasToken("that")) {
+			return "@THAT";
+		}
+
+		throw new Error(`No base pointer for ${vmCommand}`);
 	}
 
 	saveDRegisterValueInTemp() {

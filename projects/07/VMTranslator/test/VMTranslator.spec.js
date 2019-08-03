@@ -431,4 +431,22 @@ describe("VMTranslator", () => {
 			"M=M+1",
 		]);
 	});
+
+	it("Should translate 'push' to stack from this segment at a certain index", () => {
+		const tokens = vm.translateCommandToHack("push this 2", 0);
+
+		expect(tokens).to.deep.equal([
+			"@THIS",
+			"D=M",
+			"@2",
+			"D=D+A",
+			"A=D",
+			"D=M",
+			"@SP",
+			"A=M",
+			"M=D", // pushed to stack now
+			"@SP",
+			"M=M+1", // Advance the pointer
+		]);
+	});
 });

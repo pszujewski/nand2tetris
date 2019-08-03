@@ -98,7 +98,10 @@ export default class VMTranslator {
 		if (isMemoryCommand("push static")) {
 			return this.memory.pushStatic(vmCommand, this.getVMFileName());
 		}
-		throw new Error("Failed to identify command");
+		if (isMemoryCommand("push")) {
+			return this.memory.pushToStackGeneric(vmCommand);
+		}
+		throw new Error(`Failed to identify command ${vmCommand}`);
 	};
 
 	isMemoryCommandInit = vmCommand => matcher => {
