@@ -101,6 +101,9 @@ export default class VMTranslator {
 		if (isMemoryCommand("push")) {
 			return this.memory.pushToStackGeneric(vmCommand);
 		}
+		if (isMemoryCommand("pop")) {
+			return this.memory.popFromStackGeneric(vmCommand);
+		}
 		throw new Error(`Failed to identify command ${vmCommand}`);
 	};
 

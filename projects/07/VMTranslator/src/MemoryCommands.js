@@ -155,6 +155,19 @@ export default class MemoryCommands {
 		]);
 	}
 
+	popFromStackGeneric(vmCommand) {
+		return util.flatten([
+			`${this.getSegmentBasePointer(vmCommand)}`,
+			"D=M",
+			`@${this.getSegmentIndex(vmCommand)}`,
+			"D=D+A",
+			this.saveDRegisterValueInTemp(),
+			this.arithmetic.popOneOperand(),
+			"D=M",
+			this.setMRegisterToValueInTemp(),
+		]);
+	}
+
 	getSegmentIndex(vmCommand) {
 		const tokens = vmCommand.split(" ");
 		return tokens[tokens.length - 1];
@@ -168,6 +181,12 @@ export default class MemoryCommands {
 		}
 		if (hasToken("that")) {
 			return "@THAT";
+		}
+		if (hasToken("temp")) {
+			return "@R5";
+		}
+		if (hasToken("local")) {
+			return "@LCL";
 		}
 
 		throw new Error(`No base pointer for ${vmCommand}`);

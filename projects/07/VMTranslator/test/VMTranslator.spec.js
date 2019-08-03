@@ -449,4 +449,24 @@ describe("VMTranslator", () => {
 			"M=M+1", // Advance the pointer
 		]);
 	});
+
+	it("Should translate 'pop' from the top of the stack to the 'temp' memory segment", () => {
+		const tokens = vm.translateCommandToHack("pop temp 3", 0);
+
+		expect(tokens).to.deep.equal([
+			"@R5",
+			"D=M",
+			"@3",
+			"D=D+A",
+			"@R5",
+			"M=D",
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M", // 'D' holds value from the top of the stack
+			"@R5",
+			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"M=D",
+		]);
+	});
 });

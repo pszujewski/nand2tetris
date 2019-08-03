@@ -135,7 +135,7 @@ A=M
 M=D
 @SP
 M=M+1
-undefined
+@THAT
 D=M
 @6
 D=D+A
