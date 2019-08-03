@@ -83,9 +83,6 @@ export default class VMTranslator {
 		if (isMemoryCommand("push argument")) {
 			return this.memory.pushArgument(vmCommand);
 		}
-		if (isMemoryCommand("push temp")) {
-			return this.memory.pushTemp(vmCommand);
-		}
 		if (isMemoryCommand("pop pointer")) {
 			return this.memory.popPointer(vmCommand);
 		}
@@ -97,6 +94,12 @@ export default class VMTranslator {
 		}
 		if (isMemoryCommand("push static")) {
 			return this.memory.pushStatic(vmCommand, this.getVMFileName());
+		}
+		if (isMemoryCommand("pop temp")) {
+			return this.memory.popToTemp(vmCommand);
+		}
+		if (isMemoryCommand("push temp")) {
+			return this.memory.pushToTemp(vmCommand);
 		}
 		if (isMemoryCommand("push")) {
 			return this.memory.pushToStackGeneric(vmCommand);

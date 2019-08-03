@@ -258,14 +258,14 @@ describe("VMTranslator", () => {
 			"D=M", // Now M & D === RAM[LCL]. The value of LCL is the RAM address that corresponds to the base of the 'local' memory segment for the VM
 			"@0", // The index of the 'local' memory segment to access from 0. Here it is just 0.
 			"D=D+A", // Get the address of the memory segment we need to access.
-			"@R5", // Temp memory
-			"M=D", // Save address to access at RAM[R5]
+			"@R13", // Temp memory
+			"M=D", // Save address to access at RAM[R13]
 			"@SP", // POP from the stack
 			"M=M-1",
 			"A=M",
 			"D=M", // 'D' holds value from the top of the stack
-			"@R5",
-			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"@R13",
+			"A=M", // RAM[R13] === adress to correct idx of memory segment
 			"M=D", // Set segment[idx] = value popped off stack
 		]);
 	});
@@ -278,14 +278,14 @@ describe("VMTranslator", () => {
 			"D=M", // M is the integer address of the base of the 'argument' segment
 			"@2",
 			"D=D+A",
-			"@R5",
+			"@R13",
 			"M=D",
 			"@SP",
 			"M=M-1",
 			"A=M",
 			"D=M", // 'D' holds value from the top of the stack
-			"@R5",
-			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"@R13",
+			"A=M", // RAM[R13] === adress to correct idx of memory segment
 			"M=D", // Set segment[idx] = value popped off stack
 		]);
 	});
@@ -298,13 +298,13 @@ describe("VMTranslator", () => {
 			"D=M",
 			"@6",
 			"D=D+A",
-			"@R5",
+			"@R13",
 			"M=D",
 			"@SP",
 			"M=M-1",
 			"A=M",
 			"D=M", // 'D' holds value from the top of the stack
-			"@R5",
+			"@R13",
 			"A=M",
 			"M=D",
 		]);
@@ -318,13 +318,13 @@ describe("VMTranslator", () => {
 			"D=M",
 			"@5",
 			"D=D+A",
-			"@R5",
+			"@R13",
 			"M=D",
 			"@SP",
 			"M=M-1",
 			"A=M",
 			"D=M", // 'D' holds value from the top of the stack
-			"@R5",
+			"@R13",
 			"A=M",
 			"M=D",
 		]);
@@ -353,7 +353,7 @@ describe("VMTranslator", () => {
 
 		expect(tokens).to.deep.equal([
 			"@R5",
-			"D=M",
+			"D=A",
 			"@6",
 			"D=D+A",
 			"A=D",
@@ -374,13 +374,13 @@ describe("VMTranslator", () => {
 			"D=A", // The address of the base of the 'pointer' segment
 			"@1",
 			"D=D+A", // Adding to the address
-			"@R5",
+			"@R13",
 			"M=D", // Save the computed address in temp memory
 			"@SP",
 			"M=M-1", // Reduce the value of the stack pointer
 			"A=M",
 			"D=M", // Top stack value is in the 'D' register
-			"@R5", // Get computed address
+			"@R13", // Get computed address
 			"A=M",
 			"M=D",
 		]);
@@ -455,17 +455,17 @@ describe("VMTranslator", () => {
 
 		expect(tokens).to.deep.equal([
 			"@R5",
-			"D=M",
+			"D=A",
 			"@3",
 			"D=D+A",
-			"@R5",
+			"@R13",
 			"M=D",
 			"@SP",
 			"M=M-1",
 			"A=M",
 			"D=M", // 'D' holds value from the top of the stack
-			"@R5",
-			"A=M", // RAM[R5] === adress to correct idx of memory segment
+			"@R13",
+			"A=M", // RAM[R13] === adress to correct idx of memory segment
 			"M=D",
 		]);
 	});

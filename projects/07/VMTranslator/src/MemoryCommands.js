@@ -84,19 +84,6 @@ export default class MemoryCommands {
 		]);
 	}
 
-	pushTemp(vmCommand) {
-		return util.flatten([
-			"@R5",
-			"D=M",
-			`@${this.getSegmentIndex(vmCommand)}`,
-			"D=D+A",
-			"A=D",
-			"D=M",
-			this.arithmetic.pushDToStack(),
-			this.arithmetic.advanceSP(),
-		]);
-	}
-
 	popPointer(vmCommand) {
 		return util.flatten([
 			"@THIS",
@@ -155,6 +142,32 @@ export default class MemoryCommands {
 		]);
 	}
 
+	popToTemp(vmCommand) {
+		return util.flatten([
+			`${this.getSegmentBasePointer(vmCommand)}`,
+			"D=A",
+			`@${this.getSegmentIndex(vmCommand)}`,
+			"D=D+A",
+			this.saveDRegisterValueInTemp(),
+			this.arithmetic.popOneOperand(),
+			"D=M",
+			this.setMRegisterToValueInTemp(),
+		]);
+	}
+
+	pushToTemp(vmCommand) {
+		return util.flatten([
+			`${this.getSegmentBasePointer(vmCommand)}`,
+			"D=A",
+			`@${this.getSegmentIndex(vmCommand)}`,
+			"D=D+A",
+			"A=D",
+			"D=M",
+			this.arithmetic.pushDToStack(),
+			this.arithmetic.advanceSP(),
+		]);
+	}
+
 	popFromStackGeneric(vmCommand) {
 		return util.flatten([
 			`${this.getSegmentBasePointer(vmCommand)}`,
@@ -193,10 +206,10 @@ export default class MemoryCommands {
 	}
 
 	saveDRegisterValueInTemp() {
-		return ["@R5", "M=D"];
+		return ["@R13", "M=D"];
 	}
 
 	setMRegisterToValueInTemp() {
-		return ["@R5", "A=M", "M=D"];
+		return ["@R13", "A=M", "M=D"];
 	}
 }
