@@ -30,17 +30,22 @@ export default class File {
 	}
 
 	write(content, extension) {
-		const name = this.relPath.replace(".vm", extension);
+		const name = `${this.getVMFileName()}${extension}`;
 
-		const path = fspath.resolve(__dirname, `../asm/${name}`);
+		const path = fspath.join(__dirname, `/../asm/${name}`);
 
 		return new Promise(resolve => {
 			fs.writeFile(path, content, err => {
 				if (err) {
 					console.error("Unable to write");
 				}
-				resolve();
+				resolve(path);
 			});
 		});
+	}
+
+	getVMFileName() {
+		const tokens = this.relPath.split("/");
+		return tokens[tokens.length - 1].replace(".vm", "").trim();
 	}
 }

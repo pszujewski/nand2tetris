@@ -10,16 +10,18 @@ import File from "../src/File";
  */
 
 describe("VMTranslator", () => {
-	const vm = new VMTranslator();
+	const path = "../../StackArithmetic/SimpleAdd/SimpleAdd.vm";
+	const vmFile = new File(path);
+	const vm = new VMTranslator(vmFile);
 
 	it("Should parse raw VM Intermediate source code into string tokens", async () => {
-		const path = "../../StackArithmetic/SimpleAdd/SimpleAdd.vm";
-		const file = new File(path);
+		const source = await vmFile.read();
 
-		const source = await file.read(path);
-
-		const expected = ["push constant 7", "push constant 8", "add"];
-		expect(vm.tokenize(source)).to.deep.equal(expected);
+		expect(vm.tokenize(source)).to.deep.equal([
+			"push constant 7",
+			"push constant 8",
+			"add",
+		]);
 	});
 
 	it("Should translate the 'push constant' command successfully", () => {
@@ -404,7 +406,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' from stack to static segment at a certain index", () => {
-		const vmTest = new VMTranslator("./test/Test.vm");
+		const vmTest = new VMTranslator(new File("./test/Test.vm"));
+
 		const tokens = vmTest.translateCommandToHack("pop static 8", 1);
 
 		expect(tokens).to.deep.equal([
@@ -418,7 +421,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from static segment at a certain index of the segment", () => {
-		const vmTest = new VMTranslator("../test/Test.vm");
+		const vmTest = new VMTranslator(new File("./test/Test.vm"));
+
 		const tokens = vmTest.translateCommandToHack("push static 3", 2);
 
 		expect(tokens).to.deep.equal([

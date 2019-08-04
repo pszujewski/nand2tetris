@@ -4,15 +4,14 @@ import VMTokenizer from "./VMTokenizer";
 import * as util from "./util";
 
 export default class VMTranslator {
-	constructor(relPathToVmFile) {
+	constructor(vmFile) {
 		this.arithmetic = new ArithmeticCommands();
 		this.memory = new MemoryCommands();
-		this.relPathToVmFile = relPathToVmFile;
+		this.vmFile = vmFile;
 	}
 
 	getVMFileName() {
-		const tokens = this.relPathToVmFile.split("/");
-		return tokens[tokens.length - 1].replace(".vm", "").trim();
+		return this.vmFile.getVMFileName();
 	}
 
 	translate(sourceVMCode) {
