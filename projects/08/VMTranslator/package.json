@@ -1,5 +1,5 @@
 {
-	"name": "vmtranslator",
+	"name": "vmtranslator-08",
 	"version": "1.0.0",
 	"description": "translates intermediate vm code into Hack assembly code",
 	"main": "src/index.js",

@@ -473,4 +473,50 @@ describe("VMTranslator", () => {
 			"M=D",
 		]);
 	});
+
+	it("Should transanslate a VM function definition and initialize the function's LCL segment values to 0", () => {
+		const vmCommand = "function SimpleFunction.test 2";
+		const tokens = vm.translateCommandToHack(vmCommand);
+
+		expect(tokens).to.deep.equal([
+			"(SimpleFunction.test)",
+			"@0", // Push 0 to the stack
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@0", // Push 0 to the stack again
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+		]);
+	});
+
+	it("Should return from a function, restoring the state of the calling function", () => {
+		const tokens = vm.translateCommandToHack("return");
+
+		expect(tokens).to.deep.equal([
+			"@LCL",
+			"D=M",
+			"@R15",
+			"M=D",
+			"@SP",
+			"A=M-1",
+			"D=M",
+			"@ARG",
+			"A=M",
+		]);
+	});
+
+	// it("Should call a given VM function and initialize its stack frame", () => {
+	// 	const vmCommand = "call Main.fibonacci 1";
+	// 	const tokens = vm.translateCommandToHack(vmCommand, 0);
+
+	// 	expect(tokens).to.deep.equal(["@RETURN.0.ADDRESS", "D=A"]);
+	// });
 });
