@@ -1,10 +1,12 @@
 import ArithmeticCommands, { ACommands } from "./ArithmeticCommands";
 import MemoryCommands from "./MemoryCommands";
+import FunctionProtocol from "./FunctionProtocol";
 import VMTokenizer from "./VMTokenizer";
 import * as util from "./util";
 
 export default class VMTranslator {
 	constructor(vmFile) {
+		this.fp;
 		this.arithmetic = new ArithmeticCommands();
 		this.memory = new MemoryCommands();
 		this.vmFile = vmFile;
@@ -27,10 +29,23 @@ export default class VMTranslator {
 	}
 
 	translateCommandToHack = (vmCommand, statementIdx) => {
+		this.fp = new FunctionProtocol(vmCommand);
 		const idx = statementIdx;
 
 		if (ACommands[vmCommand]) {
 			return this.translateArithmeticCommand(vmCommand, idx);
+		}
+
+		if (this.fp.isCall()) {
+			return this.fp.callCommand();
+		}
+
+		if (this.fp.isDeclaration()) {
+			return this.fp.funcDeclaration();
+		}
+
+		if (this.fp.isReturn()) {
+			return this.fp.returnCommand();
 		}
 
 		return this.translateMemoryCommand(vmCommand);

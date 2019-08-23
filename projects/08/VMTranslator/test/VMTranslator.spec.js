@@ -10,7 +10,7 @@ import File from "../src/File";
  */
 
 describe("VMTranslator", () => {
-	const path = "../../StackArithmetic/SimpleAdd/SimpleAdd.vm";
+	const path = "../../../07/StackArithmetic/SimpleAdd/SimpleAdd.vm";
 	const vmFile = new File(path);
 	const vm = new VMTranslator(vmFile);
 
@@ -510,6 +510,45 @@ describe("VMTranslator", () => {
 			"D=M",
 			"@ARG",
 			"A=M",
+			"M=D",
+			"@ARG",
+			"D=M+1",
+			"@SP",
+			"M=D",
+			"@R15",
+			"D=M",
+			"@1",
+			"A=D-A",
+			"D=M",
+			"@THAT",
+			"M=D", // THAT is retored
+			"@R15",
+			"D=M",
+			"@2",
+			"A=D-A",
+			"D=M",
+			"@THIS",
+			"M=D", // THIS is retored
+			"@R15",
+			"D=M",
+			"@3",
+			"A=D-A",
+			"D=M",
+			"@ARG",
+			"M=D", // ARG is retored
+			"@R15",
+			"D=M",
+			"@4",
+			"A=D-A",
+			"D=M",
+			"@LCL",
+			"M=D", // LCL is restored
+			"@R15",
+			"D=M",
+			"@5",
+			"A=D-A",
+			"A=M", // Return Address is in A
+			"0;JMP",
 		]);
 	});
 
