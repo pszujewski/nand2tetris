@@ -552,10 +552,61 @@ describe("VMTranslator", () => {
 		]);
 	});
 
-	// it("Should call a given VM function and initialize its stack frame", () => {
-	// 	const vmCommand = "call Main.fibonacci 1";
-	// 	const tokens = vm.translateCommandToHack(vmCommand, 0);
+	it("Should call a given VM function and initialize its stack frame", () => {
+		const vmCommand = "call Main.fibonacci 2";
+		const tokens = vm.translateCommandToHack(vmCommand, 42);
 
-	// 	expect(tokens).to.deep.equal(["@RETURN.0.ADDRESS", "D=A"]);
-	// });
+		expect(tokens).to.deep.equal([
+			"@RETURN.42.ADDRESS", // Push return address
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@LCL", // Push LCL
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@ARG", // Push ARG
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@THIS", // Push THIS
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@THAT", // Push THAT
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			"@2", // Reposition ARG; n = 2
+			"D=A",
+			"@SP",
+			"D=A-D",
+			"@5",
+			"D=D-A",
+			"@ARG",
+			"M=D",
+			"@SP", // Reposition LCL
+			"D=M",
+			"@LCL",
+			"M=D",
+			"@Main.fibonacci",
+			"0;JMP",
+			"(RETURN.42.ADDRESS)",
+		]);
+	});
 });
