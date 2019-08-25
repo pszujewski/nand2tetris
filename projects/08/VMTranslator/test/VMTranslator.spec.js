@@ -565,28 +565,28 @@ describe("VMTranslator", () => {
 			"@SP",
 			"M=M+1",
 			"@LCL", // Push LCL
-			"D=A",
+			"D=M",
 			"@SP",
 			"A=M",
 			"M=D",
 			"@SP",
 			"M=M+1",
 			"@ARG", // Push ARG
-			"D=A",
+			"D=M",
 			"@SP",
 			"A=M",
 			"M=D",
 			"@SP",
 			"M=M+1",
 			"@THIS", // Push THIS
-			"D=A",
+			"D=M",
 			"@SP",
 			"A=M",
 			"M=D",
 			"@SP",
 			"M=M+1",
 			"@THAT", // Push THAT
-			"D=A",
+			"D=M",
 			"@SP",
 			"A=M",
 			"M=D",
@@ -595,7 +595,7 @@ describe("VMTranslator", () => {
 			"@2", // Reposition ARG; n = 2
 			"D=A",
 			"@SP",
-			"D=A-D",
+			"D=M-D",
 			"@5",
 			"D=D-A",
 			"@ARG",
@@ -608,5 +608,39 @@ describe("VMTranslator", () => {
 			"0;JMP",
 			"(RETURN.42.ADDRESS)",
 		]);
+	});
+
+	it("Should translate the VM 'label' command", () => {
+		const vmCommand = "label LOOP";
+		const tokens = vm.translateCommandToHack(vmCommand, 7);
+
+		vm.setCurrentFunc("Main.fibonacci");
+
+		expect(tokens).to.deep.equal(["(Main.fibonacci$LOOP)"]);
+	});
+
+	it("Should transalte the VM 'if-goto' command", () => {
+		const vmCommand = "if-goto IF_TRUE";
+		const tokens = vm.translateCommandToHack(vmCommand);
+
+		vm.setCurrentFunc("Main.fibonacci");
+
+		expect(tokens).to.deep.equal([
+			"@SP",
+			"M=M-1",
+			"A=M",
+			"D=M",
+			"@Main.fibonacci$IF_TRUE",
+			"D;JGT",
+		]);
+	});
+
+	it("Should translate the unconditional jump 'goto' command", () => {
+		const vmCommand = "goto IF_FALSE";
+		const tokens = vm.translateCommandToHack(vmCommand);
+
+		vm.setCurrentFunc("Main.fibonacci");
+
+		expect(tokens).to.deep.equal(["@Main.fibonacci$IF_FALSE", "0;JMP"]);
 	});
 });

@@ -1,8 +1,9 @@
 import * as util from "./util";
 
 export default class FunctionProtocol {
-	constructor(vmCommand) {
+	constructor(vmCommand, program) {
 		this.vmCommand = vmCommand;
+		this.program = program;
 		this.tokens = this.getCommandTokens(vmCommand);
 	}
 
@@ -20,8 +21,79 @@ export default class FunctionProtocol {
 		return this.vmCommand.trim() === "return";
 	}
 
-	callCommand() {
-		return [""];
+	isLabel() {
+		const first = this.tokens[0];
+		return first === "label" && this.tokens.length === 2;
+	}
+
+	isIfGoto() {
+		const first = this.tokens[0];
+		return first === "if-goto" && this.tokens.length === 2;
+	}
+
+	isUnconditionalGoto() {
+		const first = this.tokens[0];
+		return first === "goto" && this.tokens.length === 2;
+	}
+
+	ifGoto() {
+		const label = this.getLabelFromVMCommand();
+		return ["@SP", "M=M-1", "A=M", "D=M", `@${label}`, "D;JGT"];
+	}
+
+	goto() {
+		const label = this.getLabelFromVMCommand();
+		return [`@${label}`, "0;JMP"];
+	}
+
+	labelCommand() {
+		return [`(${this.getLabelFromVMCommand()})`];
+	}
+
+	getLabelFromVMCommand() {
+		const currentFunc = this.program.currentFunc;
+		const labelName = this.tokens[1];
+		return `${currentFunc}$${labelName}`;
+	}
+
+	callCommand(index) {
+		const localVarCount = Number(this.tokens[2]);
+		const funcName = this.tokens[1].trim();
+
+		this.program.setCurrentFunc(funcName);
+
+		return util.flatten([
+			`@RETURN.${index}.ADDRESS`,
+			"D=A",
+			"@SP",
+			"A=M",
+			"M=D",
+			"@SP",
+			"M=M+1",
+			this.pushPointerValueToStack("@LCL"),
+			this.pushPointerValueToStack("@ARG"),
+			this.pushPointerValueToStack("@THIS"),
+			this.pushPointerValueToStack("@THAT"),
+			`@${localVarCount}`, // Reposition ARG according to n local variables in func
+			"D=A",
+			"@SP",
+			"D=M-D",
+			"@5",
+			"D=D-A",
+			"@ARG",
+			"M=D",
+			"@SP", // Reposition LCL
+			"D=M",
+			"@LCL",
+			"M=D",
+			`@${funcName}`,
+			"0;JMP",
+			`(RETURN.${index}.ADDRESS)`,
+		]);
+	}
+
+	pushPointerValueToStack(pointer) {
+		return [pointer, "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"];
 	}
 
 	funcDeclaration() {

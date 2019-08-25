@@ -12,6 +12,14 @@ export default class VMTranslator {
 		this.vmFile = vmFile;
 	}
 
+	state = {
+		currentFunc: "",
+	};
+
+	setCurrentFunc = funcName => {
+		this.state.currentFunc = funcName;
+	};
+
 	getVMFileName() {
 		return this.vmFile.getVMFileName();
 	}
@@ -29,7 +37,14 @@ export default class VMTranslator {
 	}
 
 	translateCommandToHack = (vmCommand, statementIdx) => {
-		this.fp = new FunctionProtocol(vmCommand);
+		const state = this.state;
+
+		const program = {
+			currentFunc: state.currentFunc,
+			setCurrentFunc: funcName => this.setCurrentFunc(funcName),
+		};
+
+		this.fp = new FunctionProtocol(vmCommand, program);
 		const idx = statementIdx;
 
 		if (ACommands[vmCommand]) {
@@ -37,7 +52,7 @@ export default class VMTranslator {
 		}
 
 		if (this.fp.isCall()) {
-			return this.fp.callCommand();
+			return this.fp.callCommand(statementIdx);
 		}
 
 		if (this.fp.isDeclaration()) {
@@ -46,6 +61,18 @@ export default class VMTranslator {
 
 		if (this.fp.isReturn()) {
 			return this.fp.returnCommand();
+		}
+
+		if (this.fp.isLabel()) {
+			return this.fp.labelCommand();
+		}
+
+		if (this.fp.isIfGoto()) {
+			return this.fp.ifGoto();
+		}
+
+		if (this.fp.isUnconditionalGoto()) {
+			return this.fp.goto();
 		}
 
 		return this.translateMemoryCommand(vmCommand);
