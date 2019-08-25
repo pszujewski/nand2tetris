@@ -60,8 +60,6 @@ export default class FunctionProtocol {
 		const localVarCount = Number(this.tokens[2]);
 		const funcName = this.tokens[1].trim();
 
-		this.program.setCurrentFunc(funcName);
-
 		return util.flatten([
 			`@RETURN.${index}.ADDRESS`,
 			"D=A",
@@ -98,8 +96,9 @@ export default class FunctionProtocol {
 
 	funcDeclaration() {
 		const name = this.tokens[1];
-		const localVarCount = Number(this.tokens[2]);
+		this.program.setCurrentFunc(name);
 
+		const localVarCount = Number(this.tokens[2]);
 		const cmd = [`(${name})`];
 
 		for (let i = 1; i <= localVarCount; i++) {

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import VMTranslator from "../src/VMTranslator";
-import File from "../src/File";
+import VMFile from "../src/File";
 
 /**
  * NOTE:
@@ -11,7 +11,7 @@ import File from "../src/File";
 
 describe("VMTranslator", () => {
 	const path = "../../../07/StackArithmetic/SimpleAdd/SimpleAdd.vm";
-	const vmFile = new File(path);
+	const vmFile = new VMFile(path);
 	const vm = new VMTranslator(vmFile);
 
 	it("Should parse raw VM Intermediate source code into string tokens", async () => {
@@ -406,7 +406,7 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' from stack to static segment at a certain index", () => {
-		const vmTest = new VMTranslator(new File("./test/Test.vm"));
+		const vmTest = new VMTranslator(new VMFile("./test/Test.vm"));
 
 		const tokens = vmTest.translateCommandToHack("pop static 8", 1);
 
@@ -421,7 +421,7 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from static segment at a certain index of the segment", () => {
-		const vmTest = new VMTranslator(new File("./test/Test.vm"));
+		const vmTest = new VMTranslator(new VMFile("./test/Test.vm"));
 
 		const tokens = vmTest.translateCommandToHack("push static 3", 2);
 
@@ -612,18 +612,18 @@ describe("VMTranslator", () => {
 
 	it("Should translate the VM 'label' command", () => {
 		const vmCommand = "label LOOP";
-		const tokens = vm.translateCommandToHack(vmCommand, 7);
 
 		vm.setCurrentFunc("Main.fibonacci");
+		const tokens = vm.translateCommandToHack(vmCommand, 7);
 
 		expect(tokens).to.deep.equal(["(Main.fibonacci$LOOP)"]);
 	});
 
 	it("Should transalte the VM 'if-goto' command", () => {
 		const vmCommand = "if-goto IF_TRUE";
-		const tokens = vm.translateCommandToHack(vmCommand);
 
 		vm.setCurrentFunc("Main.fibonacci");
+		const tokens = vm.translateCommandToHack(vmCommand);
 
 		expect(tokens).to.deep.equal([
 			"@SP",
@@ -637,9 +637,9 @@ describe("VMTranslator", () => {
 
 	it("Should translate the unconditional jump 'goto' command", () => {
 		const vmCommand = "goto IF_FALSE";
-		const tokens = vm.translateCommandToHack(vmCommand);
 
 		vm.setCurrentFunc("Main.fibonacci");
+		const tokens = vm.translateCommandToHack(vmCommand);
 
 		expect(tokens).to.deep.equal(["@Main.fibonacci$IF_FALSE", "0;JMP"]);
 	});
