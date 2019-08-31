@@ -36,6 +36,19 @@ export default class VMTranslator {
 		return util.flatten(vmTokens.map(this.translateCommandToHack));
 	}
 
+	getBootstrapCode() {
+		const cmd = "call Sys.init 0";
+		this.fp = new FunctionProtocol(cmd, {});
+
+		return util.flatten([
+			"@256",
+			"D=A",
+			"@SP",
+			"M=D",
+			this.fp.callCommand(Math.random()),
+		]);
+	}
+
 	translateCommandToHack = (vmCommand, statementIdx) => {
 		const state = this.state;
 

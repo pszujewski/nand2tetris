@@ -109,6 +109,13 @@ M=M+1
 D=M
 @R15
 M=D
+@R15
+D=M
+@5
+A=D-A
+D=M
+@R14
+M=D
 @SP
 A=M-1
 D=M
@@ -147,9 +154,6 @@ A=D-A
 D=M
 @LCL
 M=D
-@R15
-D=M
-@5
-A=D-A
+@R14
 A=M
 0;JMP

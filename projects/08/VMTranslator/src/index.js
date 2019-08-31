@@ -43,6 +43,9 @@ class Main {
 		const vm = new VMTranslator(file);
 		const hackASMTokens = vm.translate(rawVMCode);
 
+		if (file.getVMFileName().indexOf("Sys") > -1) {
+			return util.flatten([vm.getBootstrapCode(), ...hackASMTokens]);
+		}
 		return hackASMTokens;
 	}
 }

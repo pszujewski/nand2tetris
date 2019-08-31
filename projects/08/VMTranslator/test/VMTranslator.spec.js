@@ -500,21 +500,30 @@ describe("VMTranslator", () => {
 	it("Should return from a function, restoring the state of the calling function", () => {
 		const tokens = vm.translateCommandToHack("return");
 
+		// R15 holds 'old' LCL and R14 holds return-address
+
 		expect(tokens).to.deep.equal([
 			"@LCL",
 			"D=M",
 			"@R15",
-			"M=D",
-			"@SP",
-			"A=M-1",
+			"M=D", // RAM[LCL] = R15
+			"@R15",
 			"D=M",
+			"@5",
+			"A=D-A",
+			"D=M", // D = return-address
+			"@R14",
+			"M=D", // RAM[14] = return-address
+			"@SP", // pop stack-top to *ARG (RAM[ARG])
+			"A=M-1",
+			"D=M", // top of the stack is in D
 			"@ARG",
 			"A=M",
-			"M=D",
+			"M=D", // RAM[ARG] = D (which was holding top of stack value). This is where our return value needs to live
 			"@ARG",
 			"D=M+1",
 			"@SP",
-			"M=D",
+			"M=D", // SP restored
 			"@R15",
 			"D=M",
 			"@1",
@@ -543,10 +552,7 @@ describe("VMTranslator", () => {
 			"D=M",
 			"@LCL",
 			"M=D", // LCL is restored
-			"@R15",
-			"D=M",
-			"@5",
-			"A=D-A",
+			"@R14",
 			"A=M", // Return Address is in A
 			"0;JMP",
 		]);
@@ -592,12 +598,10 @@ describe("VMTranslator", () => {
 			"M=D",
 			"@SP",
 			"M=M+1",
-			"@2", // Reposition ARG; n = 2
+			"@7", // Reposition ARG; n = 2
 			"D=A",
 			"@SP",
 			"D=M-D",
-			"@5",
-			"D=D-A",
 			"@ARG",
 			"M=D",
 			"@SP", // Reposition LCL

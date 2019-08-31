@@ -72,12 +72,10 @@ export default class FunctionProtocol {
 			this.pushPointerValueToStack("@ARG"),
 			this.pushPointerValueToStack("@THIS"),
 			this.pushPointerValueToStack("@THAT"),
-			`@${localVarCount}`, // Reposition ARG according to n local variables in func
+			`@${localVarCount + 5}`, // Reposition ARG according to n local variables in func
 			"D=A",
 			"@SP",
 			"D=M-D",
-			"@5",
-			"D=D-A",
 			"@ARG",
 			"M=D",
 			"@SP", // Reposition LCL
@@ -113,6 +111,13 @@ export default class FunctionProtocol {
 			"D=M",
 			"@R15",
 			"M=D",
+			"@R15",
+			"D=M",
+			"@5",
+			"A=D-A",
+			"D=M",
+			"@R14",
+			"M=D",
 			"@SP",
 			"A=M-1",
 			"D=M",
@@ -127,10 +132,7 @@ export default class FunctionProtocol {
 			this.restorePointer("@THIS", 2),
 			this.restorePointer("@ARG", 3),
 			this.restorePointer("@LCL", 4),
-			"@R15",
-			"D=M",
-			"@5",
-			"A=D-A",
+			"@R14",
 			"A=M", // Return Address is in A
 			"0;JMP",
 		]);
