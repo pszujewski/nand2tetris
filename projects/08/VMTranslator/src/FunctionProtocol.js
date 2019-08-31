@@ -99,7 +99,7 @@ export default class FunctionProtocol {
 		const localVarCount = Number(this.tokens[2]);
 		const cmd = [`(${name})`];
 
-		for (let i = 1; i <= localVarCount; i++) {
+		for (let i = 0; i < localVarCount; i++) {
 			cmd.push(this.pushZeroToStack());
 		}
 		return util.flatten(cmd);
