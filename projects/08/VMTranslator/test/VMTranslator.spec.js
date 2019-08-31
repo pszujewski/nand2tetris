@@ -14,16 +14,6 @@ describe("VMTranslator", () => {
 	const vmFile = new VMFile(path);
 	const vm = new VMTranslator(vmFile);
 
-	it("Should parse raw VM Intermediate source code into string tokens", async () => {
-		const source = await vmFile.read();
-
-		expect(vm.tokenize(source)).to.deep.equal([
-			"push constant 7",
-			"push constant 8",
-			"add",
-		]);
-	});
-
 	it("Should translate the 'push constant' command successfully", () => {
 		const asmTokens = vm.translateCommandToHack("push constant 7", 0);
 
