@@ -13,27 +13,37 @@ export const ACommands = {
 };
 
 export default class ArithmeticCommands {
-	eq(statementCount) {
+	constructor(labelCounter) {
+		this.labelCounter = labelCounter;
+	}
+
+	eq() {
+		const labelId = this.labelCounter.getNextId();
+
 		return util.flatten([
 			this.popTwoOperands(),
 			"D=M-D",
-			this.getComparisonBlocks(statementCount, "JEQ"),
+			this.getComparisonBlocks(labelId, "JEQ"),
 		]);
 	}
 
-	lt(statementCount) {
+	lt() {
+		const labelId = this.labelCounter.getNextId();
+
 		return util.flatten([
 			this.popTwoOperands(),
 			"D=M-D",
-			this.getComparisonBlocks(statementCount, "JLT"),
+			this.getComparisonBlocks(labelId, "JLT"),
 		]);
 	}
 
-	gt(statementCount) {
+	gt() {
+		const labelId = this.labelCounter.getNextId();
+
 		return util.flatten([
 			this.popTwoOperands(),
 			"D=M-D",
-			this.getComparisonBlocks(statementCount, "JGT"),
+			this.getComparisonBlocks(labelId, "JGT"),
 		]);
 	}
 
@@ -107,26 +117,25 @@ export default class ArithmeticCommands {
 		];
 	}
 
-	getComparisonBlocks(statementCount, jumpCommand) {
-		const ct = statementCount;
+	getComparisonBlocks(id, jumpCommand) {
 		return util.flatten([
-			`@COMP.${ct}.TRUE`,
+			`@COMP.${id}.TRUE`,
 			`D;${jumpCommand}`,
-			`@COMP.${ct}.FALSE`,
+			`@COMP.${id}.FALSE`,
 			"0;JMP",
-			`(COMP.${ct}.TRUE)`,
+			`(COMP.${id}.TRUE)`,
 			"@SP",
 			"A=M",
 			"M=-1", // -1 means true
 			this.advanceSP(),
-			`@COMP.${ct}.END`,
+			`@COMP.${id}.END`,
 			"0;JMP",
-			`(COMP.${ct}.FALSE)`,
+			`(COMP.${id}.FALSE)`,
 			"@SP",
 			"A=M",
 			"M=0", // 0 means false
 			this.advanceSP(),
-			`(COMP.${ct}.END)`,
+			`(COMP.${id}.END)`,
 		]);
 	}
 

@@ -5,11 +5,9 @@ import VMTokenizer from "./VMTokenizer";
 import * as util from "./util";
 
 export default class VMTranslator {
-	constructor(vmFile) {
-		this.fp;
-		this.arithmetic = new ArithmeticCommands();
-		this.memory = new MemoryCommands();
+	constructor(vmFile, labelCounter) {
 		this.vmFile = vmFile;
+		this.labelCounter = labelCounter;
 	}
 
 	state = {
@@ -38,18 +36,11 @@ export default class VMTranslator {
 
 	getBootstrapCode() {
 		const cmd = "call Sys.init 0";
-		this.fp = new FunctionProtocol(cmd, {});
-
-		return util.flatten([
-			"@256",
-			"D=A",
-			"@SP",
-			"M=D",
-			this.fp.callCommand(Math.random()),
-		]);
+		const fp = new FunctionProtocol(cmd, {}, this.labelCounter);
+		return util.flatten(["@256", "D=A", "@SP", "M=D", fp.callCommand()]);
 	}
 
-	translateCommandToHack = (vmCommand, statementIdx) => {
+	translateCommandToHack = vmCommand => {
 		const state = this.state;
 
 		const program = {
@@ -57,109 +48,111 @@ export default class VMTranslator {
 			setCurrentFunc: funcName => this.setCurrentFunc(funcName),
 		};
 
-		this.fp = new FunctionProtocol(vmCommand, program);
-		const idx = statementIdx;
+		const fp = new FunctionProtocol(vmCommand, program, this.labelCounter);
 
 		if (ACommands[vmCommand]) {
-			return this.translateArithmeticCommand(vmCommand, idx);
+			return this.translateArithmeticCommand(vmCommand);
 		}
 
-		if (this.fp.isCall()) {
-			return this.fp.callCommand(statementIdx);
+		if (fp.isCall()) {
+			return fp.callCommand();
 		}
 
-		if (this.fp.isDeclaration()) {
-			return this.fp.funcDeclaration();
+		if (fp.isDeclaration()) {
+			return fp.funcDeclaration();
 		}
 
-		if (this.fp.isReturn()) {
-			return this.fp.returnCommand();
+		if (fp.isReturn()) {
+			return fp.returnCommand();
 		}
 
-		if (this.fp.isLabel()) {
-			return this.fp.labelCommand();
+		if (fp.isLabel()) {
+			return fp.labelCommand();
 		}
 
-		if (this.fp.isIfGoto()) {
-			return this.fp.ifGoto();
+		if (fp.isIfGoto()) {
+			return fp.ifGoto();
 		}
 
-		if (this.fp.isUnconditionalGoto()) {
-			return this.fp.goto();
+		if (fp.isUnconditionalGoto()) {
+			return fp.goto();
 		}
 
 		return this.translateMemoryCommand(vmCommand);
 	};
 
-	translateArithmeticCommand = (vmCommand, statementIdx) => {
+	translateArithmeticCommand = vmCommand => {
+		const arithmetic = new ArithmeticCommands(this.labelCounter);
+
 		switch (vmCommand) {
 			case ACommands.eq:
-				return this.arithmetic.eq(statementIdx);
+				return arithmetic.eq();
 			case ACommands.lt:
-				return this.arithmetic.lt(statementIdx);
+				return arithmetic.lt();
 			case ACommands.gt:
-				return this.arithmetic.gt(statementIdx);
+				return arithmetic.gt();
 			case ACommands.add:
-				return this.arithmetic.add();
+				return arithmetic.add();
 			case ACommands.sub:
-				return this.arithmetic.sub();
+				return arithmetic.sub();
 			case ACommands.neg:
-				return this.arithmetic.neg();
+				return arithmetic.neg();
 			case ACommands.and:
-				return this.arithmetic.and();
+				return arithmetic.and();
 			case ACommands.or:
-				return this.arithmetic.or();
+				return arithmetic.or();
 			case ACommands.not:
-				return this.arithmetic.not();
+				return arithmetic.not();
 			default:
 				return "";
 		}
 	};
 
 	translateMemoryCommand = vmCommand => {
+		const memory = new MemoryCommands(vmCommand);
 		const isMemoryCommand = this.isMemoryCommandInit(vmCommand);
 
 		if (isMemoryCommand("push constant")) {
-			return this.memory.pushConstant(vmCommand);
+			return memory.pushConstant();
 		}
 		if (isMemoryCommand("pop local")) {
-			return this.memory.popLocal(vmCommand);
+			return memory.popLocal();
 		}
 		if (isMemoryCommand("pop argument")) {
-			return this.memory.popArgument(vmCommand);
+			return memory.popArgument();
 		}
 		if (isMemoryCommand("pop this")) {
-			return this.memory.popThis(vmCommand);
+			return memory.popThis();
 		}
 		if (isMemoryCommand("pop that")) {
-			return this.memory.popThat(vmCommand);
+			return memory.popThat();
 		}
 		if (isMemoryCommand("push argument")) {
-			return this.memory.pushArgument(vmCommand);
+			return memory.pushArgument();
 		}
 		if (isMemoryCommand("pop pointer")) {
-			return this.memory.popPointer(vmCommand);
+			return memory.popPointer();
 		}
 		if (isMemoryCommand("push pointer")) {
-			return this.memory.pushPointer(vmCommand);
+			return memory.pushPointer();
 		}
 		if (isMemoryCommand("pop static")) {
-			return this.memory.popStatic(vmCommand, this.getVMFileName());
+			return memory.popStatic(this.getVMFileName());
 		}
 		if (isMemoryCommand("push static")) {
-			return this.memory.pushStatic(vmCommand, this.getVMFileName());
+			return memory.pushStatic(this.getVMFileName());
 		}
 		if (isMemoryCommand("pop temp")) {
-			return this.memory.popToTemp(vmCommand);
+			return memory.popToTemp();
 		}
 		if (isMemoryCommand("push temp")) {
-			return this.memory.pushToTemp(vmCommand);
+			return memory.pushToTemp();
 		}
 		if (isMemoryCommand("push")) {
-			return this.memory.pushToStackGeneric(vmCommand);
+			return memory.pushToStackGeneric();
 		}
 		if (isMemoryCommand("pop")) {
-			return this.memory.popFromStackGeneric(vmCommand);
+			return memory.popFromStackGeneric();
 		}
 		throw new Error(`Failed to identify command ${vmCommand}`);
 	};

@@ -127,7 +127,7 @@ M=M-1
 A=M
 D=M
 @$LOOP_START
-D;JNE
+D;JGT
 @LCL
 D=M
 @0

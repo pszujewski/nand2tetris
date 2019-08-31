@@ -1,9 +1,10 @@
 import * as util from "./util";
 
 export default class FunctionProtocol {
-	constructor(vmCommand, program) {
+	constructor(vmCommand, program, labelCounter) {
 		this.vmCommand = vmCommand;
 		this.program = program;
+		this.labelCounter = labelCounter;
 		this.tokens = this.getCommandTokens(vmCommand);
 	}
 
@@ -38,7 +39,7 @@ export default class FunctionProtocol {
 
 	ifGoto() {
 		const label = this.getLabelFromVMCommand();
-		return ["@SP", "M=M-1", "A=M", "D=M", `@${label}`, "D;JGT"];
+		return ["@SP", "M=M-1", "A=M", "D=M", `@${label}`, "D;JNE"];
 	}
 
 	goto() {
@@ -56,12 +57,13 @@ export default class FunctionProtocol {
 		return `${currentFunc}$${labelName}`;
 	}
 
-	callCommand(index) {
+	callCommand() {
 		const localVarCount = Number(this.tokens[2]);
 		const funcName = this.tokens[1].trim();
 
+		const labelId = this.labelCounter.getNextId();
 		return util.flatten([
-			`@RETURN.${index}.ADDRESS`,
+			`@RETURN.${labelId}.ADDRESS`,
 			"D=A",
 			"@SP",
 			"A=M",
@@ -84,7 +86,7 @@ export default class FunctionProtocol {
 			"M=D",
 			`@${funcName}`,
 			"0;JMP",
-			`(RETURN.${index}.ADDRESS)`,
+			`(RETURN.${labelId}.ADDRESS)`,
 		]);
 	}
 

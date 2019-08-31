@@ -124,7 +124,7 @@
     "A=M",
     "D=M",
     "@$COMPUTE_ELEMENT",
-    "D;JNE",
+    "D;JGT",
     "@$END_PROGRAM",
     "0;JMP",
     "($COMPUTE_ELEMENT)",

@@ -625,7 +625,7 @@ describe("VMTranslator", () => {
 			"A=M",
 			"D=M",
 			"@Main.fibonacci$IF_TRUE",
-			"D;JGT",
+			"D;JNE",
 		]);
 	});
 

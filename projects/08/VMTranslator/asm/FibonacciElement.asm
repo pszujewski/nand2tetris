@@ -2,7 +2,7 @@
 D=A
 @SP
 M=D
-@RETURN.0.8359032714103418.ADDRESS
+@RETURN.2.ADDRESS
 D=A
 @SP
 A=M
@@ -49,7 +49,7 @@ D=M
 M=D
 @Sys.init
 0;JMP
-(RETURN.0.8359032714103418.ADDRESS)
+(RETURN.2.ADDRESS)
 (Sys.init)
 @4
 D=A
@@ -58,7 +58,7 @@ A=M
 M=D
 @SP
 M=M+1
-@RETURN.2.ADDRESS
+@RETURN.1.ADDRESS
 D=A
 @SP
 A=M
@@ -105,7 +105,7 @@ D=M
 M=D
 @Main.fibonacci
 0;JMP
-(RETURN.2.ADDRESS)
+(RETURN.1.ADDRESS)
 (Sys.init$WHILE)
 @Sys.init$WHILE
 0;JMP
@@ -160,7 +160,7 @@ M=M-1
 A=M
 D=M
 @Main.fibonacci$IF_TRUE
-D;JGT
+D;JNE
 @Main.fibonacci$IF_FALSE
 0;JMP
 (Main.fibonacci$IF_TRUE)
@@ -259,7 +259,7 @@ A=M
 M=D
 @SP
 M=M+1
-@RETURN.13.ADDRESS
+@RETURN.4.ADDRESS
 D=A
 @SP
 A=M
@@ -306,7 +306,7 @@ D=M
 M=D
 @Main.fibonacci
 0;JMP
-(RETURN.13.ADDRESS)
+(RETURN.4.ADDRESS)
 @ARG
 D=M
 @0
@@ -338,7 +338,7 @@ A=M
 M=D
 @SP
 M=M+1
-@RETURN.17.ADDRESS
+@RETURN.5.ADDRESS
 D=A
 @SP
 A=M
@@ -385,7 +385,7 @@ D=M
 M=D
 @Main.fibonacci
 0;JMP
-(RETURN.17.ADDRESS)
+(RETURN.5.ADDRESS)
 @SP
 M=M-1
 A=M
