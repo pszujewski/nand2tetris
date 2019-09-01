@@ -8,7 +8,7 @@ import * as util from "./util";
 // You append the compiled asm output array together until the loop is done.
 // Then you finally write all the hack asm tokens at once as JSON and asm separately.
 
-class LabelCounter {
+export class LabelCounter {
 	constructor() {
 		this.count = 1;
 	}
@@ -51,13 +51,13 @@ class Main {
 	}
 
 	static async tranlateVMFileToHackASMTokens(pathToVmFile) {
-		const file = new VMFile(pathToVmFile);
-		const rawVMCode = await file.read();
+		const vmFile = new VMFile(pathToVmFile);
+		const rawVMCode = await vmFile.read();
 
-		const vm = new VMTranslator(file, labelCounter);
+		const vm = new VMTranslator(vmFile, labelCounter);
 		const hackASMTokens = vm.translate(rawVMCode);
 
-		if (file.getVMFileName().indexOf("Sys") > -1) {
+		if (vmFile.isSysInitFile()) {
 			return util.flatten([vm.getBootstrapCode(), ...hackASMTokens]);
 		}
 		return hackASMTokens;

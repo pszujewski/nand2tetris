@@ -1,21 +1,18 @@
 import { expect } from "chai";
 import VMTranslator from "../src/VMTranslator";
 import VMFile from "../src/File";
+import { LabelCounter } from "../src/index";
 
-/**
- * NOTE:
- * When popping 2 operands off the stack, the first popped off
- * is 'y' and it is saved in the 'D' register. The second popped off
- * is 'x' and it is saved in the 'M' register.
- */
+const setupTranslator = (mockFilePath = "./SimpleAdd/SimpleAdd.vm") => {
+	const vmFile = new VMFile(mockFilePath);
+	const vm = new VMTranslator(vmFile, new LabelCounter());
+	return { vm, vmFile };
+};
 
 describe("VMTranslator", () => {
-	const path = "../../../07/StackArithmetic/SimpleAdd/SimpleAdd.vm";
-	const vmFile = new VMFile(path);
-	const vm = new VMTranslator(vmFile);
-
 	it("Should translate the 'push constant' command successfully", () => {
-		const asmTokens = vm.translateCommandToHack("push constant 7", 0);
+		const { vm } = setupTranslator();
+		const asmTokens = vm.translateCommandToHack("push constant 7");
 
 		expect(asmTokens).to.deep.equal([
 			"@7",
@@ -29,7 +26,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'eq' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("eq", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("eq");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -40,30 +38,31 @@ describe("VMTranslator", () => {
 			"M=M-1",
 			"A=M", // 2 operands saved in 'D' and 'M' registers
 			"D=M-D", // If they are 'eq', subtracting them should equal zero
-			"@COMP.0.TRUE",
+			"@COMP.1.TRUE",
 			"D;JEQ", // Is zero?
-			"@COMP.0.FALSE",
+			"@COMP.1.FALSE",
 			"0;JMP",
-			"(COMP.0.TRUE)",
+			"(COMP.1.TRUE)",
 			"@SP",
 			"A=M",
 			"M=-1", // -1 means true
 			"@SP",
 			"M=M+1",
-			"@COMP.0.END", // Go straight to the end
+			"@COMP.1.END", // Go straight to the end
 			"0;JMP",
-			"(COMP.0.FALSE)",
+			"(COMP.1.FALSE)",
 			"@SP",
 			"A=M",
 			"M=0", // 0 means false
 			"@SP",
 			"M=M+1",
-			"(COMP.0.END)", // Anything can come after
+			"(COMP.1.END)", // Anything can come after
 		]);
 	});
 
 	it("Should translate the 'lt' operation successfully (M < D?)", () => {
-		const tokens = vm.translateCommandToHack("lt", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("lt");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack, y = D and M = x
@@ -74,30 +73,31 @@ describe("VMTranslator", () => {
 			"M=M-1",
 			"A=M", // 2 operands saved in 'D' and 'M' registers
 			"D=M-D", // If M < D, then D will be less than 0
-			"@COMP.0.TRUE",
+			"@COMP.1.TRUE",
 			"D;JLT", // Is less than zero?
-			"@COMP.0.FALSE",
+			"@COMP.1.FALSE",
 			"0;JMP",
-			"(COMP.0.TRUE)",
+			"(COMP.1.TRUE)",
 			"@SP",
 			"A=M",
 			"M=-1", // -1 means true
 			"@SP",
 			"M=M+1",
-			"@COMP.0.END", // Go straight to the end
+			"@COMP.1.END", // Go straight to the end
 			"0;JMP",
-			"(COMP.0.FALSE)",
+			"(COMP.1.FALSE)",
 			"@SP",
 			"A=M",
 			"M=0", // 0 means false
 			"@SP",
 			"M=M+1",
-			"(COMP.0.END)", // Anything can come after
+			"(COMP.1.END)", // Anything can come after
 		]);
 	});
 
 	it("Should translate the 'gt' operation successfully (M > D?)", () => {
-		const tokens = vm.translateCommandToHack("gt", 42);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("gt");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -108,30 +108,31 @@ describe("VMTranslator", () => {
 			"M=M-1",
 			"A=M", // 2 operands saved in 'D' and 'M' registers
 			"D=M-D",
-			"@COMP.42.TRUE",
+			"@COMP.1.TRUE",
 			"D;JGT", // Is greater than zero?
-			"@COMP.42.FALSE",
+			"@COMP.1.FALSE",
 			"0;JMP",
-			"(COMP.42.TRUE)",
+			"(COMP.1.TRUE)",
 			"@SP",
 			"A=M",
 			"M=-1", // -1 means true
 			"@SP",
 			"M=M+1",
-			"@COMP.42.END", // Go straight to the end
+			"@COMP.1.END", // Go straight to the end
 			"0;JMP",
-			"(COMP.42.FALSE)",
+			"(COMP.1.FALSE)",
 			"@SP",
 			"A=M",
 			"M=0", // 0 means false
 			"@SP",
 			"M=M+1",
-			"(COMP.42.END)", // Anything can come after
+			"(COMP.1.END)", // Anything can come after
 		]);
 	});
 
 	it("Should translate the 'add' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("add", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("add");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -151,7 +152,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'sub' operation successfully (x - y)", () => {
-		const tokens = vm.translateCommandToHack("sub", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("sub");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -171,7 +173,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'neg' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("neg", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("neg");
 
 		expect(tokens).to.deep.equal([
 			"@SP",
@@ -187,7 +190,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'and' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("and", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("and");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -207,7 +211,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'or' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("or", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("or");
 
 		expect(tokens).to.deep.equal([
 			"@SP", // Pop 2 operands off the stack
@@ -227,7 +232,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'not' operation successfully", () => {
-		const tokens = vm.translateCommandToHack("not", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("not");
 
 		expect(tokens).to.deep.equal([
 			"@SP",
@@ -243,7 +249,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the 'pop local' command (pop from the stack onto the 'local' memory segment)", () => {
-		const tokens = vm.translateCommandToHack("pop local 0", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop local 0");
 
 		expect(tokens).to.deep.equal([
 			"@LCL", // "ARegister = LCL address integer"
@@ -263,7 +270,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' to the 'argument' virtual memory segment", () => {
-		const tokens = vm.translateCommandToHack("pop argument 2", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop argument 2");
 
 		expect(tokens).to.deep.equal([
 			"@ARG", // Points to base of 'argument' segment
@@ -283,7 +291,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' to the 'this' virtual memory segment", () => {
-		const tokens = vm.translateCommandToHack("pop this 6", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop this 6");
 
 		expect(tokens).to.deep.equal([
 			"@THIS",
@@ -303,7 +312,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' to the 'that' virtual memory segment", () => {
-		const tokens = vm.translateCommandToHack("pop that 5", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop that 5");
 
 		expect(tokens).to.deep.equal([
 			"@THAT",
@@ -323,7 +333,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' from the argument segment to the stack top", () => {
-		const tokens = vm.translateCommandToHack("push argument 1", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("push argument 1");
 
 		expect(tokens).to.deep.equal([
 			"@ARG", // Address to the base address of 'argument'
@@ -341,7 +352,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from temp segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("push temp 6", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("push temp 6");
 
 		expect(tokens).to.deep.equal([
 			"@R5",
@@ -359,7 +371,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' to pointer segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("pop pointer 1", 7);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop pointer 1");
 
 		expect(tokens).to.deep.equal([
 			"@THIS",
@@ -379,7 +392,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from pointer segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("push pointer 1", 7);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("push pointer 1");
 
 		expect(tokens).to.deep.equal([
 			"@THIS",
@@ -396,9 +410,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' from stack to static segment at a certain index", () => {
-		const vmTest = new VMTranslator(new VMFile("./test/Test.vm"));
-
-		const tokens = vmTest.translateCommandToHack("pop static 8", 1);
+		const { vm } = setupTranslator("./test/Test.vm");
+		const tokens = vm.translateCommandToHack("pop static 8");
 
 		expect(tokens).to.deep.equal([
 			"@SP",
@@ -411,9 +424,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from static segment at a certain index of the segment", () => {
-		const vmTest = new VMTranslator(new VMFile("./test/Test.vm"));
-
-		const tokens = vmTest.translateCommandToHack("push static 3", 2);
+		const { vm } = setupTranslator("./test/Test.vm");
+		const tokens = vm.translateCommandToHack("push static 3");
 
 		expect(tokens).to.deep.equal([
 			"@Test.3",
@@ -427,7 +439,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'push' to stack from this segment at a certain index", () => {
-		const tokens = vm.translateCommandToHack("push this 2", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("push this 2");
 
 		expect(tokens).to.deep.equal([
 			"@THIS",
@@ -445,7 +458,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate 'pop' from the top of the stack to the 'temp' memory segment", () => {
-		const tokens = vm.translateCommandToHack("pop temp 3", 0);
+		const { vm } = setupTranslator();
+		const tokens = vm.translateCommandToHack("pop temp 3");
 
 		expect(tokens).to.deep.equal([
 			"@R5",
@@ -465,6 +479,8 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should transanslate a VM function definition and initialize the function's LCL segment values to 0", () => {
+		const { vm } = setupTranslator();
+
 		const vmCommand = "function SimpleFunction.test 2";
 		const tokens = vm.translateCommandToHack(vmCommand);
 
@@ -488,6 +504,7 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should return from a function, restoring the state of the calling function", () => {
+		const { vm } = setupTranslator();
 		const tokens = vm.translateCommandToHack("return");
 
 		// R15 holds 'old' LCL and R14 holds return-address
@@ -549,11 +566,13 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should call a given VM function and initialize its stack frame", () => {
+		const { vm } = setupTranslator();
+
 		const vmCommand = "call Main.fibonacci 2";
-		const tokens = vm.translateCommandToHack(vmCommand, 42);
+		const tokens = vm.translateCommandToHack(vmCommand);
 
 		expect(tokens).to.deep.equal([
-			"@RETURN.42.ADDRESS", // Push return address
+			"@RETURN.1.ADDRESS", // Push return address
 			"D=A",
 			"@SP",
 			"A=M",
@@ -600,20 +619,22 @@ describe("VMTranslator", () => {
 			"M=D",
 			"@Main.fibonacci",
 			"0;JMP",
-			"(RETURN.42.ADDRESS)",
+			"(RETURN.1.ADDRESS)",
 		]);
 	});
 
 	it("Should translate the VM 'label' command", () => {
+		const { vm } = setupTranslator();
 		const vmCommand = "label LOOP";
 
 		vm.setCurrentFunc("Main.fibonacci");
-		const tokens = vm.translateCommandToHack(vmCommand, 7);
+		const tokens = vm.translateCommandToHack(vmCommand);
 
 		expect(tokens).to.deep.equal(["(Main.fibonacci$LOOP)"]);
 	});
 
 	it("Should transalte the VM 'if-goto' command", () => {
+		const { vm } = setupTranslator();
 		const vmCommand = "if-goto IF_TRUE";
 
 		vm.setCurrentFunc("Main.fibonacci");
@@ -630,6 +651,7 @@ describe("VMTranslator", () => {
 	});
 
 	it("Should translate the unconditional jump 'goto' command", () => {
+		const { vm } = setupTranslator();
 		const vmCommand = "goto IF_FALSE";
 
 		vm.setCurrentFunc("Main.fibonacci");

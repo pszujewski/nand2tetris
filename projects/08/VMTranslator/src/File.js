@@ -11,6 +11,10 @@ export default class VMFile {
 		return tokens[tokens.length - 1].replace(".vm", "").trim();
 	}
 
+	isSysInitFile() {
+		return this.getVMFileName().indexOf("Sys") > -1;
+	}
+
 	read() {
 		const path = this.fullPathToVmFile;
 
@@ -28,7 +32,6 @@ export default class VMFile {
 export class VMDirectoryReader {
 	constructor(relPathToDirWithVmFiles) {
 		this.relPathToDir = relPathToDirWithVmFiles;
-		console.log(this.getRelPathTokens());
 	}
 
 	getRootDirectoryName() {
