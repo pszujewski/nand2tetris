@@ -1,0 +1,21 @@
+/** A Space invader screen position at (x, y) */
+
+class Invader {
+    field Square graphic;
+
+    constructor Invader new(int x, int y) {
+        let graphic = Square.new(x, y, 10);
+        return this;
+    }
+
+    method void advance() {
+        do graphic.moveDown();
+        return;
+    }
+
+    method void dispose() {
+      do graphic.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+}

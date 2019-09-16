@@ -1,0 +1,68 @@
+function Game.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push constant 4
+pop this 0
+push this 0
+call Array.new 1
+pop this 1
+push pointer 0
+return
+function Game.run 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Game.initInvaders 1
+pop temp 0
+push constant 0
+return
+function Game.initInvaders 3
+push argument 0
+pop pointer 0
+push constant 15
+pop local 1
+push constant 15
+pop local 2
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 0
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 1
+add
+push local 1
+push local 2
+call Invader.new 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push constant 15
+add
+pop local 1
+push local 2
+push constant 15
+add
+pop local 2
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function Game.dispose 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return

@@ -1,0 +1,41 @@
+/** Space invader game */
+
+class Game {
+    field int length;
+    field Array invaders;
+
+    constructor Game new() {
+        let length = 4;
+        let invaders = Array.new(length);
+        return this;
+    }
+
+    method void run() {
+        do initInvaders();
+        return;
+    }
+
+    method void initInvaders() {
+        var int i;
+        var int x;
+        var int y;
+
+        let x = 15;
+        let y = 15;
+
+        let i = 0;
+        while (i < length) {
+            let invaders[i] = Invader.new(x, y);
+            
+            let x = x + 15;
+            let y = y + 15;
+            let i = i + 1; 
+        }
+        return;
+    }
+
+    method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+}
