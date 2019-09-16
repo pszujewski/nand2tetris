@@ -3,15 +3,33 @@
 class Game {
     field int length;
     field Array invaders;
+    field Canon canon;
+    field Array lasers;
+    field int lasersCount;
 
     constructor Game new() {
         let length = 4;
+        let lasersCount = 0;
         let invaders = Array.new(length);
+
+        let canon = Canon.new();
         return this;
     }
 
     method void run() {
         do initInvaders();
+
+        /*
+        Run an infinite loop that is 'true' so long as
+        the canon hasn't been hit and user hasn't pressed 'q'
+        to quit the game
+        */
+
+        /*
+        If user presses left or right arrow, move canon. If they press
+        spacebar, then shoot a laser.
+        */
+
         return;
     }
 

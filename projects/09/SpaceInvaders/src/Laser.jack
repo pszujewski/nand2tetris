@@ -1,0 +1,21 @@
+/** A Canon to shoot invaders with screen position at (x, y) */
+
+class Laser {
+    field Square graphic;
+
+    constructor Laser new(int x) {
+        let graphic = Square.new(x, 55, 5);
+        return this;
+    }
+
+    method void advance() {
+        do graphic.moveUp();
+        return;
+    }
+
+    method void dispose() {
+      do graphic.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+}
