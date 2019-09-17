@@ -1,0 +1,43 @@
+function Laser.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+push constant 225
+push constant 5
+call Square.new 3
+pop this 0
+push pointer 0
+return
+function Laser.advance 1
+push argument 0
+pop pointer 0
+push this 0
+call Square.getY 1
+pop local 0
+push local 0
+push constant 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 0
+call Square.moveUp 1
+pop temp 0
+push constant 0
+not
+return
+label IF_FALSE0
+push constant 0
+return
+function Laser.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Square.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return

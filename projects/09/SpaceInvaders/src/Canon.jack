@@ -4,26 +4,15 @@ class Canon {
     field Square graphic;
 
     constructor Canon new() {
-        let graphic = Square.new(50, 0, 20);
+        let graphic = Square.new(235, 235, 20);
         return this;
-    }
-
-    /* left arrow is 130 and right arrow is 132 on Keyboard.keyPressed(); 0 if no key is pressed */ 
-    method void move(int key) {
-        if (key = 130) {
-            do moveLeft();
-        }
-        if (key = 132) {
-            do moveRight();
-        }
-        return;
     }
 
     method Laser shoot() {
         var Laser laser;
         var int x;
 
-        let x = do graphic.getX();
+        let x = graphic.getX();
         let laser = Laser.new(x);
         return laser;
     }
@@ -34,7 +23,7 @@ class Canon {
     }
 
     method void moveRight() {
-        do.graphic.moveRight();
+        do graphic.moveRight();
         return;
     }
 

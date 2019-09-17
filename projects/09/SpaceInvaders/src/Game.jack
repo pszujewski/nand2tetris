@@ -17,19 +17,35 @@ class Game {
     }
 
     method void run() {
+        var int key;
+        var boolean isRunning;
+
+        let isRunning = true;
         do initInvaders();
 
-        /*
-        Run an infinite loop that is 'true' so long as
-        the canon hasn't been hit and user hasn't pressed 'q'
-        to quit the game
-        */
+        while (isRunning) {
+            let key = Keyboard.keyPressed();
 
-        /*
-        If user presses left or right arrow, move canon. If they press
-        spacebar, then shoot a laser.
-        */
+            if (key = 130) {
+                do canon.moveLeft();
+            }   
 
+            if (key = 132) {
+                do canon.moveRight();
+            }
+
+            if (key = 32) {
+                do handleCanonShot();
+            }
+
+            if (key = 81) {
+                let isRunning = false;
+            }
+
+            if (key = 131) {
+                do advanceLastLaser();
+            }
+        }
         return;
     }
 
@@ -48,6 +64,44 @@ class Game {
             let x = x + 15;
             let y = y + 15;
             let i = i + 1; 
+        }
+        return;
+    }
+
+    method void handleCanonShot() {
+        var Laser laser;
+        let laser = canon.shoot();
+
+        let lasersCount = lasersCount + 1;
+        let lasers = Array.new(lasersCount);
+
+        /// EACH Old array item must be pushed back onto the new array!
+        // starting at 0, "push" all items onto the "new" array
+        let lasers[lasersCount - 1] = laser;
+        return;
+    }
+ 
+    method void advanceLastLaser() {
+        var int laserIdx;
+        var Laser laser;
+
+        let laserIdx = lasersCount - 1;
+        do advanceOneLaser(laserIdx);
+
+        return;
+    }
+
+    method void advanceOneLaser(int laserIdx) {
+        var Laser laser;
+        var boolean didAdvance;
+
+        let laser = lasers[laserIdx];
+        let didAdvance = laser.advance();
+
+        if (~(didAdvance)) {
+            do laser.dispose();
+            let lasersCount = lasersCount - 1;
+            // You need to immediately build out the new array here
         }
         return;
     }

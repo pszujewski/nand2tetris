@@ -1,0 +1,49 @@
+function Canon.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push constant 235
+push constant 235
+push constant 20
+call Square.new 3
+pop this 0
+push pointer 0
+return
+function Canon.shoot 2
+push argument 0
+pop pointer 0
+push this 0
+call Square.getX 1
+pop local 1
+push local 1
+call Laser.new 1
+pop local 0
+push local 0
+return
+function Canon.moveLeft 0
+push argument 0
+pop pointer 0
+push this 0
+call Square.moveLeft 1
+pop temp 0
+push constant 0
+return
+function Canon.moveRight 0
+push argument 0
+pop pointer 0
+push this 0
+call Square.moveRight 1
+pop temp 0
+push constant 0
+return
+function Canon.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Square.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
