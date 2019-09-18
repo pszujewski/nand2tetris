@@ -1,0 +1,62 @@
+/** Represents a linked list of invaders. A list consists of a data field, followed by a list*/
+
+class InvaderList {
+    field Invader invader;
+    field InvaderList next;
+
+    /* Creates a List. */
+    constructor List new(Invader invader, InvaderList pointer) {
+        let data = invader;  
+        let next = pointer;
+        return this;
+    }
+
+    /** Accessors. */
+    method Invader getData() { return data; }
+    method InvaderList getNext() { return next; }
+
+    /** Disposes this List by recursively disposing its tail. */
+    method void dispose() {
+        if (~(next = null)) {
+            do next.dispose();
+        }
+        // Uses an OS routine to recycle this object.
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void add(InvaderList nextInvaderList) {
+        var InvaderList end;   
+        let end = getLast();  
+
+        end.setNext(nextInvaderList);
+        return;
+    }
+
+    /* Removes last invader and returns it */
+    method Invader pop() {
+        var InvaderList end;   
+        var Invader invader;
+        
+        let end = getLast(); 
+        let invader = end.getData();
+
+        do end.dispose();
+        return invader; 
+    }
+
+    method InvaderList getLast() {
+        var InvaderList current;    // initializes current to the first item
+        let current = this;  // of this list
+
+        while (~(current = null)) {
+            let current = current.getNext();
+        }
+
+        return current; // 'current' now is the list item with 'next' = null
+    }
+
+    method void setNext(InvaderList nextInvaderList) {
+        let next = nextInvaderList;
+    }
+}
