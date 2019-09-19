@@ -1,0 +1,110 @@
+function LaserList.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+push argument 1
+pop this 1
+push pointer 0
+return
+function LaserList.getData 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function LaserList.getNext 0
+push argument 0
+pop pointer 0
+push this 1
+return
+function LaserList.dispose 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 1
+call LaserList.dispose 1
+pop temp 0
+label IF_FALSE0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function LaserList.add 1
+push argument 0
+pop pointer 0
+push pointer 0
+call LaserList.getLast 1
+pop local 0
+push local 0
+push argument 1
+call LaserList.setNext 2
+pop temp 0
+push constant 0
+return
+function LaserList.pop 2
+push argument 0
+pop pointer 0
+push pointer 0
+call LaserList.getLast 1
+pop local 0
+push local 0
+call LaserList.getData 1
+pop local 1
+push local 1
+return
+function LaserList.trim 2
+push argument 0
+pop pointer 0
+push pointer 0
+call LaserList.getLast 1
+pop local 0
+push local 0
+call LaserList.getData 1
+pop local 1
+push local 1
+call Laser.dispose 1
+pop temp 0
+push local 0
+call LaserList.dispose 1
+pop temp 0
+push constant 0
+return
+function LaserList.getLast 2
+push argument 0
+pop pointer 0
+push pointer 0
+pop local 0
+push pointer 0
+call LaserList.getNext 1
+pop local 1
+label WHILE_EXP0
+push local 1
+push constant 0
+eq
+not
+not
+if-goto WHILE_END0
+push local 1
+pop local 0
+push local 0
+call LaserList.getNext 1
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
+return
+function LaserList.setNext 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 1
+push constant 0
+return

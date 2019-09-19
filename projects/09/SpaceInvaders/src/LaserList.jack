@@ -1,0 +1,79 @@
+/** Represents a linked list of lasers. A list consists of a data field, followed by a list*/
+
+class LaserList {
+    field Laser data;
+    field LaserList next;
+
+    /* Creates a List. */
+    constructor LaserList new(Laser laser, LaserList pointer) {
+        let data = laser;  
+        let next = pointer;
+        return this;
+    }
+
+    /** Accessors. */
+    method Laser getData() { return data; }
+    method LaserList getNext() { return next; }
+
+    /** Disposes this List by recursively disposing its tail. */
+    method void dispose() {
+        if (~(next = null)) {
+            do next.dispose();
+        }
+        // Uses an OS routine to recycle this object.
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void add(LaserList nextLaserList) {
+        var LaserList end;   
+        let end = getLast();  
+
+        do end.setNext(nextLaserList);
+        return;
+    }
+
+    /* Removes last invader and returns it */
+    method Invader pop() {
+        var LaserList end;   
+        var Laser laser;
+        
+        let end = getLast(); 
+        let laser = end.getData();
+
+        return laser; 
+    }
+
+    method void trim() {
+        var LaserList end;   
+        var Laser laser;
+        
+        let end = getLast(); 
+        let laser = end.getData();
+
+        do laser.dispose();
+        do end.dispose();
+
+        return;
+    }
+
+    method LaserList getLast() {
+        var LaserList current;
+        var LaserList next;
+
+        let current = this;
+        let next = getNext(); 
+
+        while (~(next = null)) {
+            let current = next;
+            let next = current.getNext();
+        }
+
+        return current; // 'current' now is the list item with 'next' = null
+    }
+
+    method void setNext(LaserList nextLaserList) {
+        let next = nextLaserList;
+        return;
+    }
+}
