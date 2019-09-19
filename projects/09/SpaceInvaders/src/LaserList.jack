@@ -51,6 +51,8 @@ class LaserList {
         let end = getLast(); 
         let laser = end.getData();
 
+        // Will need to set the new end.next = null explicitly
+
         do laser.dispose();
         do end.dispose();
 
