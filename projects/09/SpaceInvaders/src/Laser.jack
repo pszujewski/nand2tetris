@@ -14,12 +14,17 @@ class Laser {
         var int y;
         let y = graphic.getY(); 
 
-        if (y > 1) {
+        if (y > 25) {
             do graphic.moveUp();
             return true;
         }
 
         return false;
+    }
+
+    method void erase() {
+        do graphic.erase();
+        return;
     }
 
     method void dispose() {

@@ -18,7 +18,7 @@ class LaserList {
     /** Disposes this List by recursively disposing its tail. */
     method void dispose() {
         if (~(next = null)) {
-            do next.dispose();
+            do next.dispose();    
         }
         // Uses an OS routine to recycle this object.
         do Memory.deAlloc(this);
@@ -45,17 +45,27 @@ class LaserList {
     }
 
     method void trim() {
-        var LaserList end;   
-        var Laser laser;
+        var LaserList prev;
+        var LaserList current;
+        var LaserList next;
+
+        let prev = null;
+        let current = this;
+        let next = getNext(); 
+
+        while (~(next = null)) {
+            let prev = current;
+            let current = next;
+            let next = current.getNext();
+        }
+
+        if (~(current = null)) {
+            do current.dispose();
+        }
         
-        let end = getLast(); 
-        let laser = end.getData();
-
-        // Will need to set the new end.next = null explicitly
-
-        do laser.dispose();
-        do end.dispose();
-
+        if (~(prev = null)) {
+            do prev.setNext(null);
+        }
         return;
     }
 
