@@ -6,7 +6,7 @@ export default class JackFileReader {
     private directoryName: string;
 
     constructor(relPath: string) {
-        this.relativePathToDir = relPath;
+        this.relativePathToDir = `../${relPath}`;
         this.directoryName = this.identifyJackDirectory();
     }
 
@@ -78,8 +78,8 @@ export default class JackFileReader {
     }
 
     private getAbsolutePathsToJackFiles(): Promise<string[]> {
-        let pathToDirectory: string;
-        pathToDirectory = fspath.join(__dirname, this.relativePathToDir);
+        const p: string = this.relativePathToDir;
+        const pathToDirectory: string = fspath.join(__dirname, p);
 
         return new Promise((resolve, reject) => {
             fs.readdir(pathToDirectory, (err, fileNames) => {
@@ -112,8 +112,6 @@ export default class JackFileReader {
     private convertToAbsolutePaths(fileNames: string[]): string[] {
         return fileNames.map((f: string) => {
             const pathTokens: string[] = this.tokenizePath();
-            pathTokens.pop();
-
             pathTokens.push(f);
             return fspath.join(__dirname, pathTokens.join("/"));
         });

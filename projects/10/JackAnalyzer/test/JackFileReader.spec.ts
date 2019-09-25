@@ -12,6 +12,7 @@ describe("JackFileReader", () => {
             result = await reader.read();
         } catch (err) {
             console.log(err.message);
+            result = err;
         }
 
         expect(result).to.deep.equal([]);
