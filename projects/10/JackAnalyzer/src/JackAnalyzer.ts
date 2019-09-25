@@ -11,6 +11,7 @@ export default class JackAnalyzer {
 
     public async analyze(): Promise<void> {
         let inputTokens: string[];
+
         let tokenizer: JackTokenizer;
         let engine: JackCompilationEngine;
 
