@@ -19,6 +19,8 @@ export default class CompilationEngine {
         this.jackTokenizer = tokenizer;
     }
 
+    public compile(): void {}
+
     /** Compiles a complete class */
     public compileClass(): void {}
 
