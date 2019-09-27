@@ -66,14 +66,21 @@ export default class JackFileReader {
     private tokenizeJackCode(sourceJackCode: string): string[] {
         let tokens: string[];
 
-        tokens = sourceJackCode.replace(/\r/g, "").split("\n");
-        tokens = tokens.filter(t => t && t.length > 0 && t.indexOf("//") !== 0);
+        tokens = sourceJackCode.replace(/(\r|\t)/g, "").split("\n");
+
+        tokens = tokens.filter(t => {
+            const isValidStr: boolean = typeof t === "string" && t.length > 0;
+            return isValidStr && t.indexOf("//") !== 0 && t.indexOf("/*") !== 0;
+        });
 
         return tokens.map(t => {
             if (t.indexOf("//")) {
                 return t.replace(/\/\/.+/g, "").trim();
             }
-            return t;
+            if (t.indexOf("/*")) {
+                return t.replace(/\/\*.+/g, "").trim();
+            }
+            return t.trim();
         });
     }
 
