@@ -1,5 +1,6 @@
 import fs from "fs";
 import fspath from "path";
+import Tokens from "./Tokens";
 
 export default class JackFileReader {
     private relativePathToDir: string;
@@ -18,7 +19,9 @@ export default class JackFileReader {
         try {
             pathsToJackFiles = await this.getAbsolutePathsToJackFiles();
             jackCode = await this.readDataInJackFiles(pathsToJackFiles);
+
             codeTokens = this.tokenizeJackCode(jackCode);
+            codeTokens = new Tokens(codeTokens).parse();
         } catch (err) {
             throw new Error(err.message);
         }

@@ -1,4 +1,7 @@
 import SymbolTable from "../SymbolTable";
+import Source from "./Source";
+
+const DoubleQuote = '"';
 
 export default class Tokens {
     private baseTokens: string[];
@@ -8,36 +11,68 @@ export default class Tokens {
     }
 
     public parse(): string[] {
-        const chunks: string[][] = this.baseTokens.map(this.parseOne);
+        return this.baseTokens
+            .map(this.parseOneBaseToken)
+            .reduce((prev, curr) => {
+                return [...prev, ...curr];
+            }, []);
     }
 
-    private parseOne = (bt: string): string[] => {
-        const tokens: string[] = [];
-        const splitBt: string[] = bt.split("s");
+    private parseOneBaseToken = (baseToken: string): string[] => {
+        let baseTokenSource: Source;
+        let tokens: string[];
 
-        let i: number;
-        let j: number;
-
-        let initial: string;
-        let nextToken: string;
-
-        for (i = 0; i < splitBt.length; i++) {
-            initial = splitBt[i];
-            nextToken = "";
-
-            for (j = 0; j < initial.length; j++) {
-                const char: string = initial[j];
-
-                if (nextToken && SymbolTable.isSymbol(char)) {
-                    tokens.push(nextToken.trim());
-                    nextToken = "";
-                    tokens.push(char);
-                } else {
-                    nextToken = nextToken + char;
-                }
-            }
+        try {
+            baseTokenSource = new Source(baseToken);
+            tokens = this.recursiveParse(baseTokenSource);
+        } catch (err) {
+            throw err;
         }
-
         return tokens;
     };
+
+    private recursiveParse(base: Source, tokens: string[] = []): string[] {
+        const currChar: string = base.getNextChar();
+
+        const lastIdx: number = tokens.length - 1;
+        const end: string = tokens[lastIdx];
+
+        if (currChar.length === 0) {
+            return tokens;
+        }
+
+        if (SymbolTable.includes(currChar) && end) {
+            return this.recursiveParse(base, [...tokens, currChar]);
+        }
+
+        if (currChar && Array.isArray(currChar.match(/\s/))) {
+            return this.recursiveParse(base, [...tokens, ""]);
+        }
+
+        if (currChar === DoubleQuote) {
+            const str = this.buildStringToken(base);
+            return this.recursiveParse(base, [...tokens, str]);
+        }
+
+        if (SymbolTable.includes(end)) {
+            return this.recursiveParse(base, [...tokens, currChar]);
+        }
+
+        if (typeof end !== "string") {
+            return this.recursiveParse(base, [currChar]);
+        }
+
+        tokens[lastIdx] = end.concat(currChar);
+        return this.recursiveParse(base, tokens);
+    }
+
+    private buildStringToken(base: Source, stringConstant = ""): string {
+        const currChar: string = base.getNextChar();
+
+        if (currChar === DoubleQuote) {
+            return `stringConstant=${stringConstant}`;
+        }
+
+        return this.buildStringToken(base, stringConstant.concat(currChar));
+    }
 }

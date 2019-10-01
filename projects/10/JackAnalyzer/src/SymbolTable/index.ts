@@ -23,7 +23,7 @@ const symbols: string[] = [
 ];
 
 export default class SymbolTable {
-    static isSymbol(char: string): boolean {
+    static includes(char: string): boolean {
         return symbols.includes(char);
     }
 }
