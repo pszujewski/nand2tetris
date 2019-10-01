@@ -23,6 +23,30 @@ const symbols: string[] = [
 ];
 
 export default class SymbolTable {
+    static get(char: string): string {
+        let i: number;
+
+        if (char === "&") {
+            return Symbol.Ampersand;
+        }
+
+        if (char === "<") {
+            return Symbol.LessThan;
+        }
+
+        if (char === ">") {
+            return Symbol.GreaterThan;
+        }
+
+        for (i = 0; i < symbols.length; i++) {
+            if (symbols[i] === char) {
+                return symbols[i];
+            }
+        }
+
+        throw new Error("Failed to identify symbol");
+    }
+
     static includes(char: string): boolean {
         return symbols.includes(char);
     }

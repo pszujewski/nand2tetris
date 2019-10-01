@@ -1,6 +1,8 @@
 import Symbol from "../../types/Symbol";
 import Keyword from "../../types/Keyword";
 import TokenType from "../../types/TokenType";
+import KeywordTable from "../KeywordTable";
+import SymbolTable from "../SymbolTable";
 
 /** Removes all comments and whitespace from the input stream and breaks it into Jack-language tokens */
 export default class JackTokenizer {
@@ -16,49 +18,71 @@ export default class JackTokenizer {
 
     /** Returns true if we have more tokens in the input */
     public hasMoreTokens(): boolean {
-        return false;
+        return this.pointer < this.syntacticElements.length;
     }
 
     /** Gets the next token from the input and makes it the current token. */
     public advance(): void {
-        return undefined;
+        const curr: number = this.pointer;
+        this.pointer = this.pointer + 1;
+        this.currentToken = this.syntacticElements[curr];
     }
 
     /** Returns the type of the current token */
-    private getTokenType(): TokenType {
+    public getTokenType(): TokenType {
+        const token: string = this.currentToken;
+
+        if (KeywordTable.includes(token)) {
+            return TokenType.Keyword;
+        }
+
+        if (SymbolTable.includes(token)) {
+            return TokenType.Symbol;
+        }
+
+        if (token.indexOf("stringConstant=") > -1) {
+            return TokenType.StringConst;
+        }
+
+        if (!isNaN(parseInt(token))) {
+            return TokenType.IntConst;
+        }
+
         return TokenType.Identifier;
     }
 
     /** Returns the keyword which is the current token */
-    private getKeyword(): Keyword {
-        return Keyword.Boolean;
+    public getKeyword(): Keyword {
+        return KeywordTable.get(this.currentToken);
     }
 
     /** Returns the symbol character which is the current token.
      * Should only be called when tokenType is Symbol
      */
-    private getSymbol(): string {
-        return Symbol.Ampersand;
+    public getSymbol(): string {
+        return SymbolTable.get(this.currentToken);
     }
 
     /** Returns the identifier which is the current token.
      * Only called when tokenType is Identifier. For example in 'class Fraction'
      * 'Fraction' is the 'identifier' that would be returned
      * */
-    private getIdentifier(): string {
-        return "";
+    public getIdentifier(): string {
+        return this.currentToken.trim();
     }
 
     /** Returns the integer value of the current token.
      * Should be called only when tokenType is Int_Const
      * */
-    private getIntVal(): number {
-        return 0;
+    public getIntVal(): number {
+        return parseInt(this.currentToken);
     }
 
     /** Return the string value of the current token without the double quotes.
      * Only called when the tokenType is String_Const */
-    private getStringVal(): string {
-        return "";
+    public getStringVal(): string {
+        const token: string = this.currentToken;
+        const toReplace = "stringConstant=";
+        return token.replace(toReplace, "");
     }
 }
