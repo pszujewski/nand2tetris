@@ -4,14 +4,14 @@ import TokenType from "../../types/TokenType";
 
 /** Removes all comments and whitespace from the input stream and breaks it into Jack-language tokens */
 export default class JackTokenizer {
-    private inputTokens: string[];
+    private syntacticElements: string[];
     private pointer: number;
     private currentToken: string;
 
-    public constructor(inputTokens: string[]) {
-        this.inputTokens = inputTokens;
+    public constructor(syntacticElements: string[]) {
+        this.syntacticElements = syntacticElements;
         this.pointer = 0;
-        this.currentToken = inputTokens[0];
+        this.currentToken = syntacticElements[0];
     }
 
     /** Returns true if we have more tokens in the input */
@@ -20,7 +20,9 @@ export default class JackTokenizer {
     }
 
     /** Gets the next token from the input and makes it the current token. */
-    public advance(): void {}
+    public advance(): void {
+        return undefined;
+    }
 
     /** Returns the type of the current token */
     private getTokenType(): TokenType {
@@ -33,9 +35,9 @@ export default class JackTokenizer {
     }
 
     /** Returns the symbol character which is the current token.
-     * Should only be called when tokenType os Symbol
+     * Should only be called when tokenType is Symbol
      */
-    private getSymbol(): Symbol {
+    private getSymbol(): string {
         return Symbol.Ampersand;
     }
 
