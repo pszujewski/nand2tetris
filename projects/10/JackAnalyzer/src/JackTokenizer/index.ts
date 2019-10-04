@@ -12,7 +12,11 @@ export default class JackTokenizer {
     public constructor(syntacticElements: string[]) {
         this.syntacticElements = syntacticElements;
         this.pointer = 0;
-        this.currentToken = syntacticElements[0];
+        this.currentToken = "";
+    }
+
+    public isFirstTokenClassKeyword(): boolean {
+        return KeywordTable.isClass(this.syntacticElements[0]);
     }
 
     /** Returns true if we have more tokens in the input */
@@ -22,9 +26,13 @@ export default class JackTokenizer {
 
     /** Gets the next token from the input and makes it the current token. */
     public advance(): void {
-        const curr: number = this.pointer;
-        this.pointer = this.pointer + 1;
-        this.currentToken = this.syntacticElements[curr];
+        if (!this.currentToken) {
+            this.currentToken[this.pointer];
+        } else {
+            const curr: number = this.pointer;
+            this.pointer = this.pointer + 1;
+            this.currentToken = this.syntacticElements[curr];
+        }
     }
 
     /** Returns the type of the current token */

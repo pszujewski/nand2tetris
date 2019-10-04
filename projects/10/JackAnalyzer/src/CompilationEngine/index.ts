@@ -4,6 +4,7 @@ import TokenType from "../../types/TokenType";
 import Symbol from "../../types/Symbol";
 import SymbolTable from "../SymbolTable";
 import XMLWriter from "./XMLWriter";
+import CurrentToken from "../../types/CurrentToken";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -28,12 +29,9 @@ export default class CompilationEngine {
 
     public compile(): void {
         let xml: string;
-        let currentToken: string;
 
         try {
-            currentToken = this.tokenizer.getCurrentToken();
-
-            if (KeywordTable.isClass(currentToken)) {
+            if (this.tokenizer.isFirstTokenClassKeyword()) {
                 xml = this.compileClass();
                 console.log("Write XML", xml);
             } else {
@@ -46,23 +44,18 @@ export default class CompilationEngine {
 
     /** Compiles a complete class */
     public compileClass(xml = ""): string {
-        const currentToken: string = this.tokenizer.getCurrentToken();
-        const tokenType: TokenType = this.tokenizer.getTokenType();
+        this.tokenizer.advance();
 
-        const isSymbol: boolean = tokenType === TokenType.Symbol;
-        const isKeyword: boolean = tokenType === TokenType.Keyword;
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        if (isSymbol && currentToken === Symbol.CurlyLeft) {
+        if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             return xml.concat(this.xmlWriter.getSymbol());
         }
 
-        if (isKeyword && KeywordTable.isClassVarDec(currentToken)) {
-            xml = this.compileClassVarDec(xml);
+        if (KeywordTable.isClassVarDec(tokenState.value)) {
+            return this.compileClassVarDec(xml);
         }
 
-        if (this.tokenizer.hasMoreTokens()) {
-            this.tokenizer.advance();
-        }
         return this.compileClass(xml);
     }
 
@@ -70,25 +63,28 @@ export default class CompilationEngine {
      * (static | field) type varName (, varName)*
      * */
     private compileClassVarDec(xml: string): string {
-        const currentToken: string = this.tokenizer.getCurrentToken();
-        const tokenType: TokenType = this.tokenizer.getTokenType();
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        const isKeyword: boolean = tokenType === TokenType.Keyword;
-
-        if (SymbolTable.isSemi(currentToken)) {
+        if (SymbolTable.isSemi(tokenState.value)) {
             return xml.concat(this.xmlWriter.getSymbol());
         }
 
-        if (isKeyword) {
+        if (tokenState.isKeyword) {
             return this.compileClassVarDec(
                 xml.concat(this.xmlWriter.getKeyword())
             );
         }
 
-        if ()
-    }
+        if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
+            return this.compileClassVarDec(
+                xml.concat(this.xmlWriter.getSymbol())
+            );
+        }
 
-    
+        return this.compileClassVarDec(
+            xml.concat(this.xmlWriter.getIdentifier())
+        );
+    }
 
     private compileSubroutne(): string {}
 
