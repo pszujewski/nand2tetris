@@ -48,8 +48,23 @@ export default class CompilationEngine {
 
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
+        // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             return xml.concat(this.xmlWriter.getSymbol());
+        }
+
+        if (KeywordTable.isClass(tokenState.value)) {
+            return this.compileClass(xml.concat(this.xmlWriter.getKeyword()));
+        }
+
+        if (tokenState.isIdentifier) {
+            return this.compileClass(
+                xml.concat(this.xmlWriter.getIdentifier())
+            );
+        }
+
+        if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
+            return this.compileClass(xml.concat(this.xmlWriter.getSymbol()));
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
