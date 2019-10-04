@@ -1,6 +1,6 @@
 import Keyword from "../../types/Keyword";
 
-const keywords: Keyword[] = [
+const keywords: string[] = [
     Keyword.Class,
     Keyword.Class,
     Keyword.Method,
@@ -26,7 +26,7 @@ const keywords: Keyword[] = [
 ];
 
 export default class KeywordTable {
-    static get(keyword: string): Keyword {
+    static get(keyword: string): string {
         let i: number;
 
         for (i = 0; i < keywords.length; i++) {
@@ -40,5 +40,13 @@ export default class KeywordTable {
 
     static includes(word: string): boolean {
         return keywords.includes(word);
+    }
+
+    static isClass(word: string): boolean {
+        return word === Keyword.Class;
+    }
+
+    static isClassVarDec(word: string): boolean {
+        return word === Keyword.Field || word === Keyword.Static;
     }
 }

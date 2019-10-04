@@ -1,4 +1,3 @@
-import Symbol from "../../types/Symbol";
 import Keyword from "../../types/Keyword";
 import TokenType from "../../types/TokenType";
 import KeywordTable from "../KeywordTable";
@@ -51,8 +50,12 @@ export default class JackTokenizer {
         return TokenType.Identifier;
     }
 
+    public getCurrentToken(): string {
+        return this.currentToken;
+    }
+
     /** Returns the keyword which is the current token */
-    public getKeyword(): Keyword {
+    public getKeyword(): string {
         return KeywordTable.get(this.currentToken);
     }
 
