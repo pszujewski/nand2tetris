@@ -1,4 +1,4 @@
-import Keyword from "../../types/Keyword";
+import CurrentToken from "../../types/CurrentToken";
 import TokenType from "../../types/TokenType";
 import KeywordTable from "../KeywordTable";
 import SymbolTable from "../SymbolTable";
@@ -52,6 +52,21 @@ export default class JackTokenizer {
 
     public getCurrentToken(): string {
         return this.currentToken;
+    }
+
+    public getCurrentTokenState(): CurrentToken {
+        const value: string = this.getCurrentToken();
+        const type: string = this.getTokenType();
+
+        return {
+            value,
+            type,
+            isSymbol: type === TokenType.Symbol,
+            isKeyword: type === TokenType.Keyword,
+            isIntConst: type === TokenType.IntConst,
+            isStringConst: type === TokenType.StringConst,
+            isIdentifier: type === TokenType.Identifier,
+        };
     }
 
     /** Returns the keyword which is the current token */

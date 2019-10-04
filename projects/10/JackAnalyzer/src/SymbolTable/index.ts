@@ -50,4 +50,8 @@ export default class SymbolTable {
     static includes(char: string): boolean {
         return symbols.includes(char);
     }
+
+    static isSemi(char: string): boolean {
+        return char === Symbol.Semi;
+    }
 }

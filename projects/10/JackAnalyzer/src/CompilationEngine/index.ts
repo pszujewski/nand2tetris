@@ -2,6 +2,8 @@ import JackTokenizer from "../JackTokenizer";
 import KeywordTable from "../KeywordTable";
 import TokenType from "../../types/TokenType";
 import Symbol from "../../types/Symbol";
+import SymbolTable from "../SymbolTable";
+import XMLWriter from "./XMLWriter";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -17,9 +19,11 @@ import Symbol from "../../types/Symbol";
 
 export default class CompilationEngine {
     private tokenizer: JackTokenizer;
+    private xmlWriter: XMLWriter;
 
     constructor(tokenizer: JackTokenizer) {
         this.tokenizer = tokenizer;
+        this.xmlWriter = new XMLWriter(tokenizer);
     }
 
     public compile(): void {
@@ -49,11 +53,11 @@ export default class CompilationEngine {
         const isKeyword: boolean = tokenType === TokenType.Keyword;
 
         if (isSymbol && currentToken === Symbol.CurlyLeft) {
-            return xml.concat(this.getSymbol());
+            return xml.concat(this.xmlWriter.getSymbol());
         }
 
         if (isKeyword && KeywordTable.isClassVarDec(currentToken)) {
-            xml = this.compileClassVarDec();
+            xml = this.compileClassVarDec(xml);
         }
 
         if (this.tokenizer.hasMoreTokens()) {
@@ -65,14 +69,29 @@ export default class CompilationEngine {
     /** Compiles a static declaration or a field declaration.
      * (static | field) type varName (, varName)*
      * */
-    private compileClassVarDec(): string {}
+    private compileClassVarDec(xml: string): string {
+        const currentToken: string = this.tokenizer.getCurrentToken();
+        const tokenType: TokenType = this.tokenizer.getTokenType();
+
+        const isKeyword: boolean = tokenType === TokenType.Keyword;
+
+        if (SymbolTable.isSemi(currentToken)) {
+            return xml.concat(this.xmlWriter.getSymbol());
+        }
+
+        if (isKeyword) {
+            return this.compileClassVarDec(
+                xml.concat(this.xmlWriter.getKeyword())
+            );
+        }
+
+        if ()
+    }
+
+    
 
     private compileSubroutne(): string {}
 
     /** Compile a possibly empty parameter list */
     private compileParameterList(): string {}
-
-    private getSymbol(): string {
-        return `<symbol> ${this.tokenizer.getSymbol()} </symbol>`;
-    }
 }
