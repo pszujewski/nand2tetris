@@ -1,10 +1,10 @@
 import JackTokenizer from "../JackTokenizer";
 import KeywordTable from "../KeywordTable";
-import TokenType from "../../types/TokenType";
 import Symbol from "../../types/Symbol";
 import SymbolTable from "../SymbolTable";
 import XMLWriter from "./XMLWriter";
 import CurrentToken from "../../types/CurrentToken";
+import Keyword from "../../types/Keyword";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -43,7 +43,8 @@ export default class CompilationEngine {
     }
 
     /** Compiles a complete class */
-    public compileClass(xml = ""): string {
+    public compileClass(xmlRoot = ""): string {
+        let xml: string = xmlRoot;
         this.tokenizer.advance();
 
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
@@ -68,16 +69,27 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
-            return this.compileClassVarDec(xml);
+            return this.compileClass(
+                this.compileClassVarDec(xml.concat(this.xmlWriter.getKeyword()))
+            );
         }
 
-        return this.compileClass(xml);
+        if (KeywordTable.isSubroutineDec(tokenState.value)) {
+            return this.compileClass(
+                this.compileSubroutine(
+                    xml.concat(`<subroutineDec>${this.xmlWriter.getKeyword()}`)
+                )
+            );
+        }
+
+        throw new Error("Failed to compile class");
     }
 
     /** Compiles a static declaration or a field declaration.
      * (static | field) type varName (, varName)*
      * */
     private compileClassVarDec(xml: string): string {
+        this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         if (SymbolTable.isSemi(tokenState.value)) {
@@ -101,8 +113,80 @@ export default class CompilationEngine {
         );
     }
 
-    private compileSubroutne(): string {}
+    private compileSubroutine(xml: string): string {
+        // return type
+        this.tokenizer.advance();
+        xml = xml.concat(this.xmlWriter.getIdentifier());
+
+        // function | method | constructor name
+        this.tokenizer.advance();
+        xml = xml.concat(this.xmlWriter.getIdentifier());
+
+        // open paran
+        this.tokenizer.advance();
+        xml = xml.concat(this.xmlWriter.getSymbol());
+
+        xml = this.compileParameterList(xml.concat("<parameterList>"));
+        return this.compileSubroutineBody(xml.concat("<subroutineBody>"));
+    }
 
     /** Compile a possibly empty parameter list */
-    private compileParameterList(): string {}
+    private compileParameterList(xml: string): string {
+        this.tokenizer.advance();
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        // base case
+        if (tokenState.isSymbol && tokenState.value === Symbol.ParenLeft) {
+            return `</parameterList>${xml.concat(this.xmlWriter.getSymbol())}`;
+        }
+
+        if (tokenState.isKeyword) {
+            return this.compileParameterList(
+                xml.concat(this.xmlWriter.getKeyword())
+            );
+        }
+
+        if (tokenState.isIdentifier) {
+            return this.compileParameterList(
+                xml.concat(this.xmlWriter.getIdentifier())
+            );
+        }
+
+        if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
+            return this.compileParameterList(
+                xml.concat(this.xmlWriter.getSymbol())
+            );
+        }
+
+        throw new Error("Failed to compile parameter list");
+    }
+
+    private compileSubroutineBody(xml: string): string {
+        this.tokenizer.advance();
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        // base case
+        if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
+            return `${xml.concat(this.xmlWriter.getSymbol())}</subroutineBody>`;
+        }
+
+        // Start of subroutine body
+        if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
+            return this.compileSubroutineBody(this.xmlWriter.getSymbol());
+        }
+
+        if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
+            return this.compileSubroutineBody(
+                this.compileVarDec(xml.concat(this.xmlWriter.getKeyword()))
+            );
+        }
+
+        return this.compileSubroutineBody(this.compileStatements(xml));
+    }
+
+    /** Compiles a var declaration */
+    private compileVarDec(xml: string): string {}
+
+    /** Compiles a sequence of statements not including the enclosing brackets */
+    private compileStatements(xml: string): string {}
 }

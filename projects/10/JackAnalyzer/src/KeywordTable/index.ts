@@ -49,4 +49,12 @@ export default class KeywordTable {
     static isClassVarDec(word: string): boolean {
         return word === Keyword.Field || word === Keyword.Static;
     }
+
+    static isSubroutineDec(word: string): boolean {
+        return (
+            word === Keyword.Constructor ||
+            word === Keyword.Function ||
+            word == Keyword.Method
+        );
+    }
 }
