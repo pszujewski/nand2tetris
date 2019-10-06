@@ -89,28 +89,9 @@ export default class CompilationEngine {
      * (static | field) type varName (, varName)*
      * */
     private compileClassVarDec(xml: string): string {
-        this.tokenizer.advance();
-        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
-
-        if (SymbolTable.isSemi(tokenState.value)) {
-            return xml.concat(this.xmlWriter.getSymbol());
-        }
-
-        if (tokenState.isKeyword) {
-            return this.compileClassVarDec(
-                xml.concat(this.xmlWriter.getKeyword())
-            );
-        }
-
-        if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
-            return this.compileClassVarDec(
-                xml.concat(this.xmlWriter.getSymbol())
-            );
-        }
-
-        return this.compileClassVarDec(
-            xml.concat(this.xmlWriter.getIdentifier())
-        );
+        return `<classVarDec>${this.compileVarDec(xml).concat(
+            "</classVarDec>"
+        )}`;
     }
 
     private compileSubroutine(xml: string): string {
@@ -175,18 +156,73 @@ export default class CompilationEngine {
             return this.compileSubroutineBody(this.xmlWriter.getSymbol());
         }
 
+        // Compile any varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
             return this.compileSubroutineBody(
-                this.compileVarDec(xml.concat(this.xmlWriter.getKeyword()))
+                `<varDec>${this.compileVarDec(
+                    xml.concat(this.xmlWriter.getKeyword())
+                ).concat("</varDec>")}`
             );
         }
 
-        return this.compileSubroutineBody(this.compileStatements(xml));
+        return `<statements>${this.compileSubroutineBody(
+            this.compileStatements(xml)
+        ).concat("</statements>")}`;
     }
 
     /** Compiles a var declaration */
-    private compileVarDec(xml: string): string {}
+    private compileVarDec(xml: string): string {
+        this.tokenizer.advance();
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-    /** Compiles a sequence of statements not including the enclosing brackets */
-    private compileStatements(xml: string): string {}
+        // base case
+        if (SymbolTable.isSemi(tokenState.value)) {
+            return xml.concat(this.xmlWriter.getSymbol());
+        }
+
+        if (tokenState.isKeyword) {
+            return this.compileVarDec(xml.concat(this.xmlWriter.getKeyword()));
+        }
+
+        if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
+            return this.compileVarDec(xml.concat(this.xmlWriter.getSymbol()));
+        }
+
+        return this.compileVarDec(xml.concat(this.xmlWriter.getIdentifier()));
+    }
+
+    /** Compiles a sequence of statements not including the enclosing brackets.
+     *  The current token must be a keyword if this function is entered
+     *
+     * Base case: the 'lookAheadToken' is a Symbol Bracket facing Left closing the statments
+     */
+    private compileStatements(xmlRoot: string): string {
+        const currentToken: string = this.tokenizer.getCurrentToken();
+        const xml: string = xmlRoot.concat(this.xmlWriter.getKeyword());
+    }
+
+    /** Compiles a do statement */
+    private compileDo(xml: string): string {}
+
+    /** Compiles a let statement */
+    private compileLet(xml: string): string {}
+
+    /** Compiles a while statement. Can contain statements */
+    private compileWhile(xml: string): string {}
+
+    /** Compiles a return statement */
+    private compileReturn(xml: string): string {}
+
+    /** Compiles an if statement. Can contain statements */
+    private compileIf(xml: string): string {}
+
+    /** Compiles an expression */
+    private compileExpression(xml: string): string {}
+
+    /** Compile a term. Must decide between the alternative of a variable,
+     * an array entry and a subroutine call */
+    private compileTerm(xml: string): string {}
+
+    /** Compiles a possible empty comma-separated list of expressions */
+    private compileExpressionList(xml: string): string {}
 }
