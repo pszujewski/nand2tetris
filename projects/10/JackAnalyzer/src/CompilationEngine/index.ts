@@ -32,7 +32,7 @@ export default class CompilationEngine {
 
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
-                xml = this.compileClass();
+                xml = `<class>${this.compileClass()}</class>`;
                 console.log("Write XML", xml);
             } else {
                 throw new Error("Program must begin with a class declaration");
@@ -89,9 +89,7 @@ export default class CompilationEngine {
      * (static | field) type varName (, varName)*
      * */
     private compileClassVarDec(xml: string): string {
-        return `<classVarDec>${this.compileVarDec(xml).concat(
-            "</classVarDec>"
-        )}`;
+        return `<classVarDec>${this.compileVarDec(xml)}</classVarDec>}`;
     }
 
     private compileSubroutine(xml: string): string {
@@ -107,8 +105,12 @@ export default class CompilationEngine {
         this.tokenizer.advance();
         xml = xml.concat(this.xmlWriter.getSymbol());
 
-        xml = this.compileParameterList(xml.concat("<parameterList>"));
-        return this.compileSubroutineBody(xml.concat("<subroutineBody>"));
+        xml = `<parameterList>${this.compileParameterList(
+            xml
+        )}</parameterList>`;
+        return `<subroutineBody>${this.compileSubroutineBody(
+            xml
+        )}</subroutineBody>`;
     }
 
     /** Compile a possibly empty parameter list */
@@ -118,7 +120,7 @@ export default class CompilationEngine {
 
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.ParenLeft) {
-            return `</parameterList>${xml.concat(this.xmlWriter.getSymbol())}`;
+            return xml.concat(this.xmlWriter.getSymbol());
         }
 
         if (tokenState.isKeyword) {
@@ -165,9 +167,10 @@ export default class CompilationEngine {
             );
         }
 
-        return `<statements>${this.compileSubroutineBody(
-            this.compileStatements(xml)
+        const statmentsBlock: string = `<statements>${this.compileStatements(
+            xml
         ).concat("</statements>")}`;
+        return this.compileSubroutineBody(statmentsBlock);
     }
 
     /** Compiles a var declaration */
@@ -197,8 +200,26 @@ export default class CompilationEngine {
      * Base case: the 'lookAheadToken' is a Symbol Bracket facing Left closing the statments
      */
     private compileStatements(xmlRoot: string): string {
-        const currentToken: string = this.tokenizer.getCurrentToken();
-        const xml: string = xmlRoot.concat(this.xmlWriter.getKeyword());
+        // base case -- DONT ADVANCE
+        if (this.tokenizer.getCurrentToken() === Symbol.CurlyLeft) {
+            return xmlRoot;
+        }
+
+        this.tokenizer.advance();
+        const currentToken = this.tokenizer.getCurrentToken();
+
+        if (currentToken === Symbol.CurlyLeft) {
+            return xmlRoot;
+        }
+
+        const xmlToPass: string = xmlRoot.concat(this.xmlWriter.getKeyword());
+
+        switch (currentToken) {
+            case Keyword.Do:
+                return this.compileStatements(this.compileDo(xmlToPass));
+            default:
+                return "";
+        }
     }
 
     /** Compiles a do statement */
