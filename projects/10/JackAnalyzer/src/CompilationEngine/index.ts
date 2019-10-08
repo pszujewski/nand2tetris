@@ -45,8 +45,8 @@ export default class CompilationEngine {
     /** Compiles a complete class */
     public compileClass(xmlRoot = ""): string {
         let xml: string = xmlRoot;
-        this.tokenizer.advance();
 
+        this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
@@ -76,9 +76,7 @@ export default class CompilationEngine {
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
             return this.compileClass(
-                this.compileSubroutine(
-                    xml.concat(`<subroutineDec>${this.xmlWriter.getKeyword()}`)
-                )
+                this.compileSubroutine(xml.concat(this.xmlWriter.getKeyword()))
             );
         }
 
@@ -92,7 +90,10 @@ export default class CompilationEngine {
         return `<classVarDec>${this.compileVarDec(xml)}</classVarDec>}`;
     }
 
+    // Not recursive
     private compileSubroutine(xml: string): string {
+        xml = xml.concat("<subroutineDec>");
+
         // return type
         this.tokenizer.advance();
         xml = xml.concat(this.xmlWriter.getIdentifier());
@@ -101,16 +102,18 @@ export default class CompilationEngine {
         this.tokenizer.advance();
         xml = xml.concat(this.xmlWriter.getIdentifier());
 
-        // open paran
+        // open paren for the parameter list
         this.tokenizer.advance();
         xml = xml.concat(this.xmlWriter.getSymbol());
 
-        xml = `<parameterList>${this.compileParameterList(
-            xml
-        )}</parameterList>`;
-        return `<subroutineBody>${this.compileSubroutineBody(
-            xml
-        )}</subroutineBody>`;
+        // the parens (oddly) should not be included as children to <parameterList> tag
+        xml = `<parameterList>${this.compileParameterList(xml)}`;
+
+        // The enclosing 'Curly Braces' are included as the first and last children to <subroutineBody>
+        const sb = "subroutineBody";
+        xml = `<${sb}>${this.compileSubroutineBody(xml)}</${sb}>`;
+
+        return xml.concat("</subroutineDec>");
     }
 
     /** Compile a possibly empty parameter list */
@@ -118,9 +121,9 @@ export default class CompilationEngine {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // base case
+        // base case -- ensuring <parameterList> is closed before 'getting' the closing paren symbol
         if (tokenState.isSymbol && tokenState.value === Symbol.ParenLeft) {
-            return xml.concat(this.xmlWriter.getSymbol());
+            return `</parameterList>${xml.concat(this.xmlWriter.getSymbol())}`;
         }
 
         if (tokenState.isKeyword) {
@@ -150,7 +153,7 @@ export default class CompilationEngine {
 
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
-            return `${xml.concat(this.xmlWriter.getSymbol())}</subroutineBody>`;
+            return xml.concat(this.xmlWriter.getSymbol());
         }
 
         // Start of subroutine body
@@ -160,10 +163,9 @@ export default class CompilationEngine {
 
         // Compile any varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
+            const xmlToPass = xml.concat(this.xmlWriter.getKeyword());
             return this.compileSubroutineBody(
-                `<varDec>${this.compileVarDec(
-                    xml.concat(this.xmlWriter.getKeyword())
-                ).concat("</varDec>")}`
+                `<varDec>${this.compileVarDec(xmlToPass)}</varDec>`
             );
         }
 
