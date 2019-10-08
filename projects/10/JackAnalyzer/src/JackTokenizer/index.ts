@@ -35,6 +35,14 @@ export default class JackTokenizer {
         }
     }
 
+    /** Does not set the currentToken, but returns what the next current token will be
+     * after next call to advance()
+     */
+    public lookAhead(): string {
+        const lookAheadPointer: number = this.pointer + 1;
+        return this.syntacticElements[lookAheadPointer];
+    }
+
     /** Returns the type of the current token */
     public getTokenType(): TokenType {
         const token: string = this.currentToken;

@@ -156,7 +156,7 @@ export default class CompilationEngine {
             return xml.concat(this.xmlWriter.getSymbol());
         }
 
-        // Start of subroutine body
+        // Start of subroutine body (braces are included as children of <subroutineBody>)
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
             return this.compileSubroutineBody(this.xmlWriter.getSymbol());
         }
@@ -164,15 +164,16 @@ export default class CompilationEngine {
         // Compile any varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
             const xmlToPass = xml.concat(this.xmlWriter.getKeyword());
+
             return this.compileSubroutineBody(
                 `<varDec>${this.compileVarDec(xmlToPass)}</varDec>`
             );
         }
 
-        const statmentsBlock: string = `<statements>${this.compileStatements(
-            xml
-        ).concat("</statements>")}`;
-        return this.compileSubroutineBody(statmentsBlock);
+        // Anything else should be a keyword indicating the start of a 'statement'
+        return this.compileSubroutineBody(
+            `<statements>${this.compileStatements(xml)}</statements>`
+        );
     }
 
     /** Compiles a var declaration */
@@ -202,32 +203,42 @@ export default class CompilationEngine {
      * Base case: the 'lookAheadToken' is a Symbol Bracket facing Left closing the statments
      */
     private compileStatements(xmlRoot: string): string {
-        // base case -- DONT ADVANCE
-        if (this.tokenizer.getCurrentToken() === Symbol.CurlyLeft) {
-            return xmlRoot;
-        }
-
-        this.tokenizer.advance();
+        let xml = xmlRoot;
         const currentToken = this.tokenizer.getCurrentToken();
-
-        if (currentToken === Symbol.CurlyLeft) {
-            return xmlRoot;
-        }
-
-        const xmlToPass: string = xmlRoot.concat(this.xmlWriter.getKeyword());
 
         switch (currentToken) {
             case Keyword.Do:
-                return this.compileStatements(this.compileDo(xmlToPass));
+                xml = this.compileDo(xml);
+                break;
+            case Keyword.Let:
+                xml = this.compileLet(xml);
+                break;
+            case Keyword.While:
+                xml = this.compileWhile(xml);
+                break;
+            case Keyword.Return:
+                xml = this.compileReturn(xml);
+                break;
+            case Keyword.If:
+                xml = this.compileIf(xml);
+                break;
             default:
-                return "";
+                break;
         }
+
+        if (this.tokenizer.lookAhead() === Symbol.CurlyLeft) {
+            return xml;
+        }
+
+        // If the 'lookAhead' value is not a '}' then we are still compiling statements
+        this.tokenizer.advance();
+        return this.compileStatements(xml);
     }
 
-    /** Compiles a do statement */
+    /** Compiles a do statement. Base case is Semi. */
     private compileDo(xml: string): string {}
 
-    /** Compiles a let statement */
+    /** Compiles a let statement. Base case is Semi */
     private compileLet(xml: string): string {}
 
     /** Compiles a while statement. Can contain statements */
