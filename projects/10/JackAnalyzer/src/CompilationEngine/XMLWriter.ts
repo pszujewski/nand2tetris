@@ -18,4 +18,12 @@ export default class XMLWriter {
     public getSymbol(): string {
         return `<symbol> ${this.tokenizer.getSymbol()} </symbol>`;
     }
+
+    public getIntConst(): string {
+        return `<integerConstant> ${this.tokenizer.getIntVal()} </integerConstant>`;
+    }
+
+    public getStringConst(): string {
+        return `<stringConstant> ${this.tokenizer.getStringVal()} </stringConstant>`;
+    }
 }
