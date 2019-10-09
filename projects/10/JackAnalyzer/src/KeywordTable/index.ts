@@ -57,4 +57,13 @@ export default class KeywordTable {
             word == Keyword.Method
         );
     }
+
+    static isKeywordConstant(word: string): boolean {
+        return (
+            word === Keyword.True ||
+            word === Keyword.False ||
+            word === Keyword.Null ||
+            word === Keyword.This
+        );
+    }
 }

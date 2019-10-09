@@ -208,24 +208,29 @@ export default class CompilationEngine {
 
         switch (currentToken) {
             case Keyword.Do:
-                xml = this.compileDo(xml);
+                xml = `<doStatement>${this.compileDo(xml)}</doStatement>`;
                 break;
             case Keyword.Let:
-                xml = this.compileLet(xml);
+                xml = `<letStatement>${this.compileLet(xml)}</letStatement>`;
                 break;
             case Keyword.While:
-                xml = this.compileWhile(xml);
+                xml = `<whileStatement>${this.compileWhile(
+                    xml
+                )}</whileStatement>`;
                 break;
             case Keyword.Return:
-                xml = this.compileReturn(xml);
+                xml = `<returnStatement>${this.compileReturn(
+                    xml
+                )}</returnStatement>`;
                 break;
             case Keyword.If:
-                xml = this.compileIf(xml);
+                xml = `<ifStatement>${this.compileIf(xml)}</ifStatement>`;
                 break;
             default:
                 break;
         }
 
+        // base case
         if (this.tokenizer.lookAhead() === Symbol.CurlyLeft) {
             return xml;
         }
@@ -250,12 +255,42 @@ export default class CompilationEngine {
     /** Compiles an if statement. Can contain statements */
     private compileIf(xml: string): string {}
 
-    /** Compiles an expression */
-    private compileExpression(xml: string): string {}
+    /** Compiles an expression. Wrap calls to this method in <expression> tag */
+    private compileExpression(xml: string, stopAtToken: string): string {
+        let currentToken = this.tokenizer.getCurrentToken();
+
+        if (SymbolTable.isOp(currentToken)) {
+            const nextXml = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return this.compileExpression(nextXml, stopAtToken);
+        }
+
+        // Else the currentToken must be the start of a <term>
+        const nextXml = `<term>${this.compileTerm(xml)}</term>`;
+
+        // Building the term will have advanced() the currentToken pointer
+        currentToken = this.tokenizer.getCurrentToken();
+
+        if (currentToken === stopAtToken) {
+            return nextXml;
+        }
+
+        this.tokenizer.advance();
+        return this.compileExpression(nextXml, stopAtToken);
+    }
 
     /** Compile a term. Must decide between the alternative of a variable,
-     * an array entry and a subroutine call */
-    private compileTerm(xml: string): string {}
+     * an array entry and a subroutine call.
+     * NOT RECURSIVE */
+    private compileTerm(xml: string): string {
+        // Needs to determine if we are dealing with a subroutineCall which is wrapped in <term>
+        // Needs to determine if we are dealing with a term including '[' ']' for array access
+        // Needs to determine if we are dealing with a `unaryOp term`
+        // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
+        // Else return <integerConstant> if isIntConst
+        // Else return <stringConstant> if isStringConst
+        // Else return <keyword> if isKeywordConst
+    }
 
     /** Compiles a possible empty comma-separated list of expressions */
     private compileExpressionList(xml: string): string {}

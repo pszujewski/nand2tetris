@@ -22,19 +22,23 @@ const symbols: string[] = [
     Symbol.Not,
 ];
 
+const amp = "&";
+const lt = "<";
+const gt = ">";
+
 export default class SymbolTable {
     static get(char: string): string {
         let i: number;
 
-        if (char === "&") {
+        if (char === amp) {
             return Symbol.Ampersand;
         }
 
-        if (char === "<") {
+        if (char === lt) {
             return Symbol.LessThan;
         }
 
-        if (char === ">") {
+        if (char === gt) {
             return Symbol.GreaterThan;
         }
 
@@ -53,5 +57,24 @@ export default class SymbolTable {
 
     static isSemi(char: string): boolean {
         return char === Symbol.Semi;
+    }
+
+    static isOp(char: string): boolean {
+        return [
+            Symbol.Plus,
+            Symbol.Minus,
+            Symbol.Times,
+            Symbol.SlashRight,
+            amp,
+            Symbol.Pipe,
+            gt,
+            lt,
+            Symbol.Equals,
+        ].includes(char);
+    }
+
+    static isUnaryOp(char: string): boolean {
+        const unaries: string[] = [Symbol.Not, Symbol.Minus];
+        return unaries.includes(char);
     }
 }
