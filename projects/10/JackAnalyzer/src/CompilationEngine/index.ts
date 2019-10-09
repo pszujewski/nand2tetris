@@ -283,8 +283,19 @@ export default class CompilationEngine {
      * an array entry and a subroutine call.
      * NOT RECURSIVE */
     private compileTerm(xml: string): string {
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+        const lookAhead: string = this.tokenizer.lookAhead();
+
         // Needs to determine if we are dealing with a subroutineCall which is wrapped in <term>
+        // See line 608 square game
+        if (tokenState.isIdentifier && lookAhead === Symbol.Period) {
+            // compile subroutine call
+        }
+
         // Needs to determine if we are dealing with a term including '[' ']' for array access
+        if (tokenState.isIdentifier && lookAhead === Symbol.BracketRight) {
+            // compile array var access
+        }
         // Needs to determine if we are dealing with a `unaryOp term`
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
         // Else return <integerConstant> if isIntConst
