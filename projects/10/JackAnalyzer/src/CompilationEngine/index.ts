@@ -303,16 +303,16 @@ export default class CompilationEngine {
             const nextXml = this.xmlWriter.getSymbol();
             this.tokenizer.advance();
             // Are the brackets necessary? can't find an example - only recursive case
-            return `<term>${this.compileTerm(nextXml)}</term>`;
+            return `<term>${this.compileTerm(xml.concat(nextXml))}</term>`;
         }
 
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
         if (tokenState.value === Symbol.ParenRight) {
-            let nextXml = this.xmlWriter.getSymbol();
+            let nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
 
             const res = this.compileExpression(nextXml, Symbol.ParenRight);
-            nextXml = `<expression>${res}<expression>`;
+            nextXml = nextXml.concat(`<expression>${res}<expression>`);
 
             // Append the '(' which is a part of this 'term' and advance() since we appended the currentToken
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
@@ -323,24 +323,28 @@ export default class CompilationEngine {
 
         // Else return <integerConstant> if isIntConst
         if (tokenState.isIntConst) {
-            let nextXml = this.xmlWriter.getIntConst();
+            let nextXml = xml.concat(this.xmlWriter.getIntConst());
             this.tokenizer.advance();
             return nextXml;
         }
 
         // Else return <stringConstant> if isStringConst
         if (tokenState.isStringConst) {
-            let nextXml = this.xmlWriter.getStringConst();
+            let nextXml = xml.concat(this.xmlWriter.getStringConst());
             this.tokenizer.advance();
             return nextXml;
         }
 
         // Else return <keyword> if isKeywordConst
         if (tokenState.isKeyword) {
-            let nextXml = this.xmlWriter.getKeyword();
+            let nextXml = xml.concat(this.xmlWriter.getKeyword());
             this.tokenizer.advance();
             return nextXml;
         }
+    }
+
+    private compileSubroutine(xml: string): string {
+        //let nextXml =
     }
 
     /** Compiles a possible empty comma-separated list of expressions */
