@@ -75,9 +75,7 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
-            return this.compileClass(
-                this.compileSubroutine(xml.concat(this.xmlWriter.getKeyword()))
-            );
+            return this.compileClass(this.compileSubroutine(xml));
         }
 
         throw new Error("Failed to compile class");
@@ -90,20 +88,24 @@ export default class CompilationEngine {
         return `<classVarDec>${this.compileVarDec(xml)}</classVarDec>}`;
     }
 
-    // Not recursive
+    // Not recursive. The currentToken should be the first keyword in the
+    // function definition when this function is entered (function | method | constructor)
     private compileSubroutine(xml: string): string {
         xml = xml.concat("<subroutineDec>");
 
-        // return type
+        // Get the <keyword> (function | method | constructor)
+        xml = xml.concat(this.xmlWriter.getKeyword());
         this.tokenizer.advance();
-        xml = xml.concat(this.xmlWriter.getIdentifier());
 
-        // function | method | constructor name
+        // Get the return type <keyword>
+        xml = xml.concat(this.xmlWriter.getKeyword());
         this.tokenizer.advance();
+
+        // Append the function | method | constructor name <identifier>
         xml = xml.concat(this.xmlWriter.getIdentifier());
+        this.tokenizer.advance();
 
         // open paren for the parameter list
-        this.tokenizer.advance();
         xml = xml.concat(this.xmlWriter.getSymbol());
 
         // the parens (oddly) should not be included as children to <parameterList> tag
@@ -343,10 +345,43 @@ export default class CompilationEngine {
         }
     }
 
-    private compileSubroutine(xml: string): string {
-        //let nextXml =
+    private compileSubroutineCall(xml: string): string {
+        // Get the identifier class name
+        let nextXml = xml.concat(this.xmlWriter.getIdentifier());
+        this.tokenizer.advance();
+
+        // Get the period symbol
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // Get the function | method name identifier
+        nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
+        this.tokenizer.advance();
+
+        // Get the open paren symbol
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // compile expression list
+        const expListContent = this.compileExpressionList(nextXml);
+        nextXml = `<expressionList>${expListContent}</expressionList>`;
+
+        // The current token should now be ParenLeft. That's how
+        // expressionList knows to stop executing
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // tokenizer now points to ";" Semi. Pass execution back to caller
+        // to handle the Semi. In a do statement, the semi is included within the
+        // 'do' tags. As a term, the ';' is not included within the <term> tags
+        return nextXml;
     }
 
     /** Compiles a possible empty comma-separated list of expressions */
-    private compileExpressionList(xml: string): string {}
+    private compileExpressionList(xml: string): string {
+        // base case: currentToken == ParenLeft, just return built out xml
+        // and dont advance the pointer
+        // else if Symbol.Comma then proceed to compile expressionlist and advance()
+        // else we need to recursively compile an expression and call this
+    }
 }
