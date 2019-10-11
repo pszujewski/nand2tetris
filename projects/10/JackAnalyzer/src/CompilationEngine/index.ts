@@ -379,9 +379,26 @@ export default class CompilationEngine {
 
     /** Compiles a possible empty comma-separated list of expressions */
     private compileExpressionList(xml: string): string {
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
         // base case: currentToken == ParenLeft, just return built out xml
         // and dont advance the pointer
+        if (tokenState.value === Symbol.ParenLeft) {
+            return xml;
+        }
+
         // else if Symbol.Comma then proceed to compile expressionlist and advance()
-        // else we need to recursively compile an expression and call this
+        if (tokenState.value === Symbol.Comma) {
+            const nextXml = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return this.compileExpressionList(nextXml);
+        }
+
+        // else we need to recursively compile an expression and call this function
+        const exp: string = this.compileExpression(xml, Symbol.ParenLeft);
+
+        return this.compileExpressionList(
+            xml.concat(`<expression>${exp}</expression>`)
+        );
     }
 }
