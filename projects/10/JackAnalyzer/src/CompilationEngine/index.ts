@@ -44,7 +44,7 @@ export default class CompilationEngine {
 
     /** Compiles a complete class */
     public compileClass(xmlRoot = ""): string {
-        let xml: string = xmlRoot;
+        const xml: string = xmlRoot;
 
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
@@ -69,8 +69,11 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
+            const nextXml = xml.concat("<classVarDec>");
+            const keywordXml = this.xmlWriter.getKeyword();
+
             return this.compileClass(
-                this.compileClassVarDec(xml.concat(this.xmlWriter.getKeyword()))
+                this.compileClassVarDec(nextXml.concat(keywordXml))
             );
         }
 
@@ -85,7 +88,7 @@ export default class CompilationEngine {
      * (static | field) type varName (, varName)*
      * */
     private compileClassVarDec(xml: string): string {
-        return `<classVarDec>${this.compileVarDec(xml)}</classVarDec>}`;
+        return this.compileVarDec(xml).concat("</classVarDec>");
     }
 
     // Not recursive. The currentToken should be the first keyword in the
@@ -108,7 +111,7 @@ export default class CompilationEngine {
         // open paren for the parameter list -- because it shouldn't be within <parameterList>
         xml = xml.concat(this.xmlWriter.getSymbol());
 
-        // the parensshould not be included as children to <parameterList> tag
+        // the parens should not be included as children to <parameterList> tag
         xml = this.compileParameterList(xml.concat("<parameterList>"));
         xml = xml.concat("</parameterList>");
 
@@ -159,18 +162,21 @@ export default class CompilationEngine {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // base case
+        // base case - The Curly baces are included as the first and last children to <subroutineBody>
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             return xml.concat(this.xmlWriter.getSymbol());
         }
 
         // Start of subroutine body (braces are included as children of <subroutineBody>)
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
-            return this.compileSubroutineBody(this.xmlWriter.getSymbol());
+            return this.compileSubroutineBody(
+                xml.concat(this.xmlWriter.getSymbol())
+            );
         }
 
         // Compile any varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
+            // WRONG
             const xmlToPass = xml.concat(this.xmlWriter.getKeyword());
 
             return this.compileSubroutineBody(
@@ -178,6 +184,7 @@ export default class CompilationEngine {
             );
         }
 
+        // WRONG // WRONG
         // Anything else should be a keyword indicating the start of a 'statement'
         return this.compileSubroutineBody(
             `<statements>${this.compileStatements(xml)}</statements>`
