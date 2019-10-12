@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import JackFileReader from "../src/JackTokenizer/JackFileReader";
+import JackAnalyzer from "../src/JackAnalyzer";
 
 describe("JackFileReader", () => {
     let reader: JackFileReader;
@@ -16,5 +17,16 @@ describe("JackFileReader", () => {
         }
 
         expect(result).to.deep.equal([]);
+    });
+
+    it("Should compile Jack Filesinto XML", async () => {
+        let JA: JackAnalyzer;
+
+        try {
+            JA = new JackAnalyzer("../../ArrayTest");
+            await JA.analyze();
+        } catch (err) {
+            console.log(err.message);
+        }
     });
 });

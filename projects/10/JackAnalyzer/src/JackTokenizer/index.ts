@@ -27,11 +27,10 @@ export default class JackTokenizer {
     /** Gets the next token from the input and makes it the current token. */
     public advance(): void {
         if (!this.currentToken) {
-            this.currentToken[this.pointer];
+            this.currentToken = this.syntacticElements[this.pointer];
         } else {
-            const curr: number = this.pointer;
             this.pointer = this.pointer + 1;
-            this.currentToken = this.syntacticElements[curr];
+            this.currentToken = this.syntacticElements[this.pointer];
         }
     }
 

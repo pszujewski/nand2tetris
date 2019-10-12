@@ -105,17 +105,23 @@ export default class CompilationEngine {
         xml = xml.concat(this.xmlWriter.getIdentifier());
         this.tokenizer.advance();
 
-        // open paren for the parameter list
+        // open paren for the parameter list -- because it shouldn't be within <parameterList>
         xml = xml.concat(this.xmlWriter.getSymbol());
 
-        // the parens (oddly) should not be included as children to <parameterList> tag
-        xml = `<parameterList>${this.compileParameterList(xml)}`;
+        // the parensshould not be included as children to <parameterList> tag
+        xml = this.compileParameterList(xml.concat("<parameterList>"));
+        xml = xml.concat("</parameterList>");
 
+        // At this point, the currentToken should be ')'. Append it and advance the pointer
+        xml = xml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // The currentToken should now be '{' with param list finished
         // The enclosing 'Curly Braces' are included as the first and last children to <subroutineBody>
-        const sb = "subroutineBody";
-        xml = `<${sb}>${this.compileSubroutineBody(xml)}</${sb}>`;
+        xml = this.compileSubroutineBody(xml.concat("<subroutineBody>"));
 
-        return xml.concat("</subroutineDec>");
+        // Close out the tags
+        return xml.concat("</subroutineBody>").concat("</subroutineDec>");
     }
 
     /** Compile a possibly empty parameter list */
@@ -125,7 +131,7 @@ export default class CompilationEngine {
 
         // base case -- ensuring <parameterList> is closed before 'getting' the closing paren symbol
         if (tokenState.isSymbol && tokenState.value === Symbol.ParenLeft) {
-            return `</parameterList>${xml.concat(this.xmlWriter.getSymbol())}`;
+            return xml;
         }
 
         if (tokenState.isKeyword) {
@@ -232,7 +238,8 @@ export default class CompilationEngine {
                 break;
         }
 
-        // base case
+        // base case -- if lookAhead is '}' pass execution back to caller to
+        // handle the symbol
         if (this.tokenizer.lookAhead() === Symbol.CurlyLeft) {
             return xml;
         }
@@ -243,19 +250,29 @@ export default class CompilationEngine {
     }
 
     /** Compiles a do statement. Base case is Semi. */
-    private compileDo(xml: string): string {}
+    private compileDo(xml: string): string {
+        return "";
+    }
 
     /** Compiles a let statement. Base case is Semi */
-    private compileLet(xml: string): string {}
+    private compileLet(xml: string): string {
+        return "";
+    }
 
     /** Compiles a while statement. Can contain statements */
-    private compileWhile(xml: string): string {}
+    private compileWhile(xml: string): string {
+        return "";
+    }
 
     /** Compiles a return statement */
-    private compileReturn(xml: string): string {}
+    private compileReturn(xml: string): string {
+        return "";
+    }
 
     /** Compiles an if statement. Can contain statements */
-    private compileIf(xml: string): string {}
+    private compileIf(xml: string): string {
+        return "";
+    }
 
     /** Compiles an expression. Wrap calls to this method in <expression> tag */
     private compileExpression(xml: string, stopAtToken: string): string {
