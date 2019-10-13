@@ -69,12 +69,9 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
-            const nextXml = xml.concat("<classVarDec>");
-            const keywordXml = this.xmlWriter.getKeyword();
-
-            return this.compileClass(
-                this.compileClassVarDec(nextXml.concat(keywordXml))
-            );
+            let nextXml = xml.concat("<classVarDec>");
+            nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+            return this.compileClass(this.compileClassVarDec(nextXml));
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
@@ -300,7 +297,8 @@ export default class CompilationEngine {
         }
 
         // Else the currentToken must be the start of a <term>
-        const nextXml = `<term>${this.compileTerm(xml)}</term>`;
+        const xmlToPass = xml.concat("<term>");
+        const nextXml = this.compileTerm(xmlToPass).concat("</term>");
 
         // Building the term will have advanced() the currentToken pointer
         currentToken = this.tokenizer.getCurrentToken();
@@ -340,8 +338,9 @@ export default class CompilationEngine {
             this.tokenizer.advance();
 
             // Compile the expression between the brackets. Stop at ']'
-            const expXml = this.compileExpression(nextXml, Symbol.BracketLeft);
-            nextXml = nextXml.concat(`<expression>${expXml}</expression>`);
+            nextXml = nextXml.concat("<expression");
+            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
+            nextXml = nextXml.concat("</expression>");
 
             // The currentToken should now be pointing at ']' with exp above done.
             // Append it to this <term> xml and return
@@ -351,10 +350,13 @@ export default class CompilationEngine {
         // Needs to determine if we are dealing with a `unaryOp term`
         // This bit is recursive - unaryop term
         if (SymbolTable.isUnaryOp(tokenState.value)) {
-            const nextXml = this.xmlWriter.getSymbol();
+            let nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            // Are the brackets necessary? can't find an example - only recursive case
-            return `<term>${this.compileTerm(xml.concat(nextXml))}</term>`;
+
+            // Are the term tags necessary? can't find an example - only recursive case
+            nextXml = nextXml.concat("<term>");
+            nextXml = this.compileTerm(nextXml);
+            return nextXml.concat("</term>");
         }
 
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
@@ -363,8 +365,9 @@ export default class CompilationEngine {
             this.tokenizer.advance();
 
             // Compile the expression within the parens. Stop at ")"
-            const res = this.compileExpression(nextXml, Symbol.ParenLeft);
-            nextXml = nextXml.concat(`<expression>${res}<expression>`);
+            nextXml = nextXml.concat("<expression>");
+            nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
+            nextXml = nextXml.concat("</expression>");
 
             // Append the ')' which is a part of this 'term' and advance()
             // since we appended the currentToken
@@ -376,54 +379,55 @@ export default class CompilationEngine {
 
         // Else return <integerConstant> if isIntConst
         if (tokenState.isIntConst) {
-            let nextXml = xml.concat(this.xmlWriter.getIntConst());
+            const nextXml = xml.concat(this.xmlWriter.getIntConst());
             this.tokenizer.advance();
             return nextXml;
         }
 
         // Else return <stringConstant> if isStringConst
         if (tokenState.isStringConst) {
-            let nextXml = xml.concat(this.xmlWriter.getStringConst());
+            const nextXml = xml.concat(this.xmlWriter.getStringConst());
             this.tokenizer.advance();
             return nextXml;
         }
 
         // Else return <keyword> if isKeywordConst
         if (tokenState.isKeyword) {
-            let nextXml = xml.concat(this.xmlWriter.getKeyword());
+            const nextXml = xml.concat(this.xmlWriter.getKeyword());
             this.tokenizer.advance();
             return nextXml;
         }
 
         if (tokenState.isIdentifier) {
-            let nextXml = xml.concat(this.xmlWriter.getIdentifier());
+            const nextXml = xml.concat(this.xmlWriter.getIdentifier());
             this.tokenizer.advance();
             return nextXml;
         }
 
-        throw new Error(`Failed to idnetify <term> for ${tokenState.value}`);
+        throw new Error(`Failed to identify <term> for ${tokenState.value}`);
     }
 
     private compileSubroutineCall(xml: string): string {
-        // Get the identifier class name
+        // Append the identifier class name
         let nextXml = xml.concat(this.xmlWriter.getIdentifier());
         this.tokenizer.advance();
 
-        // Get the period symbol
+        // Append the period symbol
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
-        // Get the function | method name identifier
+        // Append the function | method name identifier
         nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
         this.tokenizer.advance();
 
-        // Get the open paren symbol
+        // Append the open paren symbol
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
         // compile expression list
-        const expListContent = this.compileExpressionList(nextXml);
-        nextXml = `<expressionList>${expListContent}</expressionList>`;
+        nextXml = nextXml.concat("<expressionList>");
+        nextXml = this.compileExpressionList(nextXml);
+        nextXml = nextXml.concat("</expressionList>");
 
         // The current token should now be ParenLeft. That's how
         // expressionList knows to stop executing. Paren symbols
@@ -456,10 +460,9 @@ export default class CompilationEngine {
 
         // else we need to recursively compile an expression and call this function
         // compileExpression will advance() as it needs
-        const expXml: string = this.compileExpression(xml, Symbol.ParenLeft);
+        let nextXml = xml.concat("<expression>");
+        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
 
-        return this.compileExpressionList(
-            xml.concat(`<expression>${expXml}</expression>`)
-        );
+        return this.compileExpressionList(nextXml.concat("</expression>"));
     }
 }
