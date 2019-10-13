@@ -176,18 +176,19 @@ export default class CompilationEngine {
 
         // Compile any varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
-            // WRONG
-            const xmlToPass = xml.concat(this.xmlWriter.getKeyword());
+            const keywordXml = this.xmlWriter.getKeyword();
+            const xmlToPass = xml.concat("<varDec>").concat(keywordXml);
 
             return this.compileSubroutineBody(
-                `<varDec>${this.compileVarDec(xmlToPass)}</varDec>`
+                this.compileVarDec(xmlToPass).concat("</varDec>")
             );
         }
 
-        // WRONG // WRONG
         // Anything else should be a keyword indicating the start of a 'statement'
+        const nextXml = xml.concat("<statements>");
+
         return this.compileSubroutineBody(
-            `<statements>${this.compileStatements(xml)}</statements>`
+            this.compileStatements(nextXml).concat("</statements>")
         );
     }
 
@@ -217,66 +218,73 @@ export default class CompilationEngine {
      *
      * Base case: the 'lookAheadToken' is a Symbol Bracket facing Left closing the statments
      */
-    private compileStatements(xmlRoot: string): string {
-        let xml = xmlRoot;
+    private compileStatements(xml: string): string {
+        let nextXml: string;
         const currentToken = this.tokenizer.getCurrentToken();
 
         switch (currentToken) {
             case Keyword.Do:
-                xml = `<doStatement>${this.compileDo(xml)}</doStatement>`;
+                nextXml = this.compileDo(xml);
                 break;
             case Keyword.Let:
-                xml = `<letStatement>${this.compileLet(xml)}</letStatement>`;
+                nextXml = this.compileLet(xml);
                 break;
             case Keyword.While:
-                xml = `<whileStatement>${this.compileWhile(
-                    xml
-                )}</whileStatement>`;
+                nextXml = this.compileWhile(xml);
                 break;
             case Keyword.Return:
-                xml = `<returnStatement>${this.compileReturn(
-                    xml
-                )}</returnStatement>`;
+                nextXml = this.compileReturn(xml);
                 break;
             case Keyword.If:
-                xml = `<ifStatement>${this.compileIf(xml)}</ifStatement>`;
+                nextXml = this.compileIf(xml);
                 break;
             default:
-                break;
+                throw new Error(`Failed to identify keyword: ${currentToken}`);
         }
 
         // base case -- if lookAhead is '}' pass execution back to caller to
         // handle the symbol
         if (this.tokenizer.lookAhead() === Symbol.CurlyLeft) {
-            return xml;
+            return nextXml;
         }
 
-        // If the 'lookAhead' value is not a '}' then we are still compiling statements
+        // If the 'lookAhead' value is not a '}' then we are still compiling statements,
+        // soadvance the currentToken to the lookAhead and proceed
         this.tokenizer.advance();
-        return this.compileStatements(xml);
+        return this.compileStatements(nextXml);
     }
 
-    /** Compiles a do statement. Base case is Semi. */
+    /** Compiles a do statement. Base case is Semi.
+     * Must wrap in "<doStatement>"
+     */
     private compileDo(xml: string): string {
         return "";
     }
 
-    /** Compiles a let statement. Base case is Semi */
+    /** Compiles a let statement. Base case is Semi
+     * Must wrap in "<letStatement>"
+     */
     private compileLet(xml: string): string {
         return "";
     }
 
-    /** Compiles a while statement. Can contain statements */
+    /** Compiles a while statement. Can contain statements
+     * Must wrap in "<whileStatement>"
+     */
     private compileWhile(xml: string): string {
         return "";
     }
 
-    /** Compiles a return statement */
+    /** Compiles a return statement
+     * Must wrap in <returnStatement>
+     */
     private compileReturn(xml: string): string {
         return "";
     }
 
-    /** Compiles an if statement. Can contain statements */
+    /** Compiles an if statement. Can contain statements
+     * Must wrap in <ifStatement>
+     */
     private compileIf(xml: string): string {
         return "";
     }
