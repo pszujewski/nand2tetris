@@ -155,8 +155,9 @@ export default class CompilationEngine {
         throw new Error("Failed to compile parameter list");
     }
 
+    // WORK ON THIS
     private compileSubroutineBody(xml: string): string {
-        this.tokenizer.advance();
+        let nextXml: string;
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case - The Curly baces are included as the first and last children to <subroutineBody>
@@ -166,9 +167,9 @@ export default class CompilationEngine {
 
         // Start of subroutine body (braces are included as children of <subroutineBody>)
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
-            return this.compileSubroutineBody(
-                xml.concat(this.xmlWriter.getSymbol())
-            );
+            nextXml = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return this.compileSubroutineBody(nextXml);
         }
 
         // Compile any varDecs
@@ -182,7 +183,7 @@ export default class CompilationEngine {
         }
 
         // Anything else should be a keyword indicating the start of a 'statement'
-        const nextXml = xml.concat("<statements>");
+        nextXml = xml.concat("<statements>");
 
         return this.compileSubroutineBody(
             this.compileStatements(nextXml).concat("</statements>")
@@ -239,15 +240,11 @@ export default class CompilationEngine {
                 throw new Error(`Failed to identify keyword: ${currentToken}`);
         }
 
-        // base case -- if lookAhead is '}' pass execution back to caller to
-        // handle the symbol
-        if (this.tokenizer.lookAhead() === Symbol.CurlyLeft) {
+        // base case: if the currentToken is '}' pass execution back to the caller
+        if (this.tokenizer.getCurrentToken() === Symbol.CurlyLeft) {
             return nextXml;
         }
-
-        // If the 'lookAhead' value is not a '}' then we are still compiling statements,
-        // soadvance the currentToken to the lookAhead and proceed
-        this.tokenizer.advance();
+        // If the currentToken value is not '}' then we are still compiling statements
         return this.compileStatements(nextXml);
     }
 
@@ -255,7 +252,21 @@ export default class CompilationEngine {
      * Must wrap in "<doStatement>"
      */
     private compileDo(xml: string): string {
-        return "";
+        let nextXml: string = xml.concat("<doStatement>");
+
+        // Append the 'do' keyword
+        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        this.tokenizer.advance();
+
+        // Compile the subroutine call
+        nextXml = nextXml.concat(this.compileSubroutineCall(nextXml));
+
+        // Close out the do statement with the semi, allowing compileStatements
+        // to advance() or not the currentToken pointer
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        return nextXml.concat("</doStatement>");
     }
 
     /** Compiles a let statement. Base case is Semi
@@ -276,11 +287,23 @@ export default class CompilationEngine {
      * Must wrap in <returnStatement>
      */
     private compileReturn(xml: string): string {
-        return "";
+        let nextXml: string = xml.concat("<returnStatement>");
+
+        // Append the 'return' keyword
+        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        this.tokenizer.advance();
+
+        if (this.tokenizer.getCurrentToken() === Symbol.Semi) {
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            return nextXml.concat("</returnStatement>");
+        }
+
+        nextXml = this.compileExpression(nextXml, Symbol.Semi);
+        return nextXml.concat("</returnStatement>");
     }
 
     /** Compiles an if statement. Can contain statements
-     * Must wrap in <ifStatement>
+     * Must wrap in <ifStatement>, needs to include possible 'else'
      */
     private compileIf(xml: string): string {
         return "";
