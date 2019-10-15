@@ -177,9 +177,11 @@ export default class CompilationEngine {
             const keywordXml = this.xmlWriter.getKeyword();
             const xmlToPass = xml.concat("<varDec>").concat(keywordXml);
 
-            return this.compileSubroutineBody(
-                this.compileVarDec(xmlToPass).concat("</varDec>")
-            );
+            nextXml = this.compileVarDec(xmlToPass).concat("</varDec>");
+            // the currentToken will now be pointing at the ';' so advance()
+            this.tokenizer.advance();
+
+            return this.compileSubroutineBody(nextXml);
         }
 
         // Anything else should be a keyword indicating the start of a 'statement'
