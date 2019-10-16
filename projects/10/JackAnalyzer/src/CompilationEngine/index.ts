@@ -155,7 +155,6 @@ export default class CompilationEngine {
         throw new Error("Failed to compile parameter list");
     }
 
-    // WORK ON THIS
     private compileSubroutineBody(xml: string): string {
         let nextXml: string;
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
@@ -263,8 +262,7 @@ export default class CompilationEngine {
         // Compile the subroutine call
         nextXml = nextXml.concat(this.compileSubroutineCall(nextXml));
 
-        // Close out the do statement with the semi, allowing compileStatements
-        // to advance() or not the currentToken pointer
+        // Close out the do statement with the semi
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
@@ -275,14 +273,89 @@ export default class CompilationEngine {
      * Must wrap in "<letStatement>"
      */
     private compileLet(xml: string): string {
-        return "";
+        let nextXml: string = xml.concat("<letStatement>");
+
+        // Append 'let' keyword
+        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        this.tokenizer.advance();
+
+        // Append varName identifier
+        nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
+        this.tokenizer.advance();
+
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        // The currentToken is now either the start of an expression or 'equals'
+
+        if (tokenState.isSymbol && tokenState.value === Symbol.Equals) {
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        } else {
+            nextXml = nextXml.concat("<expression>");
+            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
+
+            // The currentToken is "]". This should be included in the expression
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            nextXml = nextXml.concat("</expression>");
+
+            // Advance to the '=' symbol
+            this.tokenizer.advance();
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        }
+
+        // Regardless of case, the last token compiled was '=' symbol
+        // Advance past it and compile the final <expression>
+        this.tokenizer.advance();
+        nextXml = nextXml.concat("<expression>");
+
+        nextXml = this.compileExpression(nextXml, Symbol.Semi);
+        nextXml = nextXml.concat("</expression>");
+
+        // Append the Semi and close out 'let' advancing outside the statement
+        nextXml = nextXml.concat(this.tokenizer.getSymbol());
+        this.tokenizer.advance();
+
+        return nextXml.concat("</letStatement>");
     }
 
     /** Compiles a while statement. Can contain statements
      * Must wrap in "<whileStatement>"
      */
     private compileWhile(xml: string): string {
-        return "";
+        let nextXml: string = xml.concat("<whileStatement>");
+
+        // Append 'while' keyword
+        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        this.tokenizer.advance();
+
+        // Append the open paren
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // Now currentToken should be pointing at the first token in
+        // an <expression>
+        nextXml = nextXml.concat("<expression>");
+        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
+        nextXml = nextXml.concat("</expression>");
+
+        // The currentToken is now pointing at the closing paren
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // Append the '{' signaling start of statements block
+        // and advance to the first keyword in statements
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        nextXml = nextXml.concat("<statements>");
+        nextXml = this.compileStatements(nextXml);
+        nextXml = nextXml.concat("</statements>");
+
+        // The currentToken is now '}' close of while statement
+        // Append and advance past it and therefore the while statement
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        return nextXml.concat("</whileStatement>");
     }
 
     /** Compiles a return statement
@@ -300,7 +373,10 @@ export default class CompilationEngine {
             return nextXml.concat("</returnStatement>");
         }
 
+        nextXml = nextXml.concat("<expression>");
         nextXml = this.compileExpression(nextXml, Symbol.Semi);
+        nextXml = nextXml.concat("</expression>");
+
         return nextXml.concat("</returnStatement>");
     }
 
@@ -363,7 +439,7 @@ export default class CompilationEngine {
             this.tokenizer.advance();
 
             // Compile the expression between the brackets. Stop at ']'
-            nextXml = nextXml.concat("<expression");
+            nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
             nextXml = nextXml.concat("</expression>");
 
