@@ -377,6 +377,10 @@ export default class CompilationEngine {
         nextXml = this.compileExpression(nextXml, Symbol.Semi);
         nextXml = nextXml.concat("</expression>");
 
+        // Append the Semiwhich is the currentToken and advance
+        nextXml = nextXml.concat(this.tokenizer.getSymbol());
+        this.tokenizer.advance();
+
         return nextXml.concat("</returnStatement>");
     }
 
@@ -384,7 +388,45 @@ export default class CompilationEngine {
      * Must wrap in <ifStatement>, needs to include possible 'else'
      */
     private compileIf(xml: string): string {
-        return "";
+        let nextXml: string = xml.concat("<ifStatement>");
+
+        // Append the if keyword
+        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        this.tokenizer.advance();
+
+        // Open Paren
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // The expression
+        nextXml = nextXml.concat("<expression>");
+        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
+        nextXml = nextXml.concat("</expression>");
+
+        // Close Paren
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        // Append the '{' signaling start of statements block
+        // and advance to the first keyword in statements
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        nextXml = nextXml.concat("<statements>");
+        nextXml = this.compileStatements(nextXml);
+        nextXml = nextXml.concat("</statements>");
+
+        // The currentToken is now '}'. Append and advance
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        this.tokenizer.advance();
+
+        const currentToken = this.tokenizer.getCurrentToken();
+
+        if (currentToken === Keyword.Else) {
+            // ELSE
+        }
+
+        return nextXml.concat("</ifStatement>");
     }
 
     /** Compiles an expression. Wrap calls to this method in <expression> tag */
