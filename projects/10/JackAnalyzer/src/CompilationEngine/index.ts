@@ -390,25 +390,40 @@ export default class CompilationEngine {
     private compileIf(xml: string): string {
         let nextXml: string = xml.concat("<ifStatement>");
 
-        // Append the if keyword
-        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        nextXml = this.compileConditional(nextXml);
+
+        if (this.tokenizer.getCurrentToken() === Keyword.Else) {
+            // Append 'else' conditional
+            nextXml = this.compileConditional(nextXml);
+        }
+
+        return nextXml.concat("</ifStatement>");
+    }
+
+    private compileConditional(xml: string): string {
+        let nextXml: string;
+
+        // Append the keyword (if or else)
+        nextXml = xml.concat(this.xmlWriter.getKeyword());
         this.tokenizer.advance();
 
-        // Open Paren
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
+        if (this.tokenizer.getCurrentToken() === Symbol.ParenRight) {
+            // Open Paren
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
 
-        // The expression
-        nextXml = nextXml.concat("<expression>");
-        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-        nextXml = nextXml.concat("</expression>");
+            // The expression
+            nextXml = nextXml.concat("<expression>");
+            nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
+            nextXml = nextXml.concat("</expression>");
 
-        // Close Paren
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
+            // Close Paren
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+        }
 
         // Append the '{' signaling start of statements block
-        // and advance to the first keyword in statements
+        // and advance to the first keyword in 'statements'
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
@@ -420,15 +435,7 @@ export default class CompilationEngine {
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
-        const currentToken = this.tokenizer.getCurrentToken();
-
-        if (currentToken === Keyword.Else) {
-            // Append keyword and advance()
-            nextXml = nextXml.concat(this.xmlWriter.getKeyword());
-            this.tokenizer.advance();
-        }
-
-        return nextXml.concat("</ifStatement>");
+        return nextXml;
     }
 
     /** Compiles an expression. Wrap calls to this method in <expression> tag */
