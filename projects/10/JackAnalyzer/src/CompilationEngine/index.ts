@@ -423,7 +423,9 @@ export default class CompilationEngine {
         const currentToken = this.tokenizer.getCurrentToken();
 
         if (currentToken === Keyword.Else) {
-            // ELSE
+            // Append keyword and advance()
+            nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+            this.tokenizer.advance();
         }
 
         return nextXml.concat("</ifStatement>");
