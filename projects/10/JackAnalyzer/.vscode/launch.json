@@ -25,6 +25,7 @@
                 "${workspaceFolder}/lib/**/*.js",
                 "<node_internals>/**/*.js"
             ]
+            //"outFiles": ["${workspaceFolder}/out/**/*.js"]
         }
     ]
 }
