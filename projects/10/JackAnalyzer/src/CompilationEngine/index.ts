@@ -447,9 +447,13 @@ export default class CompilationEngine {
         }
 
         if (SymbolTable.isOp(currentToken)) {
-            const nextXml = xml.concat(this.xmlWriter.getSymbol());
+            let nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpression(nextXml, stopAtToken);
+
+            nextXml = nextXml.concat("<expression>");
+            nextXml = this.compileExpression(nextXml, stopAtToken);
+            nextXml = nextXml.concat("</expression>");
+            return nextXml;
         }
 
         if (currentToken === Symbol.BracketRight) {
@@ -459,10 +463,7 @@ export default class CompilationEngine {
             nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
             nextXml = nextXml.concat("</expression>");
-
-            nextXml = xml.concat(this.xmlWriter.getSymbol());
-            this.tokenizer.advance();
-            return this.compileExpression(nextXml, stopAtToken);
+            return nextXml;
         }
 
         // Else the currentToken must be the start of a <term>
