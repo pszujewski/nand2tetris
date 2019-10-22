@@ -272,6 +272,9 @@ var CompilationEngine = (function () {
     CompilationEngine.prototype.compileTerm = function (xml) {
         var tokenState = this.tokenizer.getCurrentTokenState();
         var lookAhead = this.tokenizer.lookAhead();
+        if (tokenState.value === "a") {
+            console.log("a");
+        }
         if (tokenState.isIdentifier && lookAhead === Symbol_1.default.Period) {
             return this.compileSubroutineCall(xml);
         }

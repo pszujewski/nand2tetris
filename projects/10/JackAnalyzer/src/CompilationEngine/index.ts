@@ -442,8 +442,25 @@ export default class CompilationEngine {
     private compileExpression(xml: string, stopAtToken: string): string {
         let currentToken = this.tokenizer.getCurrentToken();
 
+        if (currentToken === stopAtToken) {
+            return xml;
+        }
+
         if (SymbolTable.isOp(currentToken)) {
             const nextXml = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return this.compileExpression(nextXml, stopAtToken);
+        }
+
+        if (currentToken === Symbol.BracketRight) {
+            let nextXml = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+
+            nextXml = nextXml.concat("<expression>");
+            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
+            nextXml = nextXml.concat("</expression>");
+
+            nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
             return this.compileExpression(nextXml, stopAtToken);
         }
