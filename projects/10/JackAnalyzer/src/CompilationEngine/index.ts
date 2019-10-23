@@ -242,6 +242,7 @@ export default class CompilationEngine {
         }
 
         // base case: if the currentToken is '}' pass execution back to the caller
+        // !Set new breakpoint here. Last error throw was Failed to identify keyword ";"
         if (this.tokenizer.getCurrentToken() === Symbol.CurlyLeft) {
             return nextXml;
         }
@@ -289,16 +290,21 @@ export default class CompilationEngine {
 
         if (tokenState.isSymbol && tokenState.value === Symbol.Equals) {
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        } else {
+        } else if (tokenState.value === Symbol.BracketRight) {
+            // Append the bracket symbol outside the expression
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+
             nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
-
-            // The currentToken is "]". This should be included in the expression
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
             nextXml = nextXml.concat("</expression>");
 
-            // Advance to the '=' symbol
+            // The currentToken is "]". This should NOT be included in the <expression>
+            // Append and advance to the '=' symbol
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
+
+            // The currentToken is now "=". Append as a Symbol.
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         }
 
