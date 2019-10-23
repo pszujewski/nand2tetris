@@ -8,11 +8,13 @@ export default class JackTokenizer {
     private syntacticElements: string[];
     private pointer: number;
     private currentToken: string;
+    private lookAheadToken: string;
 
     public constructor(syntacticElements: string[]) {
         this.syntacticElements = syntacticElements;
         this.pointer = 0;
         this.currentToken = "";
+        this.lookAheadToken = "";
     }
 
     public isFirstTokenClassKeyword(): boolean {
@@ -31,6 +33,15 @@ export default class JackTokenizer {
         } else {
             this.pointer = this.pointer + 1;
             this.currentToken = this.syntacticElements[this.pointer];
+        }
+        this.advanceLookAhead();
+    }
+
+    private advanceLookAhead(): void {
+        const lookAheadPointer = this.pointer + 1;
+
+        if (this.syntacticElements[lookAheadPointer]) {
+            this.lookAheadToken = this.syntacticElements[lookAheadPointer];
         }
     }
 
