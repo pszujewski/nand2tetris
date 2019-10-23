@@ -1,4 +1,6 @@
 import JackTokenizer from "../JackTokenizer";
+import * as fs from "fs";
+import * as fspath from "path";
 
 export default class XMLWriter {
     private tokenizer: JackTokenizer;
@@ -25,5 +27,19 @@ export default class XMLWriter {
 
     public getStringConst(): string {
         return `<stringConstant> ${this.tokenizer.getStringVal()} </stringConstant>`;
+    }
+
+    public toFile(xml: string): Promise<void> {
+        const name: string = "out.xml";
+        const path: string = fspath.resolve(__dirname, `./${name}`);
+
+        return new Promise<void>(resolve => {
+            fs.writeFile(path, xml, err => {
+                if (err) {
+                    console.error("Unable to write data to cache");
+                }
+                resolve();
+            });
+        });
     }
 }

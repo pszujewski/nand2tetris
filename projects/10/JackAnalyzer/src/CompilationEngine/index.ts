@@ -33,7 +33,7 @@ export default class CompilationEngine {
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
                 xml = `<class>${this.compileClass()}</class>`;
-                console.log("Write XML", xml);
+                this.xmlWriter.toFile(xml);
             } else {
                 throw new Error("Program must begin with a class declaration");
             }
@@ -317,7 +317,7 @@ export default class CompilationEngine {
         nextXml = nextXml.concat("</expression>");
 
         // Append the Semi and close out 'let' advancing outside the statement
-        nextXml = nextXml.concat(this.tokenizer.getSymbol());
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
         return nextXml.concat("</letStatement>");
