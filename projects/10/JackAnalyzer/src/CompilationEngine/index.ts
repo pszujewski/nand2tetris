@@ -375,7 +375,9 @@ export default class CompilationEngine {
         this.tokenizer.advance();
 
         if (this.tokenizer.getCurrentToken() === Symbol.Semi) {
+            // Append Semi and advance
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
             return nextXml.concat("</returnStatement>");
         }
 
@@ -383,7 +385,7 @@ export default class CompilationEngine {
         nextXml = this.compileExpression(nextXml, Symbol.Semi);
         nextXml = nextXml.concat("</expression>");
 
-        // Append the Semiwhich is the currentToken and advance
+        // Append the Semi which is the currentToken and advance
         nextXml = nextXml.concat(this.tokenizer.getSymbol());
         this.tokenizer.advance();
 
