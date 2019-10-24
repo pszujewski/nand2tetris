@@ -2,7 +2,7 @@ import JackTokenizer from "../JackTokenizer";
 export default class CompilationEngine {
     private tokenizer;
     private xmlWriter;
-    constructor(tokenizer: JackTokenizer);
+    constructor(tokenizer: JackTokenizer, writeToPath: string);
     compile(): void;
     compileClass(xmlRoot?: string): string;
     private compileClassVarDec;

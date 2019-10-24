@@ -9,8 +9,8 @@ var Main = (function () {
     }
     Main.run = function () {
         var path = process.argv[2];
-        var analyzer = new JackAnalyzer_1.default(path);
-        analyzer.analyze();
+        var JA = new JackAnalyzer_1.default(path);
+        JA.analyze();
     };
     return Main;
 }());

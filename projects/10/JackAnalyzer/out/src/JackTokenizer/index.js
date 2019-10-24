@@ -11,6 +11,7 @@ var JackTokenizer = (function () {
         this.syntacticElements = syntacticElements;
         this.pointer = 0;
         this.currentToken = "";
+        this.lookAheadToken = "";
     }
     JackTokenizer.prototype.isFirstTokenClassKeyword = function () {
         return KeywordTable_1.default.isClass(this.syntacticElements[0]);
@@ -25,6 +26,13 @@ var JackTokenizer = (function () {
         else {
             this.pointer = this.pointer + 1;
             this.currentToken = this.syntacticElements[this.pointer];
+        }
+        this.advanceLookAhead();
+    };
+    JackTokenizer.prototype.advanceLookAhead = function () {
+        var lookAheadPointer = this.pointer + 1;
+        if (this.syntacticElements[lookAheadPointer]) {
+            this.lookAheadToken = this.syntacticElements[lookAheadPointer];
         }
     };
     JackTokenizer.prototype.lookAhead = function () {

@@ -39,35 +39,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var chai_1 = require("chai");
-var JackFileReader_1 = __importDefault(require("../src/JackTokenizer/JackFileReader"));
 var JackAnalyzer_1 = __importDefault(require("../src/JackAnalyzer"));
 describe("JackFileReader", function () {
     var reader;
-    it("Should parse Jack Files into input tokens array", function () { return __awaiter(void 0, void 0, void 0, function () {
-        var result, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    reader = new JackFileReader_1.default("../../ArrayTest");
-                    return [4, reader.read()];
-                case 1:
-                    result = _a.sent();
-                    return [3, 3];
-                case 2:
-                    err_1 = _a.sent();
-                    console.log(err_1.message);
-                    result = err_1;
-                    return [3, 3];
-                case 3:
-                    chai_1.expect(result).to.deep.equal([]);
-                    return [2];
-            }
-        });
-    }); });
     it("Should compile Jack Filesinto XML", function () { return __awaiter(void 0, void 0, void 0, function () {
-        var JA, err_2;
+        var JA, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -78,8 +54,8 @@ describe("JackFileReader", function () {
                     _a.sent();
                     return [3, 3];
                 case 2:
-                    err_2 = _a.sent();
-                    console.log(err_2.message);
+                    err_1 = _a.sent();
+                    console.log(err_1.message);
                     return [3, 3];
                 case 3: return [2];
             }

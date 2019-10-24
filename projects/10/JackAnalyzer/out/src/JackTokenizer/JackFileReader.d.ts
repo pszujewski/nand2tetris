@@ -2,14 +2,14 @@ export default class JackFileReader {
     private relativePathToDir;
     private directoryName;
     constructor(relPath: string);
-    read(): Promise<string[]>;
+    readTokensFromJackFile(pathToJackFile: string): Promise<string[]>;
     getDirectoryName(): string;
+    getAbsolutePathsToJackFiles(): Promise<string[]>;
     private identifyJackDirectory;
     private tokenizePath;
     private readDataInJackFiles;
     private readOneJackFile;
     private tokenizeJackCode;
-    private getAbsolutePathsToJackFiles;
     private parseAbsolutePaths;
     private keepOnlyJack;
     private convertToAbsolutePaths;

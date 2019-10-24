@@ -9,16 +9,16 @@ var SymbolTable_1 = __importDefault(require("../SymbolTable"));
 var XMLWriter_1 = __importDefault(require("./XMLWriter"));
 var Keyword_1 = __importDefault(require("../../types/Keyword"));
 var CompilationEngine = (function () {
-    function CompilationEngine(tokenizer) {
+    function CompilationEngine(tokenizer, writeToPath) {
         this.tokenizer = tokenizer;
-        this.xmlWriter = new XMLWriter_1.default(tokenizer);
+        this.xmlWriter = new XMLWriter_1.default(tokenizer, writeToPath);
     }
     CompilationEngine.prototype.compile = function () {
         var xml;
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
                 xml = "<class>" + this.compileClass() + "</class>";
-                console.log("Write XML", xml);
+                this.xmlWriter.toFile(xml);
             }
             else {
                 throw new Error("Program must begin with a class declaration");
@@ -172,11 +172,13 @@ var CompilationEngine = (function () {
         if (tokenState.isSymbol && tokenState.value === Symbol_1.default.Equals) {
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         }
-        else {
+        else if (tokenState.value === Symbol_1.default.BracketRight) {
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
             nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol_1.default.BracketLeft);
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
             nextXml = nextXml.concat("</expression>");
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         }
@@ -184,7 +186,7 @@ var CompilationEngine = (function () {
         nextXml = nextXml.concat("<expression>");
         nextXml = this.compileExpression(nextXml, Symbol_1.default.Semi);
         nextXml = nextXml.concat("</expression>");
-        nextXml = nextXml.concat(this.tokenizer.getSymbol());
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
         return nextXml.concat("</letStatement>");
     };
@@ -214,6 +216,7 @@ var CompilationEngine = (function () {
         this.tokenizer.advance();
         if (this.tokenizer.getCurrentToken() === Symbol_1.default.Semi) {
             nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
             return nextXml.concat("</returnStatement>");
         }
         nextXml = nextXml.concat("<expression>");
@@ -255,10 +258,24 @@ var CompilationEngine = (function () {
     };
     CompilationEngine.prototype.compileExpression = function (xml, stopAtToken) {
         var currentToken = this.tokenizer.getCurrentToken();
+        if (currentToken === stopAtToken) {
+            return xml;
+        }
         if (SymbolTable_1.default.isOp(currentToken)) {
             var nextXml_1 = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpression(nextXml_1, stopAtToken);
+            nextXml_1 = nextXml_1.concat("<expression>");
+            nextXml_1 = this.compileExpression(nextXml_1, stopAtToken);
+            nextXml_1 = nextXml_1.concat("</expression>");
+            return nextXml_1;
+        }
+        if (currentToken === Symbol_1.default.BracketRight) {
+            var nextXml_2 = xml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            nextXml_2 = nextXml_2.concat("<expression>");
+            nextXml_2 = this.compileExpression(nextXml_2, Symbol_1.default.BracketLeft);
+            nextXml_2 = nextXml_2.concat("</expression>");
+            return nextXml_2;
         }
         var xmlToPass = xml.concat("<term>");
         var nextXml = this.compileTerm(xmlToPass).concat("</term>");
@@ -272,9 +289,6 @@ var CompilationEngine = (function () {
     CompilationEngine.prototype.compileTerm = function (xml) {
         var tokenState = this.tokenizer.getCurrentTokenState();
         var lookAhead = this.tokenizer.lookAhead();
-        if (tokenState.value === "a") {
-            console.log("a");
-        }
         if (tokenState.isIdentifier && lookAhead === Symbol_1.default.Period) {
             return this.compileSubroutineCall(xml);
         }
@@ -349,9 +363,9 @@ var CompilationEngine = (function () {
             return xml;
         }
         if (tokenState.value === Symbol_1.default.Comma) {
-            var nextXml_2 = xml.concat(this.xmlWriter.getSymbol());
+            var nextXml_3 = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpressionList(nextXml_2);
+            return this.compileExpressionList(nextXml_3);
         }
         var nextXml = xml.concat("<expression>");
         nextXml = this.compileExpression(nextXml, Symbol_1.default.ParenLeft);

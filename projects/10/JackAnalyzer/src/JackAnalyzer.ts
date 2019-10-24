@@ -54,12 +54,19 @@ export default class JackAnalyzer {
     private getWriteToPath(pathToJackFile: string): string {
         const dir = this.fileReader.getDirectoryName();
         const fileName = this.getCurrentJackFileName(pathToJackFile);
-        return `${dir}/${fileName}`;
+        return `${dir}${this.getSplitOn(pathToJackFile)}${fileName}`;
     }
 
     private getCurrentJackFileName(absolutePathToJackFile: string): string {
         const path: string = absolutePathToJackFile;
-        const pathTokens: string[] = path.split("/");
+        const pathTokens: string[] = path.split(this.getSplitOn(path));
         return pathTokens[pathTokens.length - 1].replace(".jack", "").trim();
+    }
+
+    private getSplitOn(path: string): string {
+        if (path.indexOf("/") > -1) {
+            return "/";
+        }
+        return "\\";
     }
 }

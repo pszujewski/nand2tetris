@@ -48,26 +48,73 @@ var JackAnalyzer = (function () {
     }
     JackAnalyzer.prototype.analyze = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var inputTokens, tokenizer, engine, err_1;
+            var i, pathToJackFile, pathsToAllJackFiles, err_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 6, , 7]);
+                        return [4, this.fileReader.getAbsolutePathsToJackFiles()];
+                    case 1:
+                        pathsToAllJackFiles = _a.sent();
+                        if (pathsToAllJackFiles.length === 0) {
+                            throw new Error("No Jack files found in given directory");
+                        }
+                        i = 0;
+                        _a.label = 2;
+                    case 2:
+                        if (!(i < pathsToAllJackFiles.length)) return [3, 5];
+                        pathToJackFile = pathsToAllJackFiles[i];
+                        return [4, this.analyzeJackFile(pathToJackFile)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        i++;
+                        return [3, 2];
+                    case 5: return [3, 7];
+                    case 6:
+                        err_1 = _a.sent();
+                        console.error(err_1.message);
+                        return [3, 7];
+                    case 7: return [2];
+                }
+            });
+        });
+    };
+    JackAnalyzer.prototype.analyzeJackFile = function (pathToJackFile) {
+        return __awaiter(this, void 0, void 0, function () {
+            var inputTokens, writeToPath, tokenizer, engine, path, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4, this.fileReader.read()];
+                        path = pathToJackFile;
+                        return [4, this.fileReader.readTokensFromJackFile(path)];
                     case 1:
                         inputTokens = _a.sent();
+                        writeToPath = this.getWriteToPath(pathToJackFile);
                         tokenizer = new JackTokenizer_1.default(inputTokens);
-                        engine = new CompilationEngine_1.default(tokenizer);
+                        engine = new CompilationEngine_1.default(tokenizer, writeToPath);
                         engine.compile();
                         return [3, 3];
                     case 2:
-                        err_1 = _a.sent();
-                        console.error(err_1.message);
+                        err_2 = _a.sent();
+                        console.error(err_2.message);
                         return [3, 3];
                     case 3: return [2];
                 }
             });
         });
+    };
+    JackAnalyzer.prototype.getWriteToPath = function (pathToJackFile) {
+        var dir = this.fileReader.getDirectoryName();
+        var fileName = this.getCurrentJackFileName(pathToJackFile);
+        return dir + "/" + fileName;
+    };
+    JackAnalyzer.prototype.getCurrentJackFileName = function (absolutePathToJackFile) {
+        var path = absolutePathToJackFile;
+        var pathTokens = path.split("/");
+        return pathTokens[pathTokens.length - 1].replace(".jack", "").trim();
     };
     return JackAnalyzer;
 }());

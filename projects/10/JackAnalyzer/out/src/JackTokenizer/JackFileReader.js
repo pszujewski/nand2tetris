@@ -47,32 +47,42 @@ var JackFileReader = (function () {
         this.relativePathToDir = "../" + relPath;
         this.directoryName = this.identifyJackDirectory();
     }
-    JackFileReader.prototype.read = function () {
+    JackFileReader.prototype.readTokensFromJackFile = function (pathToJackFile) {
         return __awaiter(this, void 0, void 0, function () {
-            var pathsToJackFiles, jackCode, codeTokens, err_1;
+            var jackCode, codeTokens, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        return [4, this.getAbsolutePathsToJackFiles()];
+                        _a.trys.push([0, 2, , 3]);
+                        return [4, this.readDataInJackFiles([pathToJackFile])];
                     case 1:
-                        pathsToJackFiles = _a.sent();
-                        return [4, this.readDataInJackFiles(pathsToJackFiles)];
-                    case 2:
                         jackCode = _a.sent();
                         codeTokens = this.tokenizeJackCode(jackCode);
                         codeTokens = new Tokens_1.default(codeTokens).parse();
-                        return [3, 4];
-                    case 3:
+                        return [3, 3];
+                    case 2:
                         err_1 = _a.sent();
                         throw new Error(err_1.message);
-                    case 4: return [2, codeTokens];
+                    case 3: return [2, codeTokens];
                 }
             });
         });
     };
     JackFileReader.prototype.getDirectoryName = function () {
         return this.directoryName;
+    };
+    JackFileReader.prototype.getAbsolutePathsToJackFiles = function () {
+        var _this = this;
+        var p = this.relativePathToDir;
+        var pathToDirectory = path_1.default.join(__dirname, p);
+        return new Promise(function (resolve, reject) {
+            fs_1.default.readdir(pathToDirectory, function (err, fileNames) {
+                if (err) {
+                    reject("Unable to read");
+                }
+                resolve(_this.parseAbsolutePaths(fileNames));
+            });
+        });
     };
     JackFileReader.prototype.identifyJackDirectory = function () {
         var pathTokens = this.tokenizePath();
@@ -128,19 +138,6 @@ var JackFileReader = (function () {
                 return t.replace(/\/\*.+/g, "").trim();
             }
             return t.trim();
-        });
-    };
-    JackFileReader.prototype.getAbsolutePathsToJackFiles = function () {
-        var _this = this;
-        var p = this.relativePathToDir;
-        var pathToDirectory = path_1.default.join(__dirname, p);
-        return new Promise(function (resolve, reject) {
-            fs_1.default.readdir(pathToDirectory, function (err, fileNames) {
-                if (err) {
-                    reject("Unable to read");
-                }
-                resolve(_this.parseAbsolutePaths(fileNames));
-            });
         });
     };
     JackFileReader.prototype.parseAbsolutePaths = function (fileNames) {
