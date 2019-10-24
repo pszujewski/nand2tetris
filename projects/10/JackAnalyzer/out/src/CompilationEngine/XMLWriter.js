@@ -30,7 +30,7 @@ var XMLWriter = (function () {
         return "<stringConstant> " + this.tokenizer.getStringVal() + " </stringConstant>";
     };
     XMLWriter.prototype.toFile = function (xml) {
-        var name = "./out/" + this.writeToPath;
+        var name = "./out/" + this.writeToPath + ".xml";
         var path = fspath.resolve(__dirname, name);
         return new Promise(function (resolve) {
             fs.writeFile(path, xml, function (err) {

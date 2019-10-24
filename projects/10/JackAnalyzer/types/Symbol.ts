@@ -12,10 +12,10 @@ enum Symbol {
     Minus = "-",
     Times = "*",
     SlashRight = "/",
-    Ampersand = "&amp",
+    Ampersand = "&amp;",
     Pipe = "|",
-    LessThan = "&lt",
-    GreaterThan = "&gt",
+    LessThan = "&lt;",
+    GreaterThan = "&gt;",
     Equals = "=",
     Not = "~",
 }

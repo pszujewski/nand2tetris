@@ -264,18 +264,7 @@ var CompilationEngine = (function () {
         if (SymbolTable_1.default.isOp(currentToken)) {
             var nextXml_1 = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            nextXml_1 = nextXml_1.concat("<expression>");
-            nextXml_1 = this.compileExpression(nextXml_1, stopAtToken);
-            nextXml_1 = nextXml_1.concat("</expression>");
-            return nextXml_1;
-        }
-        if (currentToken === Symbol_1.default.BracketRight) {
-            var nextXml_2 = xml.concat(this.xmlWriter.getSymbol());
-            this.tokenizer.advance();
-            nextXml_2 = nextXml_2.concat("<expression>");
-            nextXml_2 = this.compileExpression(nextXml_2, Symbol_1.default.BracketLeft);
-            nextXml_2 = nextXml_2.concat("</expression>");
-            return nextXml_2;
+            return this.compileExpression(nextXml_1, stopAtToken);
         }
         var xmlToPass = xml.concat("<term>");
         var nextXml = this.compileTerm(xmlToPass).concat("</term>");
@@ -283,7 +272,6 @@ var CompilationEngine = (function () {
         if (currentToken === stopAtToken) {
             return nextXml;
         }
-        this.tokenizer.advance();
         return this.compileExpression(nextXml, stopAtToken);
     };
     CompilationEngine.prototype.compileTerm = function (xml) {
@@ -300,7 +288,9 @@ var CompilationEngine = (function () {
             nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol_1.default.BracketLeft);
             nextXml = nextXml.concat("</expression>");
-            return nextXml.concat(this.xmlWriter.getSymbol());
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return nextXml;
         }
         if (SymbolTable_1.default.isUnaryOp(tokenState.value)) {
             var nextXml = xml.concat(this.xmlWriter.getSymbol());
@@ -363,9 +353,9 @@ var CompilationEngine = (function () {
             return xml;
         }
         if (tokenState.value === Symbol_1.default.Comma) {
-            var nextXml_3 = xml.concat(this.xmlWriter.getSymbol());
+            var nextXml_2 = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpressionList(nextXml_3);
+            return this.compileExpressionList(nextXml_2);
         }
         var nextXml = xml.concat("<expression>");
         nextXml = this.compileExpression(nextXml, Symbol_1.default.ParenLeft);

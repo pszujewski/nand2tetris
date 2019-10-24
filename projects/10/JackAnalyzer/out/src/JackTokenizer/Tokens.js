@@ -35,7 +35,8 @@ var Tokens = (function () {
             .map(this.parseOneBaseToken)
             .reduce(function (prev, curr) {
             return __spreadArrays(prev, curr);
-        }, []);
+        }, [])
+            .filter(function (t) { return t.length > 0; });
     };
     Tokens.prototype.recursiveParse = function (base, tokens) {
         if (tokens === void 0) { tokens = []; }

@@ -15,7 +15,8 @@ export default class Tokens {
             .map(this.parseOneBaseToken)
             .reduce((prev, curr) => {
                 return [...prev, ...curr];
-            }, []);
+            }, [])
+            .filter(t => t.length > 0);
     }
 
     private parseOneBaseToken = (baseToken: string): string[] => {

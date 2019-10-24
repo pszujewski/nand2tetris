@@ -5,5 +5,6 @@ export default class JackAnalyzer {
     private analyzeJackFile;
     private getWriteToPath;
     private getCurrentJackFileName;
+    private getSplitOn;
 }
 //# sourceMappingURL=JackAnalyzer.d.ts.map

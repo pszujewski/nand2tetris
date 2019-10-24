@@ -109,12 +109,18 @@ var JackAnalyzer = (function () {
     JackAnalyzer.prototype.getWriteToPath = function (pathToJackFile) {
         var dir = this.fileReader.getDirectoryName();
         var fileName = this.getCurrentJackFileName(pathToJackFile);
-        return dir + "/" + fileName;
+        return "" + dir + this.getSplitOn(pathToJackFile) + fileName;
     };
     JackAnalyzer.prototype.getCurrentJackFileName = function (absolutePathToJackFile) {
         var path = absolutePathToJackFile;
-        var pathTokens = path.split("/");
+        var pathTokens = path.split(this.getSplitOn(path));
         return pathTokens[pathTokens.length - 1].replace(".jack", "").trim();
+    };
+    JackAnalyzer.prototype.getSplitOn = function (path) {
+        if (path.indexOf("/") > -1) {
+            return "/";
+        }
+        return "\\";
     };
     return JackAnalyzer;
 }());

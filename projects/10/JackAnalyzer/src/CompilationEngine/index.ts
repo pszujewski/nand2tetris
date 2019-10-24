@@ -457,22 +457,14 @@ export default class CompilationEngine {
         if (SymbolTable.isOp(currentToken)) {
             let nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, stopAtToken);
-            nextXml = nextXml.concat("</expression>");
-            return nextXml;
+            return this.compileExpression(nextXml, stopAtToken);
         }
 
-        if (currentToken === Symbol.BracketRight) {
-            let nextXml = xml.concat(this.xmlWriter.getSymbol());
-            this.tokenizer.advance();
-
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
-            nextXml = nextXml.concat("</expression>");
-            return nextXml;
-        }
+        // if (currentToken === Symbol.BracketRight) {
+        //     let nextXml = xml.concat(this.xmlWriter.getSymbol());
+        //     this.tokenizer.advance();
+        //     return this.compileExpression(nextXml, Symbol.BracketLeft);
+        // }
 
         // Else the currentToken must be the start of a <term>
         const xmlToPass = xml.concat("<term>");
@@ -485,7 +477,6 @@ export default class CompilationEngine {
             return nextXml;
         }
 
-        this.tokenizer.advance();
         return this.compileExpression(nextXml, stopAtToken);
     }
 
@@ -522,7 +513,9 @@ export default class CompilationEngine {
 
             // The currentToken should now be pointing at ']' with exp above done.
             // Append it to this <term> xml and return
-            return nextXml.concat(this.xmlWriter.getSymbol());
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
+            return nextXml;
         }
 
         // Needs to determine if we are dealing with a `unaryOp term`
