@@ -11,15 +11,14 @@ export default class JackFileReader {
         this.directoryName = this.identifyJackDirectory();
     }
 
-    public async read(): Promise<string[]> {
-        let pathsToJackFiles: string[];
+    public async readTokensFromJackFile(
+        pathToJackFile: string
+    ): Promise<string[]> {
         let jackCode: string;
         let codeTokens: string[];
 
         try {
-            pathsToJackFiles = await this.getAbsolutePathsToJackFiles();
-            jackCode = await this.readDataInJackFiles(pathsToJackFiles);
-
+            jackCode = await this.readDataInJackFiles([pathToJackFile]);
             codeTokens = this.tokenizeJackCode(jackCode);
             codeTokens = new Tokens(codeTokens).parse();
         } catch (err) {
@@ -30,6 +29,20 @@ export default class JackFileReader {
 
     public getDirectoryName(): string {
         return this.directoryName;
+    }
+
+    public getAbsolutePathsToJackFiles(): Promise<string[]> {
+        const p: string = this.relativePathToDir;
+        const pathToDirectory: string = fspath.join(__dirname, p);
+
+        return new Promise((resolve, reject) => {
+            fs.readdir(pathToDirectory, (err, fileNames) => {
+                if (err) {
+                    reject("Unable to read");
+                }
+                resolve(this.parseAbsolutePaths(fileNames));
+            });
+        });
     }
 
     private identifyJackDirectory(): string {
@@ -84,20 +97,6 @@ export default class JackFileReader {
                 return t.replace(/\/\*.+/g, "").trim();
             }
             return t.trim();
-        });
-    }
-
-    private getAbsolutePathsToJackFiles(): Promise<string[]> {
-        const p: string = this.relativePathToDir;
-        const pathToDirectory: string = fspath.join(__dirname, p);
-
-        return new Promise((resolve, reject) => {
-            fs.readdir(pathToDirectory, (err, fileNames) => {
-                if (err) {
-                    reject("Unable to read");
-                }
-                resolve(this.parseAbsolutePaths(fileNames));
-            });
         });
     }
 

@@ -4,9 +4,11 @@ import * as fspath from "path";
 
 export default class XMLWriter {
     private tokenizer: JackTokenizer;
+    private writeToPath: string;
 
-    constructor(tokenizer: JackTokenizer) {
+    constructor(tokenizer: JackTokenizer, writeToPath: string) {
         this.tokenizer = tokenizer;
+        this.writeToPath = writeToPath;
     }
 
     public getKeyword(): string {
@@ -30,8 +32,8 @@ export default class XMLWriter {
     }
 
     public toFile(xml: string): Promise<void> {
-        const name: string = "out.xml";
-        const path: string = fspath.resolve(__dirname, `./${name}`);
+        const name: string = `./out/${this.writeToPath}`;
+        const path: string = fspath.resolve(__dirname, name);
 
         return new Promise<void>(resolve => {
             fs.writeFile(path, xml, err => {

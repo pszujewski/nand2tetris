@@ -22,9 +22,9 @@ export default class CompilationEngine {
     private tokenizer: JackTokenizer;
     private xmlWriter: XMLWriter;
 
-    constructor(tokenizer: JackTokenizer) {
+    constructor(tokenizer: JackTokenizer, writeToPath: string) {
         this.tokenizer = tokenizer;
-        this.xmlWriter = new XMLWriter(tokenizer);
+        this.xmlWriter = new XMLWriter(tokenizer, writeToPath);
     }
 
     public compile(): void {
