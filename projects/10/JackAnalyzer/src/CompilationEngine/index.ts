@@ -261,7 +261,7 @@ export default class CompilationEngine {
         this.tokenizer.advance();
 
         // Compile the subroutine call
-        nextXml = nextXml.concat(this.compileSubroutineCall(nextXml));
+        nextXml = this.compileSubroutineCall(nextXml);
 
         // Close out the do statement with the semi
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
