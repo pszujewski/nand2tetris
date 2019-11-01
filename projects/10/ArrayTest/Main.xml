@@ -132,7 +132,7 @@
               </expression>
               <symbol> ; </symbol>
             </letStatement>
-            <letStatement> /// Matches to 134
+            <letStatement>
               <keyword> let </keyword>
               <identifier> i </identifier>
               <symbol> = </symbol>
