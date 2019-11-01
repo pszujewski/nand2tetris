@@ -448,6 +448,7 @@ export default class CompilationEngine {
 
     /** Compiles an expression. Wrap calls to this method in <expression> tag */
     private compileExpression(xml: string, stopAtToken: string): string {
+        let nextXml: string = xml;
         let currentToken = this.tokenizer.getCurrentToken();
 
         if (currentToken === stopAtToken) {
@@ -455,20 +456,13 @@ export default class CompilationEngine {
         }
 
         if (SymbolTable.isOp(currentToken)) {
-            let nextXml = xml.concat(this.xmlWriter.getSymbol());
+            nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpression(nextXml, stopAtToken);
+            // return this.compileExpression(nextXml, stopAtToken);
         }
 
-        // if (currentToken === Symbol.BracketRight) {
-        //     let nextXml = xml.concat(this.xmlWriter.getSymbol());
-        //     this.tokenizer.advance();
-        //     return this.compileExpression(nextXml, Symbol.BracketLeft);
-        // }
-
-        // Else the currentToken must be the start of a <term>
-        const xmlToPass = xml.concat("<term>");
-        const nextXml = this.compileTerm(xmlToPass).concat("</term>");
+        // The currentToken must now be the start of a <term>
+        nextXml = this.compileTerm(nextXml.concat("<term>")).concat("</term>");
 
         // Building the term will have advanced() the currentToken pointer
         currentToken = this.tokenizer.getCurrentToken();
@@ -536,9 +530,9 @@ export default class CompilationEngine {
             this.tokenizer.advance();
 
             // Compile the expression within the parens. Stop at ")"
-            nextXml = nextXml.concat("<expression>");
+            nextXml = nextXml.concat("<expression>").concat("<term>");
             nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-            nextXml = nextXml.concat("</expression>");
+            nextXml = nextXml.concat("</term>").concat("</expression>");
 
             // Append the ')' which is a part of this 'term' and advance()
             // since we appended the currentToken
