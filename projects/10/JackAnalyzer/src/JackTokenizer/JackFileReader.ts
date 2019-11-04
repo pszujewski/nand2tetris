@@ -7,7 +7,7 @@ export default class JackFileReader {
     private directoryName: string;
 
     constructor(relPath: string) {
-        this.relativePathToDir = `../${relPath}`;
+        this.relativePathToDir = relPath;
         this.directoryName = this.identifyJackDirectory();
     }
 
