@@ -7,7 +7,7 @@
         "clean": "rimraf ./node_modules",
         "build": "tsc",
         "test": "mocha -r ts-node/register test/**/*.ts",
-        "start": "node src/index.js"
+        "start": "node out/src/index.js"
     },
     "author": "Peter Szujewski",
     "license": "MIT",

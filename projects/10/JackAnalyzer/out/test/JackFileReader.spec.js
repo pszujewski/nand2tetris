@@ -48,7 +48,7 @@ describe("JackFileReader", function () {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    JA = new JackAnalyzer_1.default("../../ArrayTest");
+                    JA = new JackAnalyzer_1.default("../../Square");
                     return [4, JA.analyze()];
                 case 1:
                     _a.sent();
