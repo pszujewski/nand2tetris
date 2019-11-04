@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Symbol;
 (function (Symbol) {
     Symbol["CurlyRight"] = "{";
@@ -22,4 +22,5 @@ var Symbol;
     Symbol["Equals"] = "=";
     Symbol["Not"] = "~";
 })(Symbol || (Symbol = {}));
-exports["default"] = Symbol;
+exports.default = Symbol;
+//# sourceMappingURL=Symbol.js.map

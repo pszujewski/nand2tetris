@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var TokenType;
 (function (TokenType) {
     TokenType["Keyword"] = "keyword";
@@ -8,4 +8,5 @@ var TokenType;
     TokenType["IntConst"] = "integerConstant";
     TokenType["StringConst"] = "stringConstant";
 })(TokenType || (TokenType = {}));
-exports["default"] = TokenType;
+exports.default = TokenType;
+//# sourceMappingURL=TokenType.js.map

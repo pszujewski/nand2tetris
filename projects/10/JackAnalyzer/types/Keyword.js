@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Keyword;
 (function (Keyword) {
     Keyword["Class"] = "class";
@@ -24,4 +24,5 @@ var Keyword;
     Keyword["Null"] = "null";
     Keyword["This"] = "this";
 })(Keyword || (Keyword = {}));
-exports["default"] = Keyword;
+exports.default = Keyword;
+//# sourceMappingURL=Keyword.js.map
