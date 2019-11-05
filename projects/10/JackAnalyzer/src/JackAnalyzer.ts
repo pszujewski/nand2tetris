@@ -23,7 +23,7 @@ export default class JackAnalyzer {
 
             for (i = 0; i < pathsToAllJackFiles.length; i++) {
                 pathToJackFile = pathsToAllJackFiles[i];
-                await this.analyzeJackFile(pathToJackFile);
+                this.analyzeJackFile(pathToJackFile);
             }
         } catch (err) {
             console.error(err.message);

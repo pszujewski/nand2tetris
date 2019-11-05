@@ -90,11 +90,13 @@ export default class JackFileReader {
         });
 
         return tokens.map(t => {
-            if (t.indexOf("//")) {
+            // JUST CHANGED
+            if (t.indexOf("//") > -1) {
                 return t.replace(/\/\/.+/g, "").trim();
             }
-            if (t.indexOf("/*")) {
-                return t.replace(/\/\*.+/g, "").trim();
+            // JUST CHANGED
+            if (t.indexOf("/*") > -1) {
+                return t.replace(/\/*\/.+\*\/$/g, "").trim();
             }
             return t.trim();
         });
