@@ -581,17 +581,25 @@ export default class CompilationEngine {
     }
 
     private compileSubroutineCall(xml: string): string {
-        // Append the identifier class name
+        // Append the className or the function | method name identifier
         let nextXml = xml.concat(this.xmlWriter.getIdentifier());
         this.tokenizer.advance();
 
-        // Append the period symbol
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
+        // If the token is now Period, then this is a method on a class instance
+        // If it's a ParenRight then it's a method on the current 'this' class
+        if (this.tokenizer.getCurrentToken() === Symbol.Period) {
+            // Append the period symbol
+            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            this.tokenizer.advance();
 
-        // Append the function | method name identifier
-        nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
-        this.tokenizer.advance();
+            // Append the function | method name identifier
+            nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
+            this.tokenizer.advance();
+        }
+
+        if (this.tokenizer.getCurrentToken() !== Symbol.ParenRight) {
+            throw new Error("Invalid Function Call");
+        }
 
         // Append the open paren symbol
         nextXml = nextXml.concat(this.xmlWriter.getSymbol());
