@@ -97,8 +97,16 @@ export default class CompilationEngine {
         xml = xml.concat(this.xmlWriter.getKeyword());
         this.tokenizer.advance();
 
-        // Get the return type <keyword>
-        xml = xml.concat(this.xmlWriter.getKeyword());
+        // Get the return type <keyword> or <identifier>
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        if (tokenState.isKeyword) {
+            xml = xml.concat(this.xmlWriter.getKeyword());
+        } else {
+            xml = xml.concat(this.xmlWriter.getIdentifier());
+        }
+
+        // Advance past what was either keyword or identifier
         this.tokenizer.advance();
 
         // Append the function | method | constructor name <identifier>
