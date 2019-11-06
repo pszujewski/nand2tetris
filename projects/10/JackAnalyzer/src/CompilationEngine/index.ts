@@ -459,7 +459,7 @@ export default class CompilationEngine {
         let nextXml: string = xml;
         let currentToken = this.tokenizer.getCurrentToken();
 
-        if (currentToken === stopAtToken) {
+        if (currentToken === stopAtToken || currentToken === Symbol.Comma) {
             return xml;
         }
 
@@ -475,7 +475,7 @@ export default class CompilationEngine {
         // Building the term will have advanced() the currentToken pointer
         currentToken = this.tokenizer.getCurrentToken();
 
-        if (currentToken === stopAtToken) {
+        if (currentToken === stopAtToken || currentToken === Symbol.Comma) {
             return nextXml;
         }
 
