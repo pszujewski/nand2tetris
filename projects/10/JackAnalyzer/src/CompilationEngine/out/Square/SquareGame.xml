@@ -75,7 +75,8 @@
                         <term>
                             <keyword> this </keyword>
                         </term>
-                    </expression>;
+                    </expression>
+                    <symbol> ; </symbol>
                 </returnStatement>
             </statements>
             <symbol> } </symbol>
@@ -570,7 +571,7 @@
                                     <term>
                                         <symbol> ( </symbol>
                                         <expression>
-                                            <term>
+                                            <term> // This shouldn't be here
                                                 <term>
                                                     <identifier> key </identifier>
                                                 </term>
@@ -578,7 +579,7 @@
                                                 <term>
                                                     <integerConstant> 0 </integerConstant>
                                                 </term>
-                                            </term>
+                                            </term> // This shouldn't be here
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>

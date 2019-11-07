@@ -394,7 +394,7 @@ export default class CompilationEngine {
         nextXml = nextXml.concat("</expression>");
 
         // Append the Semi which is the currentToken and advance
-        nextXml = nextXml.concat(this.tokenizer.getSymbol());
+        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
 
         return nextXml.concat("</returnStatement>");
@@ -538,9 +538,10 @@ export default class CompilationEngine {
             this.tokenizer.advance();
 
             // Compile the expression within the parens. Stop at ")"
-            nextXml = nextXml.concat("<expression>").concat("<term>");
+            // DO NOT ADD <term> TAGS HERE!!!!
+            nextXml = nextXml.concat("<expression>");
             nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-            nextXml = nextXml.concat("</term>").concat("</expression>");
+            nextXml = nextXml.concat("</expression>");
 
             // Append the ')' which is a part of this 'term' and advance()
             // since we appended the currentToken
