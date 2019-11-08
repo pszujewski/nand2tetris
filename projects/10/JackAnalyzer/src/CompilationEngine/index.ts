@@ -463,7 +463,15 @@ export default class CompilationEngine {
             return xml;
         }
 
-        if (SymbolTable.isOp(currentToken)) {
+        // We need to determine that this truly is an "Op" and is not
+        // actually a "Unary Op". If it's Unary Op, we need to comileTerm()
+        // In other words, we need to let compileTerm treat the symbol as a
+        // Unary Op. This is difficult though because '-' can be either
+        // "Op" or "Unary Op."
+
+        // Update SymbolTable.isOp() to take in the whole tokenizer and determine
+        // that we are really dealing with an "Op" and not actually a "UnaryOp"
+        if (SymbolTable.isOp(this.tokenizer)) {
             nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
             // return this.compileExpression(nextXml, stopAtToken);

@@ -517,9 +517,11 @@
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>
-                                    <symbol> - </symbol>
                                     <term>
-                                        <integerConstant> 1 </integerConstant>
+                                        <symbol> - </symbol>
+                                        <term>
+                                            <integerConstant> 1 </integerConstant>
+                                        </term>
                                     </term>
                                 </expression>
                                 <symbol> , </symbol>
@@ -781,9 +783,11 @@
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>
-                                    <symbol> - </symbol>
                                     <term>
-                                        <integerConstant> 1 </integerConstant>
+                                        <symbol> - </symbol>
+                                        <term>
+                                            <integerConstant> 1 </integerConstant>
+                                        </term>
                                     </term>
                                 </expression>
                                 <symbol> , </symbol>
@@ -883,9 +887,11 @@
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>
-                                    <symbol> - </symbol>
                                     <term>
-                                        <integerConstant> 1 </integerConstant>
+                                        <symbol> - </symbol>
+                                        <term>
+                                            <integerConstant> 1 </integerConstant>
+                                        </term>
                                     </term>
                                 </expression>
                                 <symbol> , </symbol>
@@ -1147,9 +1153,11 @@
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>
-                                    <symbol> - </symbol>
                                     <term>
-                                        <integerConstant> 1 </integerConstant>
+                                        <symbol> - </symbol>
+                                        <term>
+                                            <integerConstant> 1 </integerConstant>
+                                        </term>
                                     </term>
                                 </expression>
                                 <symbol> , </symbol>

@@ -178,12 +178,12 @@
                 <term>
                   <symbol> ( </symbol>
                   <expression>
-                    <term> // issue
+                    <term>
                       <symbol> - </symbol>
                       <term>
                         <identifier> j </identifier>
                       </term>
-                    </term> // issue
+                    </term>
                   </expression>
                   <symbol> ) </symbol>
                 </term>

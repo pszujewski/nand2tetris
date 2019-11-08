@@ -13,7 +13,10 @@ export default class JackTokenizer {
     lookAhead(): string;
     getTokenType(): TokenType;
     getCurrentToken(): string;
+    getPointer(): number;
     getCurrentTokenState(): CurrentToken;
+    getTokenAtPointer(pointerValue: number): string;
+    isValidPointerValue(value: number): boolean;
     getKeyword(): string;
     getSymbol(): string;
     getIdentifier(): string;

@@ -1,4 +1,6 @@
 import Symbol from "../../types/Symbol";
+import JackTokenizer from "../JackTokenizer";
+import CurrentToken from "../../out/types/CurrentToken";
 
 const symbols: string[] = [
     Symbol.CurlyRight,
@@ -59,8 +61,12 @@ export default class SymbolTable {
         return char === Symbol.Semi;
     }
 
-    static isOp(char: string): boolean {
-        return [
+    // Minus is the only Symbol that can be either 'Op' or 'UnaryOp'
+    static isOp(jackTokenizer: JackTokenizer): boolean {
+        const tokenState: CurrentToken = jackTokenizer.getCurrentTokenState();
+        const currentToken: string = tokenState.value;
+
+        const ops: string[] = [
             Symbol.Plus,
             Symbol.Minus,
             Symbol.Times,
@@ -70,7 +76,29 @@ export default class SymbolTable {
             gt,
             lt,
             Symbol.Equals,
-        ].includes(char);
+        ];
+
+        const isOp = ops.includes(currentToken);
+
+        if (!isOp) return false;
+
+        if (isOp && currentToken !== Symbol.Minus) return true;
+
+        // Otherwise isOp is true but it is Symbol.Minus
+        // Make sure the Minus is not actually a UnaryOp
+
+        const pointer: number = jackTokenizer.getPointer();
+        const lastPointer: number = pointer - 1;
+
+        if (isOp && jackTokenizer.isValidPointerValue(lastPointer)) {
+            // if the 'beforeToken' is a "Symbol" then this must be a "UnaryOp"
+            const beforeToken = jackTokenizer.getTokenAtPointer(lastPointer);
+            // If the 'beforeToken' is a "Symbol" then this is NOT an "Op". It is a "UnaryOp"
+            return !this.includes(beforeToken);
+        }
+
+        // Fallback is to just confirm this is indeed an 'Op' token
+        return isOp;
     }
 
     static isUnaryOp(char: string): boolean {

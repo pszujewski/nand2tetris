@@ -80,6 +80,10 @@ export default class JackTokenizer {
         return this.currentToken;
     }
 
+    public getPointer(): number {
+        return this.pointer;
+    }
+
     public getCurrentTokenState(): CurrentToken {
         const value: string = this.getCurrentToken();
         const type: string = this.getTokenType();
@@ -93,6 +97,18 @@ export default class JackTokenizer {
             isStringConst: type === TokenType.StringConst,
             isIdentifier: type === TokenType.Identifier,
         };
+    }
+
+    public getTokenAtPointer(pointerValue: number): string {
+        if (this.syntacticElements[pointerValue]) {
+            return this.syntacticElements[pointerValue];
+        }
+        return "";
+    }
+
+    public isValidPointerValue(value: number): boolean {
+        const len = this.syntacticElements.length;
+        return value > -1 && value < len;
     }
 
     /** Returns the keyword which is the current token */
