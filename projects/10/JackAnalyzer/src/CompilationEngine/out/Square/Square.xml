@@ -517,12 +517,12 @@
                                         </expression>
                                         <symbol> ) </symbol>
                                     </term>
-                                    <term>
+                                    <term> // It was compiled as unary op but this is just an op
                                         <symbol> - </symbol>
                                         <term>
                                             <integerConstant> 1 </integerConstant>
                                         </term>
-                                    </term>
+                                    </term> // these term tags should not be here.
                                 </expression>
                                 <symbol> , </symbol>
                                 <expression>
