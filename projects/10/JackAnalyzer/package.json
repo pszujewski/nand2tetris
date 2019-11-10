@@ -5,9 +5,9 @@
     "main": "index.js",
     "scripts": {
         "clean": "rimraf ./node_modules",
-        "build": "tsc && eslint 'types/**/*.ts' 'src/**/*.ts'",
+        "build": "tsc",
         "test": "mocha -r ts-node/register test/**/*.ts",
-        "start": "node src/index.js"
+        "start": "ts-node ./src/index.ts"
     },
     "author": "Peter Szujewski",
     "license": "MIT",

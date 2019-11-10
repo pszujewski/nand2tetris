@@ -2,8 +2,8 @@ enum TokenType {
     Keyword = "keyword",
     Symbol = "symbol",
     Identifier = "identifier",
-    Int_Const = "integerConstant",
-    String_Const = "stringConstant",
+    IntConst = "integerConstant",
+    StringConst = "stringConstant",
 }
 
 export default TokenType;
