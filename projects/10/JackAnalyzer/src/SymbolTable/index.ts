@@ -95,10 +95,10 @@ export default class SymbolTable {
             const beforeToken = jackTokenizer.getTokenAtPointer(lastPointer);
             // If the 'beforeToken' is a "Symbol" then this is NOT an "Op". It is a "UnaryOp"
 
-            // Update this to if beforeToken != ParenLeft then, true this is an Op
+            // Update this to if beforeToken != Parenright then, true this is an Op
             // If the beforeToken is ParenLeft however at this point then this is a negate
             // Unary Op and NOT an OP
-            return !this.includes(beforeToken);
+            return beforeToken !== Symbol.ParenRight;
         }
 
         // Fallback is to just confirm this is indeed an 'Op' token
