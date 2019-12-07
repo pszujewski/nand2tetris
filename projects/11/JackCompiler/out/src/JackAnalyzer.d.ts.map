@@ -1,0 +1,1 @@
+{"version":3,"file":"JackAnalyzer.d.ts","sourceRoot":"","sources":["../../src/JackAnalyzer.ts"],"names":[],"mappings":"AAIA,MAAM,CAAC,OAAO,OAAO,YAAY;IAC7B,OAAO,CAAC,UAAU,CAAiB;gBAEvB,qBAAqB,EAAE,MAAM;IAI5B,OAAO,IAAI,OAAO,CAAC,IAAI,CAAC;YAqBvB,eAAe;IAqB7B,OAAO,CAAC,cAAc;IAMtB,OAAO,CAAC,sBAAsB;IAM9B,OAAO,CAAC,UAAU;CAMrB"}

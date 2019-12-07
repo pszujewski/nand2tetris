@@ -1,0 +1,1 @@
+{"version":3,"file":"Tokens.d.ts","sourceRoot":"","sources":["../../../src/JackTokenizer/Tokens.ts"],"names":[],"mappings":"AAKA,MAAM,CAAC,OAAO,OAAO,MAAM;IACvB,OAAO,CAAC,UAAU,CAAW;gBAEjB,UAAU,EAAE,MAAM,EAAE;IAIzB,KAAK,IAAI,MAAM,EAAE;IASxB,OAAO,CAAC,iBAAiB,CAWvB;IAEF,OAAO,CAAC,cAAc;IAmCtB,OAAO,CAAC,gBAAgB;CAS3B"}
