@@ -32,7 +32,7 @@ export default class XMLWriter {
     }
 
     public toFile(xml: string): Promise<void> {
-        const name: string = `./out/${this.writeToPath}.xml`;
+        const name = `./out/${this.writeToPath}.xml`;
         const path: string = fspath.resolve(__dirname, name);
 
         return new Promise<void>(resolve => {
