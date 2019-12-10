@@ -26,4 +26,5 @@ export enum VariableKind {
     VAR = "VAR",
     STATIC = "STATIC",
     FIELD = "FIELD",
+    NONE = "NONE",
 }
