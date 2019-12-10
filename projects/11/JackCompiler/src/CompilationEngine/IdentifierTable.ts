@@ -1,4 +1,5 @@
 import Scope, { Identifier, VariableKind } from "../../types/Scope";
+import Keyword from "../../out/types/Keyword";
 
 /**
  * Should match API for SymbolTable on page pg. 239
@@ -63,6 +64,19 @@ export default class IdentifierTable {
                 break;
             default:
                 throw new Error("Invalid variable kind" + identifier.kind);
+        }
+    }
+
+    public getVarKind(kind: string): VariableKind {
+        switch (kind) {
+            case Keyword.Field:
+                return VariableKind.FIELD;
+            case Keyword.Static:
+                return VariableKind.STATIC;
+            case Keyword.Var:
+                return VariableKind.VAR;
+            default:
+                throw new Error(`Cannot determine var kind for ${kind}`);
         }
     }
 

@@ -58,7 +58,7 @@ export default class VMWriter {
      * Writes a VM label command
      */
     public writeLabel(label: string) {
-        return;
+        this.addToOutput(`label ${label}`);
     }
 
     /**
@@ -67,7 +67,7 @@ export default class VMWriter {
      * Writes a VM goto command
      */
     public writeGoto(label: string) {
-        return;
+        this.addToOutput(`goto ${label}`);
     }
 
     /**
@@ -76,7 +76,7 @@ export default class VMWriter {
      * Writes a VM if-goto command
      */
     public writeIf(label: string) {
-        return;
+        this.addToOutput(`if-goto ${label}`);
     }
 
     /**
@@ -86,24 +86,24 @@ export default class VMWriter {
      * Writes a VM call command
      */
     public writeCall(functionName: string, nArgs: number) {
-        return;
+        this.addToOutput(`call ${functionName} ${nArgs}`);
     }
 
     /**
      *
      * @param functionName
      * @param nLocals
-     * Writes a VM function command
+     * Writes a VM function command, noting number of local variables
      */
     public writeFunction(functionName: string, nLocals: number) {
-        return;
+        this.addToOutput(`function ${functionName} ${nLocals}`);
     }
 
     /**
      * Writes a VM return command
      */
     public writeReturn() {
-        return;
+        this.addToOutput("return");
     }
 
     /**

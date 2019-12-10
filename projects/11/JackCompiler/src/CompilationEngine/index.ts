@@ -2,9 +2,12 @@ import JackTokenizer from "../JackTokenizer";
 import KeywordTable from "../KeywordTable";
 import Symbol from "../../types/Symbol";
 import SymbolTable from "../SymbolTable";
-import XMLWriter from "./XMLWriter";
 import CurrentToken from "../../types/CurrentToken";
 import Keyword from "../../types/Keyword";
+import VMWriter from "./VMWriter";
+import VMSegment from "./VMSegment";
+import IdentifierTable from "./IdentifierTable";
+import { Identifier } from "../../types/Scope";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -20,20 +23,24 @@ import Keyword from "../../types/Keyword";
 
 export default class CompilationEngine {
     private tokenizer: JackTokenizer;
-    private xmlWriter: XMLWriter;
+    private vmSegment: VMSegment;
+    private identifierTable: IdentifierTable;
+    private vmWriter: VMWriter;
 
     constructor(tokenizer: JackTokenizer, writeToPath: string) {
         this.tokenizer = tokenizer;
-        this.xmlWriter = new XMLWriter(tokenizer, writeToPath);
+        this.vmWriter = new VMWriter(writeToPath);
+        this.vmSegment = new VMSegment();
+        this.identifierTable = new IdentifierTable();
     }
 
-    public compile(): void {
+    public compile(): Promise<void> {
         let xml: string;
 
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
-                xml = `<class>${this.compileClass()}</class>`;
-                this.xmlWriter.toFile(xml);
+                this.compileClass();
+                return this.vmWriter.close();
             } else {
                 throw new Error("Program must begin with a class declaration");
             }
@@ -43,35 +50,37 @@ export default class CompilationEngine {
     }
 
     /** Compiles a complete class */
-    public compileClass(xmlRoot = ""): string {
-        const xml: string = xmlRoot;
-
+    public compileClass(): string {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
-            return xml.concat(this.xmlWriter.getSymbol());
+            // Compilation finished
         }
 
         if (KeywordTable.isClass(tokenState.value)) {
-            return this.compileClass(xml.concat(this.xmlWriter.getKeyword()));
+            // Continue compilation. We are compiling the root class
         }
 
         if (tokenState.isIdentifier) {
-            return this.compileClass(
-                xml.concat(this.xmlWriter.getIdentifier())
-            );
+            this.identifierTable.setNameOfClass(tokenState.value);
+            return this.compileClass();
         }
 
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
-            return this.compileClass(xml.concat(this.xmlWriter.getSymbol()));
+            // The start of the class. We are just begining to compile the body of the
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
-            let nextXml = xml.concat("<classVarDec>");
-            nextXml = nextXml.concat(this.xmlWriter.getKeyword());
-            return this.compileClass(this.compileClassVarDec(nextXml));
+            const identifier: Identifier = {
+                name: "",
+                type: "",
+                kind: this.identifierTable.getVarKind(tokenState.value),
+            };
+
+            this.compileClassVarDec(identifier);
+            return this.compileClass();
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
@@ -84,8 +93,8 @@ export default class CompilationEngine {
     /** Compiles a static declaration or a field declaration.
      * (static | field) type varName (, varName)*
      * */
-    private compileClassVarDec(xml: string): string {
-        return this.compileVarDec(xml).concat("</classVarDec>");
+    private compileClassVarDec(identifier: Identifier) {
+        this.compileVarDec(identifier);
     }
 
     // Not recursive. The currentToken should be the first keyword in the
@@ -199,14 +208,19 @@ export default class CompilationEngine {
         );
     }
 
-    /** Compiles a var declaration */
-    private compileVarDec(xml: string): string {
+    /** Compiles a var declaration
+     *  The given identifier should already have the 'kind' determined
+     *  The problem here is that 'type' is not always a 'keyword'. It
+     *  can also be a className, so this can't really be recursive but
+     *  instead use a 'while' loop.
+     */
+    private compileVarDec(identifier: Identifier) {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
         if (SymbolTable.isSemi(tokenState.value)) {
-            return xml.concat(this.xmlWriter.getSymbol());
+            return;
         }
 
         if (tokenState.isKeyword) {
@@ -214,7 +228,10 @@ export default class CompilationEngine {
         }
 
         if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
-            return this.compileVarDec(xml.concat(this.xmlWriter.getSymbol()));
+            // this.identiferTable.define(identifer);
+            // copy into a new identifer. The new identifier will have same type and kind
+            // but a different 'name'
+            return this.compileVarDec(identifier);
         }
 
         return this.compileVarDec(xml.concat(this.xmlWriter.getIdentifier()));

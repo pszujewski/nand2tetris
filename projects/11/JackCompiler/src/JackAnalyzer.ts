@@ -45,7 +45,7 @@ export default class JackAnalyzer {
             tokenizer = new JackTokenizer(inputTokens);
 
             engine = new JackCompilationEngine(tokenizer, writeToPath);
-            engine.compile();
+            await engine.compile();
         } catch (err) {
             console.error(err.message);
         }
