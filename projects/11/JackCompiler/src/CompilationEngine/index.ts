@@ -35,8 +35,6 @@ export default class CompilationEngine {
     }
 
     public compile(): Promise<void> {
-        let xml: string;
-
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
                 this.compileClass();
@@ -73,13 +71,7 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
-            const identifier: Identifier = {
-                name: "",
-                type: "",
-                kind: this.identifierTable.getVarKind(tokenState.value),
-            };
-
-            this.compileClassVarDec(identifier);
+            this.compileClassVarDec();
             return this.compileClass();
         }
 
@@ -93,7 +85,15 @@ export default class CompilationEngine {
     /** Compiles a static declaration or a field declaration.
      * (static | field) type varName (, varName)*
      * */
-    private compileClassVarDec(identifier: Identifier) {
+    private compileClassVarDec() {
+        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        const identifier: Identifier = {
+            name: "",
+            type: "",
+            kind: this.identifierTable.getVarKind(tokenState.value),
+        };
+
         this.compileVarDec(identifier);
     }
 
@@ -216,25 +216,34 @@ export default class CompilationEngine {
      */
     private compileVarDec(identifier: Identifier) {
         this.tokenizer.advance();
-        const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // base case
-        if (SymbolTable.isSemi(tokenState.value)) {
+        // The current token is now the 'type' in the declaration
+        identifier.type = this.tokenizer.getCurrentToken();
+        this.tokenizer.advance();
+
+        // The current token is now the 'varName' in the declaration
+        identifier.name = this.tokenizer.getCurrentToken();
+        this.tokenizer.advance();
+
+        this.identifierTable.define(identifier);
+
+        while (this.tokenizer.getCurrentToken() === Symbol.Comma) {
+            // Advance past the comma to the next varName and create new identifier
+            this.tokenizer.advance();
+            const name: string = this.tokenizer.getCurrentToken();
+
+            const anotherIdentifier: Identifier = { ...identifier, name };
+            this.identifierTable.define(anotherIdentifier);
+
+            this.tokenizer.advance();
+        }
+
+        // Should be finished comiling the varDec
+        if (SymbolTable.isSemi(this.tokenizer.getCurrentToken())) {
             return;
+        } else {
+            throw new Error("VarDecs should end with Semi symbol");
         }
-
-        if (tokenState.isKeyword) {
-            return this.compileVarDec(xml.concat(this.xmlWriter.getKeyword()));
-        }
-
-        if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
-            // this.identiferTable.define(identifer);
-            // copy into a new identifer. The new identifier will have same type and kind
-            // but a different 'name'
-            return this.compileVarDec(identifier);
-        }
-
-        return this.compileVarDec(xml.concat(this.xmlWriter.getIdentifier()));
     }
 
     /** Compiles a sequence of statements not including the enclosing brackets.
