@@ -7,7 +7,7 @@ import Keyword from "../../types/Keyword";
 import VMWriter from "./VMWriter";
 import VMSegment from "./VMSegment";
 import IdentifierTable from "./IdentifierTable";
-import { Identifier } from "../../types/Scope";
+import { Identifier, VariableKind } from "../../types/Scope";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -110,35 +110,36 @@ export default class CompilationEngine {
         if (this.tokenizer.getCurrentToken() === Keyword.Method) {
             const argument: Identifier = {
                 name: "this",
+                type: this.identifierTable.getNameOfClass(),
+                kind: VariableKind.ARG,
             };
-
-            this.identifierTable.define();
+            this.identifierTable.define(argument);
         }
-        xml = xml.concat(this.xmlWriter.getKeyword());
-        this.tokenizer.advance();
 
-        // Get the return type <keyword> or <identifier>
+        // advance() to the return type <keyword> or <identifier>
+        this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         if (tokenState.isKeyword) {
-            xml = xml.concat(this.xmlWriter.getKeyword());
+            console.log("The return type is a primitive");
         } else {
-            xml = xml.concat(this.xmlWriter.getIdentifier());
+            console.log("The return type is a defined class");
         }
-
-        // Advance past what was either keyword or identifier
+        // Advance past what was either keyword or identifier for the return type
         this.tokenizer.advance();
 
-        // Append the function | method | constructor name <identifier>
-        xml = xml.concat(this.xmlWriter.getIdentifier());
+        // Save the function | method | constructor name <identifier> and advance()
+        const name: string = this.tokenizer.getCurrentToken();
+        this.identifierTable.setSubroutineName(name);
+
         this.tokenizer.advance();
 
-        // open paren for the parameter list -- because it shouldn't be within <parameterList>
-        xml = xml.concat(this.xmlWriter.getSymbol());
+        // currentToken is open paren for the parameter list
+        // It shouldn't be within <parameterList>
+        this.tokenizer.advance();
 
-        // the parens should not be included as children to <parameterList> tag
-        xml = this.compileParameterList(xml.concat("<parameterList>"));
-        xml = xml.concat("</parameterList>");
+        // Add Arguments to identifier table?
+        this.compileParameterList();
 
         // At this point, the currentToken should be ')'. Append it and advance the pointer
         xml = xml.concat(this.xmlWriter.getSymbol());

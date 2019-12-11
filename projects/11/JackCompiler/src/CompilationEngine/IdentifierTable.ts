@@ -16,6 +16,7 @@ export default class IdentifierTable {
                 static: [],
             },
             subroutineLevel: {
+                subroutineName: "",
                 varLocal: [],
                 argument: [],
             },
@@ -31,14 +32,23 @@ export default class IdentifierTable {
         return this.nameOfClass;
     }
 
+    public getSubroutineName(): string {
+        return this.scope.subroutineLevel.subroutineName;
+    }
+
     /**
      * Starts a new subroutine scope (resets the subroutine's symbol table)
      */
     public startSubroutine() {
         this.scope.subroutineLevel = {
+            subroutineName: "",
             varLocal: [],
             argument: [],
         };
+    }
+
+    public setSubroutineName(name: string) {
+        this.scope.subroutineLevel.subroutineName = name;
     }
 
     /**

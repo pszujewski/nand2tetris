@@ -9,6 +9,7 @@ export interface ClassScope {
 }
 
 export interface SubroutineScope {
+    subroutineName: string;
     varLocal: Identifier[];
     argument: Identifier[];
 }
