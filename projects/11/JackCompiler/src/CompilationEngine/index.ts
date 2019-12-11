@@ -48,17 +48,19 @@ export default class CompilationEngine {
     }
 
     /** Compiles a complete class */
-    public compileClass(): string {
+    public compileClass() {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             // Compilation finished
+            return;
         }
 
         if (KeywordTable.isClass(tokenState.value)) {
             // Continue compilation. We are compiling the root class
+            return this.compileClass();
         }
 
         if (tokenState.isIdentifier) {
@@ -76,7 +78,8 @@ export default class CompilationEngine {
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
-            return this.compileClass(this.compileSubroutine(xml));
+            this.compileSubroutine();
+            return this.compileClass();
         }
 
         throw new Error("Failed to compile class");
@@ -99,10 +102,18 @@ export default class CompilationEngine {
 
     // Not recursive. The currentToken should be the first keyword in the
     // function definition when this function is entered (function | method | constructor)
-    private compileSubroutine(xml: string): string {
-        xml = xml.concat("<subroutineDec>");
+    private compileSubroutine() {
+        this.identifierTable.startSubroutine();
 
-        // Get the <keyword> (function | method | constructor)
+        // Evaluate the <keyword> (function | method | constructor)
+        // Only for methods, the first argument must be 'this'
+        if (this.tokenizer.getCurrentToken() === Keyword.Method) {
+            const argument: Identifier = {
+                name: "this",
+            };
+
+            this.identifierTable.define();
+        }
         xml = xml.concat(this.xmlWriter.getKeyword());
         this.tokenizer.advance();
 
