@@ -90,6 +90,25 @@ export default class IdentifierTable {
         }
     }
 
+    public getVarCountForKind(kind: VariableKind): number {
+        switch (kind) {
+            case VariableKind.FIELD:
+                return this.scope.classLevel.field.length;
+            case VariableKind.STATIC:
+                return this.scope.classLevel.static.length;
+            case VariableKind.ARG:
+                return this.scope.subroutineLevel.argument.length;
+            case VariableKind.VAR:
+                return this.scope.subroutineLevel.varLocal.length;
+            default:
+                throw new Error("Invalid variable kind" + kind);
+        }
+    }
+
+    public countLocalVarsForCurrentSubroutine(): number {
+        return this.getVarCountForKind(VariableKind.VAR);
+    }
+
     /**
      *
      * @param name

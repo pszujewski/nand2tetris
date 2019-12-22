@@ -69,7 +69,7 @@ export default class CompilationEngine {
         }
 
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
-            // The start of the class. We are just begining to compile the body of the
+            // The start of the class. We are just begining to compile the body
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
@@ -135,53 +135,50 @@ export default class CompilationEngine {
         this.tokenizer.advance();
 
         // currentToken is open paren for the parameter list
-        // It shouldn't be within <parameterList>
+        // Advance past it and compile any arguments for the subroutine
         this.tokenizer.advance();
 
-        // Add Arguments to identifier table?
+        // Add Arguments to identifier table. The currentToken is now either
+        // pointing to the first ARG type or to closing of parens (if no args)
         this.compileParameterList();
 
-        // At this point, the currentToken should be ')'. Append it and advance the pointer
-        xml = xml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
+        // The currentToken should now be '{' with param list finished.
+        this.compileSubroutineBody();
 
-        // The currentToken should now be '{' with param list finished
-        // The enclosing 'Curly Braces' are included as the first and last children to <subroutineBody>
-        xml = this.compileSubroutineBody(xml.concat("<subroutineBody>"));
-
-        // Close out the tags
-        return xml.concat("</subroutineBody>").concat("</subroutineDec>");
+        return;
     }
 
     /** Compile a possibly empty parameter list */
-    private compileParameterList(xml: string): string {
-        this.tokenizer.advance();
+    private compileParameterList(): void {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // base case -- ensuring <parameterList> is closed before 'getting' the closing paren symbol
+        // base case: finished compiling arguments for subroutine. Advance past closed paren
         if (tokenState.isSymbol && tokenState.value === Symbol.ParenLeft) {
-            return xml;
+            this.tokenizer.advance();
+            return;
         }
 
-        if (tokenState.isKeyword) {
-            return this.compileParameterList(
-                xml.concat(this.xmlWriter.getKeyword())
-            );
-        }
-
-        if (tokenState.isIdentifier) {
-            return this.compileParameterList(
-                xml.concat(this.xmlWriter.getIdentifier())
-            );
-        }
-
+        // Check for comma which doesn't need to be compiled
         if (tokenState.isSymbol && tokenState.value === Symbol.Comma) {
-            return this.compileParameterList(
-                xml.concat(this.xmlWriter.getSymbol())
-            );
+            this.tokenizer.advance();
+            return this.compileParameterList();
         }
 
-        throw new Error("Failed to compile parameter list");
+        // Create a new Identifier and add the 'type' which is the currentToken
+        const argument: Identifier = {
+            name: "",
+            type: tokenState.value,
+            kind: VariableKind.ARG,
+        };
+
+        // Advance to the name of the identifier and add it to the definition table
+        this.tokenizer.advance();
+        argument.name = this.tokenizer.getCurrentToken();
+
+        this.identifierTable.define(argument);
+
+        this.tokenizer.advance();
+        return this.compileParameterList();
     }
 
     private compileSubroutineBody(xml: string): string {
