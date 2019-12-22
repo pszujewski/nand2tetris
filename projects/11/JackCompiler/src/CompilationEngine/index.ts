@@ -97,6 +97,7 @@ export default class CompilationEngine {
             kind: this.identifierTable.getVarKind(tokenState.value),
         };
 
+        this.tokenizer.advance();
         this.compileVarDec(identifier);
     }
 
@@ -143,6 +144,11 @@ export default class CompilationEngine {
         this.compileParameterList();
 
         // The currentToken should now be '{' with param list finished.
+        if (this.tokenizer.getCurrentToken() !== Symbol.CurlyRight) {
+            throw new Error("Expected Curly Right to start subroutine body");
+        }
+
+        this.tokenizer.advance();
         this.compileSubroutineBody();
 
         return;
@@ -181,51 +187,49 @@ export default class CompilationEngine {
         return this.compileParameterList();
     }
 
-    private compileSubroutineBody(xml: string): string {
-        let nextXml: string;
+    /**
+     * CONTINUE HERE!!!!
+     * Once local variables are compiled, we should be able to write VM function signature.
+     */
+    private compileSubroutineBody(): void {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // base case - The Curly baces are included as the first and last children to <subroutineBody>
+        // Delete recursion?
+        // base case: the token is CurlyLeft. Advance past it and end
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
-            return xml.concat(this.xmlWriter.getSymbol());
-        }
-
-        // Start of subroutine body (braces are included as children of <subroutineBody>)
-        if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
-            nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileSubroutineBody(nextXml);
+            return;
         }
 
-        // Compile any varDecs
+        // Compile any "local" varDecs: Change to while?
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
-            const keywordXml = this.xmlWriter.getKeyword();
-            const xmlToPass = xml.concat("<varDec>").concat(keywordXml);
+            const localVariable: Identifier = {
+                name: "",
+                type: "",
+                kind: VariableKind.VAR,
+            };
 
-            nextXml = this.compileVarDec(xmlToPass).concat("</varDec>");
+            this.compileVarDec(localVariable);
             // the currentToken will now be pointing at the ';' so advance()
             this.tokenizer.advance();
-
-            return this.compileSubroutineBody(nextXml);
+            return this.compileSubroutineBody();
         }
 
-        // Anything else should be a keyword indicating the start of a 'statement'
-        nextXml = xml.concat("<statements>");
+        // Write VM function signature?
 
-        return this.compileSubroutineBody(
-            this.compileStatements(nextXml).concat("</statements>")
-        );
+        // Anything else should be a keyword indicating the start of a 'statement'
+        // All varDecs have been compiled, so we can vmWrite the start of the function?
+
+        return this.compileStatements();
     }
 
     /** Compiles a var declaration
      *  The given identifier should already have the 'kind' determined
      *  The problem here is that 'type' is not always a 'keyword'. It
      *  can also be a className, so this can't really be recursive but
-     *  instead use a 'while' loop.
+     *  instead uses a 'while' loop.
      */
     private compileVarDec(identifier: Identifier) {
-        this.tokenizer.advance();
-
         // The current token is now the 'type' in the declaration
         identifier.type = this.tokenizer.getCurrentToken();
         this.tokenizer.advance();
@@ -247,7 +251,7 @@ export default class CompilationEngine {
             this.tokenizer.advance();
         }
 
-        // Should be finished comiling the varDec
+        // Should be finished comiling the varDec. Don't advance past the Semi here!!!
         if (SymbolTable.isSemi(this.tokenizer.getCurrentToken())) {
             return;
         } else {
@@ -263,6 +267,10 @@ export default class CompilationEngine {
     private compileStatements(xml: string): string {
         let nextXml: string;
         const currentToken = this.tokenizer.getCurrentToken();
+
+        if (currentToken === Symbol.CurlyLeft) {
+            return;
+        }
 
         switch (currentToken) {
             case Keyword.Do:
