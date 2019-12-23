@@ -149,9 +149,12 @@ export default class CompilationEngine {
         }
 
         this.tokenizer.advance();
-        this.compileSubroutineBody();
 
-        return;
+        const nameOfClass = this.identifierTable.getNameOfClass();
+        this.vmWriter.writeFunction(`${nameOfClass}.${name}`);
+
+        const nLocals: number = this.compileSubroutineBody();
+        this.vmWriter.writeLocalsCountToFunctionDefinition(nLocals);
     }
 
     /** Compile a possibly empty parameter list */
@@ -188,20 +191,19 @@ export default class CompilationEngine {
     }
 
     /**
-     * CONTINUE HERE!!!!
-     * Once local variables are compiled, we should be able to write VM function signature.
+     *
+     * Compile a complete subroutine definition and return the total count of defined local vars
      */
-    private compileSubroutineBody(): void {
+    private compileSubroutineBody(): number {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // Delete recursion?
         // base case: the token is CurlyLeft. Advance past it and end
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             this.tokenizer.advance();
-            return;
+            return this.identifierTable.countLocalVarsForCurrentSubroutine();
         }
 
-        // Compile any "local" varDecs: Change to while?
+        // Compile any "local" varDecs
         if (tokenState.isKeyword && tokenState.value === Keyword.Var) {
             const localVariable: Identifier = {
                 name: "",
@@ -215,12 +217,9 @@ export default class CompilationEngine {
             return this.compileSubroutineBody();
         }
 
-        // Write VM function signature?
-
-        // Anything else should be a keyword indicating the start of a 'statement'
-        // All varDecs have been compiled, so we can vmWrite the start of the function?
-
-        return this.compileStatements();
+        // Anything else should be a 'keyword' indicating the start of a 'statement'
+        this.compileStatements();
+        return this.compileSubroutineBody();
     }
 
     /** Compiles a var declaration
@@ -259,13 +258,11 @@ export default class CompilationEngine {
         }
     }
 
-    /** Compiles a sequence of statements not including the enclosing brackets.
-     *  The current token must be a keyword if this function is entered
-     *
-     * Base case: the 'lookAheadToken' is a Symbol Bracket facing Left closing the statments
+    /**
+     * Compiles a sequence of statements not including the enclosing brackets.
+     * The current token must be a keyword if this function is entered
      */
-    private compileStatements(xml: string): string {
-        let nextXml: string;
+    private compileStatements(): void {
         const currentToken = this.tokenizer.getCurrentToken();
 
         if (currentToken === Symbol.CurlyLeft) {
@@ -274,37 +271,36 @@ export default class CompilationEngine {
 
         switch (currentToken) {
             case Keyword.Do:
-                nextXml = this.compileDo(xml);
+                this.compileDo();
                 break;
             case Keyword.Let:
-                nextXml = this.compileLet(xml);
+                this.compileLet();
                 break;
             case Keyword.While:
-                nextXml = this.compileWhile(xml);
+                this.compileWhile();
                 break;
             case Keyword.Return:
-                nextXml = this.compileReturn(xml);
+                this.compileReturn();
                 break;
             case Keyword.If:
-                nextXml = this.compileIf(xml);
+                this.compileIf();
                 break;
             default:
                 throw new Error(`Failed to identify keyword: ${currentToken}`);
         }
 
         // base case: if the currentToken is '}' pass execution back to the caller
-        // !Set new breakpoint here. Last error throw was Failed to identify keyword ";"
         if (this.tokenizer.getCurrentToken() === Symbol.CurlyLeft) {
-            return nextXml;
+            return;
         }
         // If the currentToken value is not '}' then we are still compiling statements
-        return this.compileStatements(nextXml);
+        return this.compileStatements();
     }
 
     /** Compiles a do statement. Base case is Semi.
      * Must wrap in "<doStatement>"
      */
-    private compileDo(xml: string): string {
+    private compileDo(): string {
         let nextXml: string = xml.concat("<doStatement>");
 
         // Append the 'do' keyword
@@ -324,7 +320,7 @@ export default class CompilationEngine {
     /** Compiles a let statement. Base case is Semi
      * Must wrap in "<letStatement>"
      */
-    private compileLet(xml: string): string {
+    private compileLet(): string {
         let nextXml: string = xml.concat("<letStatement>");
 
         // Append 'let' keyword
@@ -377,7 +373,7 @@ export default class CompilationEngine {
     /** Compiles a while statement. Can contain statements
      * Must wrap in "<whileStatement>"
      */
-    private compileWhile(xml: string): string {
+    private compileWhile(): string {
         let nextXml: string = xml.concat("<whileStatement>");
 
         // Append 'while' keyword
@@ -418,7 +414,7 @@ export default class CompilationEngine {
     /** Compiles a return statement
      * Must wrap in <returnStatement>
      */
-    private compileReturn(xml: string): string {
+    private compileReturn(): string {
         let nextXml: string = xml.concat("<returnStatement>");
 
         // Append the 'return' keyword
@@ -446,7 +442,7 @@ export default class CompilationEngine {
     /** Compiles an if statement. Can contain statements
      * Must wrap in <ifStatement>, needs to include possible 'else'
      */
-    private compileIf(xml: string): string {
+    private compileIf(): string {
         let nextXml: string = xml.concat("<ifStatement>");
 
         nextXml = this.compileConditional(nextXml);

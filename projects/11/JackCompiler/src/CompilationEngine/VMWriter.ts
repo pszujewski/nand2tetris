@@ -95,8 +95,12 @@ export default class VMWriter {
      * @param nLocals
      * Writes a VM function command, noting number of local variables
      */
-    public writeFunction(functionName: string, nLocals: number) {
-        this.addToOutput(`function ${functionName} ${nLocals}`);
+    public writeFunction(functionName: string) {
+        this.addToOutput(`function ${functionName} {nLocals}`);
+    }
+
+    public writeLocalsCountToFunctionDefinition(nLocals: number) {
+        this.output.replace(/{nLocals}/, nLocals.toString());
     }
 
     /**
