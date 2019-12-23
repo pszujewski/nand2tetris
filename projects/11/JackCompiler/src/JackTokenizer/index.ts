@@ -37,6 +37,14 @@ export default class JackTokenizer {
         this.advanceLookAhead();
     }
 
+    public getTokenAt(idx: number): string {
+        const token = this.syntacticElements[idx];
+        if (token) {
+            return token;
+        }
+        return "";
+    }
+
     private advanceLookAhead(): void {
         const lookAheadPointer = this.pointer + 1;
 
