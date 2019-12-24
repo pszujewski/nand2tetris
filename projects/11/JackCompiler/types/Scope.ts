@@ -29,3 +29,10 @@ export enum VariableKind {
     FIELD = "FIELD",
     NONE = "NONE",
 }
+
+export enum SubroutineType {
+    Constructor = "Constructor",
+    Function = "Function",
+    Method = "Method",
+    None = "None",
+}

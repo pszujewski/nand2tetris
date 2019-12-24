@@ -8,6 +8,7 @@ import VMWriter from "./VMWriter";
 import VMSegment from "./VMSegment";
 import IdentifierTable from "./IdentifierTable";
 import { Identifier, VariableKind } from "../../types/Scope";
+import Segment from "../../types/Segment";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -107,8 +108,11 @@ export default class CompilationEngine {
         this.identifierTable.startSubroutine();
 
         // Evaluate the <keyword> (function | method | constructor)
+        const token = this.tokenizer.getCurrentToken();
+        this.identifierTable.setSubroutineType(token);
+
         // Only for methods, the first argument must be 'this'
-        if (this.tokenizer.getCurrentToken() === Keyword.Method) {
+        if (this.identifierTable.isMethodSubroutine()) {
             const argument: Identifier = {
                 name: "this",
                 type: this.identifierTable.getNameOfClass(),
@@ -152,6 +156,11 @@ export default class CompilationEngine {
 
         const nameOfClass = this.identifierTable.getNameOfClass();
         this.vmWriter.writeFunction(`${nameOfClass}.${name}`);
+
+        if (this.identifierTable.isMethodSubroutine()) {
+            this.vmWriter.writePush(Segment.ARG, 0);
+            this.vmWriter.writePop(Segment.POINTER, 0);
+        }
 
         const nLocals: number = this.compileSubroutineBody();
         this.vmWriter.writeLocalsCountToFunctionDefinition(nLocals);
@@ -228,7 +237,9 @@ export default class CompilationEngine {
      *  can also be a className, so this can't really be recursive but
      *  instead uses a 'while' loop.
      */
-    private compileVarDec(identifier: Identifier) {
+    private compileVarDec(identifier: Identifier): Identifier[] {
+        const identifiers: Identifier[] = [];
+
         // The current token is now the 'type' in the declaration
         identifier.type = this.tokenizer.getCurrentToken();
         this.tokenizer.advance();
@@ -238,6 +249,7 @@ export default class CompilationEngine {
         this.tokenizer.advance();
 
         this.identifierTable.define(identifier);
+        identifiers.push(identifier);
 
         while (this.tokenizer.getCurrentToken() === Symbol.Comma) {
             // Advance past the comma to the next varName and create new identifier
@@ -247,12 +259,13 @@ export default class CompilationEngine {
             const anotherIdentifier: Identifier = { ...identifier, name };
             this.identifierTable.define(anotherIdentifier);
 
+            identifiers.push(anotherIdentifier);
             this.tokenizer.advance();
         }
 
         // Should be finished comiling the varDec. Don't advance past the Semi here!!!
         if (SymbolTable.isSemi(this.tokenizer.getCurrentToken())) {
-            return;
+            return identifiers;
         } else {
             throw new Error("VarDecs should end with Semi symbol");
         }

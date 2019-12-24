@@ -1,4 +1,8 @@
-import Scope, { Identifier, VariableKind } from "../../types/Scope";
+import Scope, {
+    Identifier,
+    VariableKind,
+    SubroutineType,
+} from "../../types/Scope";
 import Keyword from "../../out/types/Keyword";
 
 /**
@@ -8,6 +12,7 @@ import Keyword from "../../out/types/Keyword";
 export default class IdentifierTable {
     private scope: Scope;
     private nameOfClass: string;
+    private subroutineType: SubroutineType;
 
     constructor() {
         this.scope = {
@@ -28,6 +33,34 @@ export default class IdentifierTable {
         this.nameOfClass = className;
     }
 
+    public setSubroutineType(keyword: string) {
+        switch (keyword) {
+            case Keyword.Constructor:
+                this.subroutineType = SubroutineType.Constructor;
+                break;
+            case Keyword.Function:
+                this.subroutineType = SubroutineType.Function;
+                break;
+            case Keyword.Method:
+                this.subroutineType = SubroutineType.Method;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public isMethodSubroutine(): boolean {
+        return this.subroutineType === SubroutineType.Method;
+    }
+
+    public isFunctionSubroutine(): boolean {
+        return this.subroutineType === SubroutineType.Function;
+    }
+
+    public isConstructorSubroutine(): boolean {
+        return this.subroutineType === SubroutineType.Constructor;
+    }
+
     public getNameOfClass(): string {
         return this.nameOfClass;
     }
@@ -45,6 +78,7 @@ export default class IdentifierTable {
             varLocal: [],
             argument: [],
         };
+        this.subroutineType = SubroutineType.None;
     }
 
     public setSubroutineName(name: string) {
