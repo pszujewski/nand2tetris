@@ -9,6 +9,7 @@ import VMSegment from "./VMSegment";
 import IdentifierTable from "./IdentifierTable";
 import { Identifier, VariableKind } from "../../types/Scope";
 import Segment from "../../types/Segment";
+import VMCommand from "../../types/VMCommand";
 
 /**
  * Effects the actual complation output. Gets its input from a JackTokenizer and emits its parsed
@@ -506,13 +507,12 @@ export default class CompilationEngine {
         return nextXml;
     }
 
-    /** Compiles an expression. Wrap calls to this method in <expression> tag */
-    private compileExpression(xml: string, stopAtToken: string): string {
-        let nextXml: string = xml;
+    /** Compiles an expression. */
+    private compileExpression(stopAtToken: string): void {
         let currentToken = this.tokenizer.getCurrentToken();
 
         if (currentToken === stopAtToken || currentToken === Symbol.Comma) {
-            return xml;
+            return;
         }
 
         // We need to determine that this truly is an "Op" and is not
@@ -521,31 +521,31 @@ export default class CompilationEngine {
         // Unary Op. This is difficult though because '-' can be either
         // "Op" or "Unary Op."
 
-        // Update SymbolTable.isOp() to take in the whole tokenizer and determine
-        // that we are really dealing with an "Op" and not actually a "UnaryOp"
         if (SymbolTable.isOp(this.tokenizer)) {
-            nextXml = xml.concat(this.xmlWriter.getSymbol());
+            const vmOp: VMCommand = SymbolTable.getVMOperation(currentToken);
             this.tokenizer.advance();
-            // return this.compileExpression(nextXml, stopAtToken);
+
+            this.compileExpression(stopAtToken);
+            return this.vmWriter.writeArithmetic(vmOp);
         }
 
         // The currentToken must now be the start of a <term>
-        nextXml = this.compileTerm(nextXml.concat("<term>")).concat("</term>");
+        this.compileTerm();
 
         // Building the term will have advanced() the currentToken pointer
         currentToken = this.tokenizer.getCurrentToken();
 
         if (currentToken === stopAtToken || currentToken === Symbol.Comma) {
-            return nextXml;
+            return;
         }
 
-        return this.compileExpression(nextXml, stopAtToken);
+        return this.compileExpression(stopAtToken);
     }
 
     /** Compile a term. Must decide between the alternative of a variable,
      * an array entry and a subroutine call.
      * Only one condition is recursive */
-    private compileTerm(xml: string): string {
+    private compileTerm(): void {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
         const lookAhead: string = this.tokenizer.lookAhead();
 
@@ -583,13 +583,13 @@ export default class CompilationEngine {
         // Needs to determine if we are dealing with a `unaryOp term`
         // This bit is recursive - unaryop term
         if (SymbolTable.isUnaryOp(tokenState.value)) {
-            let nextXml = xml.concat(this.xmlWriter.getSymbol());
+            const token = this.tokenizer.getCurrentToken();
             this.tokenizer.advance();
 
-            // Are the term tags necessary? can't find an example - only recursive case
-            nextXml = nextXml.concat("<term>");
-            nextXml = this.compileTerm(nextXml);
-            return nextXml.concat("</term>");
+            this.compileTerm();
+
+            const cmd:VMCommand = 
+            return this.vmWriter.writeArithmetic()
         }
 
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
@@ -627,15 +627,34 @@ export default class CompilationEngine {
 
         // Else return <keyword> if isKeywordConst
         if (tokenState.isKeyword) {
-            const nextXml = xml.concat(this.xmlWriter.getKeyword());
-            this.tokenizer.advance();
-            return nextXml;
+            const keyword = this.tokenizer.getCurrentToken();
+            switch (keyword) {
+                case Keyword.False:
+                ///
+                case Keyword.Null:
+                ///
+                case Keyword.True:
+                ///
+                case Keyword.This:
+                ///
+                default:
+                    break;
+            }
         }
 
         if (tokenState.isIdentifier) {
-            const nextXml = xml.concat(this.xmlWriter.getIdentifier());
+            const identifierName = this.tokenizer.getCurrentToken();
+
+            const index: number = this.identifierTable.indexOf(identifierName);
+            const kind: VariableKind = this.identifierTable.kindOf(
+                identifierName
+            );
+
+            const segment: Segment = this.vmSegment.getFromKind(kind);
+            this.vmWriter.writePush(segment, index);
+
             this.tokenizer.advance();
-            return nextXml;
+            return;
         }
 
         throw new Error(`Failed to identify <term> for ${tokenState.value}`);

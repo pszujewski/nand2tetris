@@ -27,6 +27,7 @@ export default class IdentifierTable {
             },
         };
         this.nameOfClass = "";
+        this.subroutineType = SubroutineType.None;
     }
 
     public setNameOfClass(className: string) {

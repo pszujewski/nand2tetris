@@ -1,6 +1,7 @@
 import Symbol from "../../types/Symbol";
 import JackTokenizer from "../JackTokenizer";
 import CurrentToken from "../../out/types/CurrentToken";
+import VMCommand from "../../types/VMCommand";
 
 const symbols: string[] = [
     Symbol.CurlyRight,
@@ -108,5 +109,37 @@ export default class SymbolTable {
     static isUnaryOp(char: string): boolean {
         const unaries: string[] = [Symbol.Not, Symbol.Minus];
         return unaries.includes(char);
+    }
+
+    static getVMOperation(char: string): VMCommand {
+        switch (char) {
+            case "+":
+                return VMCommand.Add;
+            case amp:
+                return VMCommand.And;
+            case "=":
+                return VMCommand.Eq;
+            case lt:
+                return VMCommand.Lt;
+            case gt:
+                return VMCommand.Gt;
+            case "|":
+                return VMCommand.Or;
+            case "-":
+                return VMCommand.Sub;
+            default:
+                throw new Error("Failed to identify operation");
+        }
+    }
+
+    static getVMUnaryOp(char: string): VMCommand {
+        switch (char) {
+            case "~":
+                return VMCommand.Or;
+            case "-":
+                return VMCommand.Neg;
+            default:
+                throw new Error("Failed to identify unary operation");
+        }
     }
 }
