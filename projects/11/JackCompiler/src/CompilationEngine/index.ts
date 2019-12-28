@@ -588,8 +588,8 @@ export default class CompilationEngine {
 
             this.compileTerm();
 
-            const cmd:VMCommand = 
-            return this.vmWriter.writeArithmetic()
+            const cmd: VMCommand = SymbolTable.getVMUnaryOp(token);
+            return this.vmWriter.writeArithmetic(cmd);
         }
 
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
@@ -613,9 +613,9 @@ export default class CompilationEngine {
 
         // Else return <integerConstant> if isIntConst
         if (tokenState.isIntConst) {
-            const nextXml = xml.concat(this.xmlWriter.getIntConst());
+            const intVal: number = this.tokenizer.getIntVal();
             this.tokenizer.advance();
-            return nextXml;
+            return this.vmWriter.writePush(Segment.CONST, intVal);
         }
 
         // Else return <stringConstant> if isStringConst
@@ -627,23 +627,11 @@ export default class CompilationEngine {
 
         // Else return <keyword> if isKeywordConst
         if (tokenState.isKeyword) {
-            const keyword = this.tokenizer.getCurrentToken();
-            switch (keyword) {
-                case Keyword.False:
-                ///
-                case Keyword.Null:
-                ///
-                case Keyword.True:
-                ///
-                case Keyword.This:
-                ///
-                default:
-                    break;
-            }
+            return this.compileTermKeyword();
         }
 
         if (tokenState.isIdentifier) {
-            const identifierName = this.tokenizer.getCurrentToken();
+            const identifierName = this.tokenizer.getIdentifier();
 
             const index: number = this.identifierTable.indexOf(identifierName);
             const kind: VariableKind = this.identifierTable.kindOf(
@@ -660,6 +648,30 @@ export default class CompilationEngine {
         throw new Error(`Failed to identify <term> for ${tokenState.value}`);
     }
 
+    // Null and False are mapped to the constant 0; True to the constant -1
+    private compileTermKeyword(): void {
+        const keyword = this.tokenizer.getKeyword();
+
+        switch (keyword) {
+            case Keyword.Null:
+            case Keyword.False:
+                this.vmWriter.writePush(Segment.CONST, 0);
+                break;
+            case Keyword.True:
+                this.vmWriter.writePush(Segment.CONST, 1);
+                this.vmWriter.writeArithmetic(VMCommand.Neg);
+                break;
+            ///
+            // Not totally sure how to handle
+            // case Keyword.This:
+            ///
+            default:
+                break;
+        }
+    }
+
+    // NEXT - page 232
+    // No totally sure yet how to compile specifically methods
     private compileSubroutineCall(xml: string): string {
         // Append the className or the function | method name identifier
         let nextXml = xml.concat(this.xmlWriter.getIdentifier());
@@ -703,7 +715,7 @@ export default class CompilationEngine {
     }
 
     /** Compiles a possible empty comma-separated list of expressions */
-    private compileExpressionList(xml: string): string {
+    private compileExpressionList() {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case: currentToken == ParenLeft, just return built out xml

@@ -135,7 +135,7 @@ export default class SymbolTable {
     static getVMUnaryOp(char: string): VMCommand {
         switch (char) {
             case "~":
-                return VMCommand.Or;
+                return VMCommand.Not;
             case "-":
                 return VMCommand.Neg;
             default:
