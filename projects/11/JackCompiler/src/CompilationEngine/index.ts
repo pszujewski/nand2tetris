@@ -670,52 +670,65 @@ export default class CompilationEngine {
         }
     }
 
-    // NEXT - page 232
-    // No totally sure yet how to compile specifically methods
-    private compileSubroutineCall(xml: string): string {
+    private compileSubroutineCall(): void {
         // Append the className or the function | method name identifier
-        let nextXml = xml.concat(this.xmlWriter.getIdentifier());
+        const identifierTokenInCall: string = this.tokenizer.getIdentifier();
         this.tokenizer.advance();
 
         // If the token is now Period, then this is a method on a class instance
+        // or it's a static function on a Class
         // If it's a ParenRight then it's a method on the current 'this' class
-        if (this.tokenizer.getCurrentToken() === Symbol.Period) {
-            // Append the period symbol
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        const token: string = this.tokenizer.getCurrentToken();
+        const isPeriod: boolean = token === Symbol.Period;
+
+        let vmNameOfFunc = "";
+
+        if (isPeriod) {
+            // then it's a method on a class instance or a static function on a class
+            // Do same thing regardless
+            vmNameOfFunc = `${identifierTokenInCall}.`;
             this.tokenizer.advance();
 
-            // Append the function | method name identifier
-            nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
+            // Append the function | method name identifier to the name
+            vmNameOfFunc = vmNameOfFunc.concat(this.tokenizer.getIdentifier());
             this.tokenizer.advance();
+        } else {
+            // it should be currentClass.identifierName
+            const currentClass: string = this.identifierTable.getNameOfClass();
+            vmNameOfFunc = `${currentClass}.${identifierTokenInCall}`;
         }
 
         if (this.tokenizer.getCurrentToken() !== Symbol.ParenRight) {
-            throw new Error("Invalid Function Call");
+            throw new Error("Invalid Function Call opening paren missing");
         }
 
-        // Append the open paren symbol
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        // Advance past the open paren symbol
         this.tokenizer.advance();
 
         // compile expression list
-        nextXml = nextXml.concat("<expressionList>");
-        nextXml = this.compileExpressionList(nextXml);
-        nextXml = nextXml.concat("</expressionList>");
+        const argsCt: number = this.compileExpressionList();
 
         // The current token should now be ParenLeft. That's how
-        // expressionList knows to stop executing. Paren symbols
-        // are not included within <expressionList> tags
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        // expressionList knows to stop executing.
+        // Advance past it
+        if (this.tokenizer.getCurrentToken() !== Symbol.ParenLeft) {
+            throw new Error("Invalid Function Call closing paren missing");
+        }
         this.tokenizer.advance();
+
+        // Once arguments are pushed to the stack, output "call f"
+        this.vmWriter.writeCall(vmNameOfFunc, argsCt);
 
         // tokenizer now points to ";" Semi. Pass execution back to caller
         // to handle the Semi. In a do statement, the semi is included within the
         // 'do' tags. As a term, the ';' is not included within the <term> tags
-        return nextXml;
+        return;
     }
 
-    /** Compiles a possible empty comma-separated list of expressions */
-    private compileExpressionList() {
+    /**
+     * NEXT - this needs to give the total number of compiled arguments!!!
+     * Compiles a possible empty comma-separated list of expressions */
+    private compileExpressionList(argsCt: number = 0): number {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case: currentToken == ParenLeft, just return built out xml
