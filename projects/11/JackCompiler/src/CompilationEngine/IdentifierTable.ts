@@ -13,6 +13,7 @@ export default class IdentifierTable {
     private scope: Scope;
     private nameOfClass: string;
     private subroutineType: SubroutineType;
+    private isVoidReturnType: boolean;
 
     constructor() {
         this.scope = {
@@ -28,10 +29,19 @@ export default class IdentifierTable {
         };
         this.nameOfClass = "";
         this.subroutineType = SubroutineType.None;
+        this.isVoidReturnType = false;
     }
 
     public setNameOfClass(className: string) {
         this.nameOfClass = className;
+    }
+
+    public setIsVoidReturnType(isVoid: boolean): void {
+        this.isVoidReturnType = isVoid;
+    }
+
+    public subroutineIsVoidReturnType(): boolean {
+        return this.isVoidReturnType;
     }
 
     public setSubroutineType(keyword: string) {
@@ -80,6 +90,7 @@ export default class IdentifierTable {
             argument: [],
         };
         this.subroutineType = SubroutineType.None;
+        this.isVoidReturnType = false;
     }
 
     public setSubroutineName(name: string) {

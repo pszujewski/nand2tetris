@@ -115,7 +115,7 @@ export default class CompilationEngine {
         // Only for methods, the first argument must be 'this'
         if (this.identifierTable.isMethodSubroutine()) {
             const argument: Identifier = {
-                name: "this",
+                name: Keyword.This,
                 type: this.identifierTable.getNameOfClass(),
                 kind: VariableKind.ARG,
             };
@@ -125,6 +125,10 @@ export default class CompilationEngine {
         // advance() to the return type <keyword> or <identifier>
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
+
+        this.identifierTable.setIsVoidReturnType(
+            tokenState.value === Keyword.Void
+        );
 
         if (tokenState.isKeyword) {
             console.log("The return type is a primitive");
@@ -681,6 +685,9 @@ export default class CompilationEngine {
         const token: string = this.tokenizer.getCurrentToken();
         const isPeriod: boolean = token === Symbol.Period;
 
+        const isMethod: boolean =
+            isPeriod && this.identifierTable.exists(identifierTokenInCall);
+
         let vmNameOfFunc = "";
 
         if (isPeriod) {
@@ -705,8 +712,15 @@ export default class CompilationEngine {
         // Advance past the open paren symbol
         this.tokenizer.advance();
 
+        if (isMethod) {
+            // the first argument expected is the 'this' context for the method
+            // function we are calling here. so *push* 'this' to the stack
+            // Question: But how can we resolve 'this' reliably for all methods?
+        }
+
         // compile expression list
-        const argsCt: number = this.compileExpressionList();
+        const initialCt = isMethod ? 1 : 0;
+        const argsCt: number = this.compileExpressionList(initialCt);
 
         // The current token should now be ParenLeft. That's how
         // expressionList knows to stop executing.
@@ -728,27 +742,24 @@ export default class CompilationEngine {
     /**
      * NEXT - this needs to give the total number of compiled arguments!!!
      * Compiles a possible empty comma-separated list of expressions */
-    private compileExpressionList(argsCt: number = 0): number {
+    private compileExpressionList(argsCt: number): number {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case: currentToken == ParenLeft, just return built out xml
         // and dont advance the pointer. The Paren is not included as a child of <expressionList>
         if (tokenState.value === Symbol.ParenLeft) {
-            return xml;
+            return argsCt;
         }
 
         // else if Symbol.Comma then proceed to compile expressionlist and advance()
         if (tokenState.value === Symbol.Comma) {
-            const nextXml = xml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-            return this.compileExpressionList(nextXml);
+            return this.compileExpressionList(argsCt);
         }
 
         // else we need to recursively compile an expression and call this function
         // compileExpression will advance() as it needs
-        let nextXml = xml.concat("<expression>");
-        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-
-        return this.compileExpressionList(nextXml.concat("</expression>"));
+        this.compileExpression(Symbol.ParenLeft); // stop at ')'
+        return this.compileExpressionList(argsCt + 1);
     }
 }
