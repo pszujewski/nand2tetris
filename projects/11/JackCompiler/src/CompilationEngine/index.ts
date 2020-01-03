@@ -432,29 +432,25 @@ export default class CompilationEngine {
     /** Compiles a return statement
      * Must wrap in <returnStatement>
      */
-    private compileReturn(): string {
-        let nextXml: string = xml.concat("<returnStatement>");
-
-        // Append the 'return' keyword
-        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+    private compileReturn(): void {
+        // the 'return' keyword is the currentToken
         this.tokenizer.advance();
 
         if (this.tokenizer.getCurrentToken() === Symbol.Semi) {
-            // Append Semi and advance
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            // Then we are returning 'undefined.' currentToken is Symbol.Semi
+            this.vmWriter.writePush(Segment.CONST, 0); // push constant 0
+            this.vmWriter.writeReturn();
+            // Advance past the Semi
             this.tokenizer.advance();
-            return nextXml.concat("</returnStatement>");
+            return;
         }
 
-        nextXml = nextXml.concat("<expression>");
-        nextXml = this.compileExpression(nextXml, Symbol.Semi);
-        nextXml = nextXml.concat("</expression>");
+        this.compileExpression(Symbol.Semi);
 
-        // Append the Semi which is the currentToken and advance
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        // The Semi is the currentToken. Return and advance
+        this.vmWriter.writeReturn();
         this.tokenizer.advance();
-
-        return nextXml.concat("</returnStatement>");
+        return;
     }
 
     /** Compiles an if statement. Can contain statements
@@ -740,7 +736,7 @@ export default class CompilationEngine {
     }
 
     /**
-     * NEXT - this needs to give the total number of compiled arguments!!!
+     *
      * Compiles a possible empty comma-separated list of expressions */
     private compileExpressionList(argsCt: number): number {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
@@ -759,7 +755,7 @@ export default class CompilationEngine {
 
         // else we need to recursively compile an expression and call this function
         // compileExpression will advance() as it needs
-        this.compileExpression(Symbol.ParenLeft); // stop at ')'
+        this.compileExpression(Symbol.ParenLeft); // stop at ')' or Comma
         return this.compileExpressionList(argsCt + 1);
     }
 }
