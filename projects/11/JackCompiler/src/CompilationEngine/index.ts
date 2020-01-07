@@ -661,10 +661,10 @@ export default class CompilationEngine {
                 this.vmWriter.writePush(Segment.CONST, 1);
                 this.vmWriter.writeArithmetic(VMCommand.Neg);
                 break;
-            ///
-            // Not totally sure how to handle
-            // case Keyword.This:
-            ///
+            case Keyword.This:
+                // The 'this' context is identified using the pointer segment
+                this.vmWriter.writePush(Segment.POINTER, 0);
+                break;
             default:
                 break;
         }
