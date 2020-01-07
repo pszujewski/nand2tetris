@@ -167,6 +167,15 @@ export default class CompilationEngine {
             this.vmWriter.writePop(Segment.POINTER, 0);
         }
 
+        if (this.identifierTable.isConstructorSubroutine()) {
+            const nFields: number = this.identifierTable.getVarCountForKind(
+                VariableKind.FIELD
+            );
+            this.vmWriter.writePush(Segment.CONST, nFields);
+            this.vmWriter.writeCall("Memory.alloc", 1);
+            this.vmWriter.writePop(Segment.POINTER, 0);
+        }
+
         const nLocals: number = this.compileSubroutineBody();
         this.vmWriter.writeLocalsCountToFunctionDefinition(nLocals);
     }
@@ -554,7 +563,7 @@ export default class CompilationEngine {
         if (tokenState.isIdentifier && lookAhead === Symbol.Period) {
             // compile subroutine call -- the currentToken will point to ";"
             // with this return
-            return this.compileSubroutineCall(xml);
+            return this.compileSubroutineCall();
         }
 
         // Needs to determine if we are dealing with a term including '[' ']' for array access
@@ -709,9 +718,16 @@ export default class CompilationEngine {
         this.tokenizer.advance();
 
         if (isMethod) {
-            // the first argument expected is the 'this' context for the method
-            // function we are calling here. so *push* 'this' to the stack
-            // Question: But how can we resolve 'this' reliably for all methods?
+            // Push the identifier found at 'segment[idx]' to the stack now
+            // since all methods expect argument[0] to be its 'this' context
+            const kind: VariableKind = this.identifierTable.kindOf(
+                identifierTokenInCall
+            );
+            const idx: number = this.identifierTable.indexOf(
+                identifierTokenInCall
+            );
+            const segment: Segment = this.vmSegment.getFromKind(kind);
+            this.vmWriter.writePush(segment, idx);
         }
 
         // compile expression list
