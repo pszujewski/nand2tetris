@@ -348,38 +348,34 @@ export default class CompilationEngine {
      * Must wrap in "<letStatement>"
      */
     private compileLet(): string {
-        let nextXml: string = xml.concat("<letStatement>");
-
-        // Append 'let' keyword
-        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+        // 'let' keyword, advance past it
         this.tokenizer.advance();
 
-        // Append varName identifier
-        nextXml = nextXml.concat(this.xmlWriter.getIdentifier());
+        // varName identifier; save it and advance()
+        const identifierName: string = this.tokenizer.getIdentifier();
         this.tokenizer.advance();
+
+        // Get identifier state kind and idx
+        const kind: VariableKind = this.identifierTable.kindOf(identifierName);
+        const seg: Segment = this.vmSegment.getFromKind(kind);
+        const idx: number = this.identifierTable.indexOf(identifierName);
 
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // The currentToken is now either the start of an expression or 'equals'
 
-        if (tokenState.isSymbol && tokenState.value === Symbol.Equals) {
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        } else if (tokenState.value === Symbol.BracketRight) {
-            // Append the bracket symbol outside the expression
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        if (tokenState.value === Symbol.BracketRight) {
+            // TODO: Set 'that' pointer
+            // Advance past the bracket symbol (outside the expression)
             this.tokenizer.advance();
 
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
-            nextXml = nextXml.concat("</expression>");
+            this.compileExpression(Symbol.BracketLeft);
 
             // The currentToken is "]". This should NOT be included in the <expression>
-            // Append and advance to the '=' symbol
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            // advance to the '=' symbol
             this.tokenizer.advance();
 
-            // The currentToken is now "=". Append as a Symbol.
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            // The currentToken is now "=".
         }
 
         // Regardless of case, the last token compiled was '=' symbol
