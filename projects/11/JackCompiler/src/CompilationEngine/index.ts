@@ -50,7 +50,7 @@ export default class CompilationEngine {
     }
 
     /** Compiles a complete class */
-    public compileClass() {
+    public compileClass(): void {
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
@@ -327,21 +327,19 @@ export default class CompilationEngine {
     /** Compiles a do statement. Base case is Semi.
      * Must wrap in "<doStatement>"
      */
-    private compileDo(): string {
-        let nextXml: string = xml.concat("<doStatement>");
-
-        // Append the 'do' keyword
-        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+    private compileDo(): void {
+        // Advance past the 'do' keyword
         this.tokenizer.advance();
 
-        // Compile the subroutine call
-        nextXml = this.compileSubroutineCall(nextXml);
+        // Compile the subroutine call which currentToken now starts
+        this.compileSubroutineCall();
 
-        // Close out the do statement with the semi
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        // Pop the 'void' constant '0' and 'ignore' by popping to temp (?)
+        this.vmWriter.writePop(Segment.TEMP, 2);
+
+        // CurrentToken should now be ";" Close out the 'do' statement
         this.tokenizer.advance();
-
-        return nextXml.concat("</doStatement>");
+        return;
     }
 
     /**
