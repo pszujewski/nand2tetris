@@ -344,7 +344,8 @@ export default class CompilationEngine {
         return nextXml.concat("</doStatement>");
     }
 
-    /** Compiles a let statement. Base case is Semi
+    /**
+     * Compiles a let statement. Base case is Semi
      * Must wrap in "<letStatement>"
      */
     private compileLet(): void {
@@ -365,33 +366,36 @@ export default class CompilationEngine {
         // The currentToken is now either the start of an expression '[' or 'equals'
 
         if (tokenState.value === Symbol.BracketRight) {
-            // Advance past the bracket symbol (outside the expression)
+            // The identifier is an 'array.' Advance past the bracket symbol (outside the expression)
             this.tokenizer.advance();
 
-            // The identifier is an 'array'. 'Push' array to set 'that' pointer
+            // 'Push' array to set 'that' pointer. This is The memory address of the array's 'base'
             this.vmWriter.writePush(seg, idx);
-            this.vmWriter.writePop(Segment.POINTER, 1); // 'that' pointer for arrays
 
             // use compileExpression to push the array index expression to the top of stack
+            // Add them together 'base of array' + index value
             this.compileExpression(Symbol.BracketLeft);
+            this.vmWriter.writeArithmetic(VMCommand.Add);
+
+            // Top of the stack now holds the exact memory address we need to manipulate
+            // Pop it to segment 'pointer 1'
+            this.vmWriter.writePop(Segment.POINTER, 1); // 'that' pointer for arrays
 
             // The currentToken is now "]". advance to the '=' symbol
             this.tokenizer.advance();
 
             // The currentToken is now "=". Advance.
             this.tokenizer.advance();
-            this.compileExpression(Symbol.Semi);
+            this.compileExpression(Symbol.Semi); // Until currentToken = ";"
 
-            // The value to save is now on the top of the stack. Save in temp[2]
-            // The top of the stack will then hold the array index value
-            this.vmWriter.writePop(Segment.TEMP, 2);
+            // The value to save is now on the top of the stack. 'that 0' gets its address from pointer 1.
+            this.vmWriter.writePop(Segment.THAT, 0);
         } else {
-            // The currentToken is '=' equals
+            // The currentToken is '=' equals. Advance past it.
             this.tokenizer.advance();
             this.compileExpression(Symbol.Semi);
 
-            // The value from compileExpression is now on top of the stack.
-            // Pop to the non-array variable
+            // The value from compileExpression is now on top of the stack. Pop to the non-array variable
             this.vmWriter.writePop(seg, idx);
         }
         // Regardless of case, currentToken == ";" Advance past the Semi and close out 'let'
@@ -399,7 +403,8 @@ export default class CompilationEngine {
         return;
     }
 
-    /** Compiles a while statement. Can contain statements
+    /**
+     * Compiles a while statement. Can contain statements
      * Must wrap in "<whileStatement>"
      */
     private compileWhile(): string {
@@ -570,25 +575,32 @@ export default class CompilationEngine {
 
         // Needs to determine if we are dealing with a term including '[' ']' for array access
         if (tokenState.isIdentifier && lookAhead === Symbol.BracketRight) {
-            // compile array var access
-            // Get idnetifier for array variable name
-            let nextXml = xml.concat(this.xmlWriter.getIdentifier());
+            // Get identifier state kind and idx
+            const identifier: string = tokenState.value;
+            // Advance to "["
             this.tokenizer.advance();
 
-            // Get the symbol bracket right
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            const kind: VariableKind = this.identifierTable.kindOf(identifier);
+            const idx: number = this.identifierTable.indexOf(identifier);
+            const seg: Segment = this.vmSegment.getFromKind(kind);
+
+            // 'Push' array to set 'that' pointer. This is The memory address of the array's 'base'
+            this.vmWriter.writePush(seg, idx);
+
+            // Advance to the expression start and compile the expression between the brackets. Stop at ']'
+            this.tokenizer.advance();
+            this.compileExpression(Symbol.BracketLeft);
+
+            // add together to get correct 'that' pointer and pop it to 'pointer 1' for 'that' segment
+            this.vmWriter.writeArithmetic(VMCommand.Add);
+            this.vmWriter.writePop(Segment.POINTER, 1);
+
+            // The currentToken should now be pointing at ']' with exp above done. Advance past it
             this.tokenizer.advance();
 
-            // Compile the expression between the brackets. Stop at ']'
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, Symbol.BracketLeft);
-            nextXml = nextXml.concat("</expression>");
-
-            // The currentToken should now be pointing at ']' with exp above done.
-            // Append it to this <term> xml and return
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-            this.tokenizer.advance();
-            return nextXml;
+            // Push 'that 0' to the stack. this is the value at 'array[expression]'
+            this.vmWriter.writePush(Segment.THAT, 0);
+            return;
         }
 
         // Needs to determine if we are dealing with a `unaryOp term`
@@ -673,7 +685,7 @@ export default class CompilationEngine {
                 this.vmWriter.writeArithmetic(VMCommand.Neg);
                 break;
             case Keyword.This:
-                // The 'this' context is identified using the pointer segment
+                // The 'this' context is identified using the pointer segment at inext '0'
                 this.vmWriter.writePush(Segment.POINTER, 0);
                 break;
             default:
