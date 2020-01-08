@@ -347,7 +347,7 @@ export default class CompilationEngine {
     /** Compiles a let statement. Base case is Semi
      * Must wrap in "<letStatement>"
      */
-    private compileLet(): string {
+    private compileLet(): void {
         // 'let' keyword, advance past it
         this.tokenizer.advance();
 
@@ -362,35 +362,41 @@ export default class CompilationEngine {
 
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
-        // The currentToken is now either the start of an expression or 'equals'
+        // The currentToken is now either the start of an expression '[' or 'equals'
 
         if (tokenState.value === Symbol.BracketRight) {
-            // TODO: Set 'that' pointer
             // Advance past the bracket symbol (outside the expression)
             this.tokenizer.advance();
 
+            // The identifier is an 'array'. 'Push' array to set 'that' pointer
+            this.vmWriter.writePush(seg, idx);
+            this.vmWriter.writePop(Segment.POINTER, 1); // 'that' pointer for arrays
+
+            // use compileExpression to push the array index expression to the top of stack
             this.compileExpression(Symbol.BracketLeft);
 
-            // The currentToken is "]". This should NOT be included in the <expression>
-            // advance to the '=' symbol
+            // The currentToken is now "]". advance to the '=' symbol
             this.tokenizer.advance();
 
-            // The currentToken is now "=".
+            // The currentToken is now "=". Advance.
+            this.tokenizer.advance();
+            this.compileExpression(Symbol.Semi);
+
+            // The value to save is now on the top of the stack. Save in temp[2]
+            // The top of the stack will then hold the array index value
+            this.vmWriter.writePop(Segment.TEMP, 2);
+        } else {
+            // The currentToken is '=' equals
+            this.tokenizer.advance();
+            this.compileExpression(Symbol.Semi);
+
+            // The value from compileExpression is now on top of the stack.
+            // Pop to the non-array variable
+            this.vmWriter.writePop(seg, idx);
         }
-
-        // Regardless of case, the last token compiled was '=' symbol
-        // Advance past it and compile the final <expression>
+        // Regardless of case, currentToken == ";" Advance past the Semi and close out 'let'
         this.tokenizer.advance();
-        nextXml = nextXml.concat("<expression>");
-
-        nextXml = this.compileExpression(nextXml, Symbol.Semi);
-        nextXml = nextXml.concat("</expression>");
-
-        // Append the Semi and close out 'let' advancing outside the statement
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
-
-        return nextXml.concat("</letStatement>");
+        return;
     }
 
     /** Compiles a while statement. Can contain statements
