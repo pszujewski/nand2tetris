@@ -405,42 +405,42 @@ export default class CompilationEngine {
      * Compiles a while statement. Can contain statements
      * Must wrap in "<whileStatement>"
      */
-    private compileWhile(): string {
-        let nextXml: string = xml.concat("<whileStatement>");
-
-        // Append 'while' keyword
-        nextXml = nextXml.concat(this.xmlWriter.getKeyword());
+    private compileWhile(): void {
+        // Skip 'while' keyword
+        this.tokenizer.advance();
+        // Skip the open paren
         this.tokenizer.advance();
 
-        // Append the open paren
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+        // Produce this whileStatement's 'labelIndex' for uniqueness
+        const labelIndex: number = this.vmWriter.getLabelIndex();
+
+        const whileStart = "while_start";
+        const whileEnd = "while_end";
+
+        // currentToken should be pointing at the first token in the conditional expression
+        // VM label L1 (pg. 233)
+        this.vmWriter.writeLabel(whileStart, labelIndex);
+
+        // Compile expression value to top of stack. 'Not' the value.
+        this.compileExpression(Symbol.ParenLeft);
+        this.vmWriter.writeArithmetic(VMCommand.Not);
+
+        // Advance past paren close. currentToken = '{'. Evaluate top of stack value now.
+        this.tokenizer.advance();
+        this.vmWriter.writeIf(whileEnd, labelIndex);
+
+        // Advance past '{' signaling start of statements block, and to the first keyword in statements
         this.tokenizer.advance();
 
-        // Now currentToken should be pointing at the first token in
-        // an <expression>
-        nextXml = nextXml.concat("<expression>");
-        nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-        nextXml = nextXml.concat("</expression>");
+        this.compileStatements();
+        this.vmWriter.writeGoto(whileStart, labelIndex);
 
-        // The currentToken is now pointing at the closing paren
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
-
-        // Append the '{' signaling start of statements block
-        // and advance to the first keyword in statements
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
-
-        nextXml = nextXml.concat("<statements>");
-        nextXml = this.compileStatements(nextXml);
-        nextXml = nextXml.concat("</statements>");
+        // End label for 'while' statement
+        this.vmWriter.writeLabel(whileEnd, labelIndex);
 
         // The currentToken is now '}' close of while statement
-        // Append and advance past it and therefore the while statement
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
         this.tokenizer.advance();
-
-        return nextXml.concat("</whileStatement>");
+        return;
     }
 
     /** Compiles a return statement

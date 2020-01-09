@@ -8,9 +8,11 @@ export default class VMWriter {
     private output: string;
     private writeToPath: string;
     private vmSegment: VMSegment;
+    private labelIndex: number;
 
     constructor(writeToPath: string) {
         this.output = "";
+        this.labelIndex = 0;
         this.writeToPath = writeToPath;
         this.vmSegment = new VMSegment();
     }
@@ -52,13 +54,20 @@ export default class VMWriter {
         }
     }
 
+    public getLabelIndex(): number {
+        const labelIdx: number = this.labelIndex;
+        this.labelIndex = this.labelIndex + 1;
+        return labelIdx;
+    }
+
     /**
      *
      * @param label
      * Writes a VM label command
      */
-    public writeLabel(label: string) {
-        this.addToOutput(`label ${label}`);
+    public writeLabel(label: string, labelIdx: number): void {
+        const labelName = `${label}_${labelIdx.toString()}`;
+        this.addToOutput(`label ${labelName}`);
     }
 
     /**
@@ -66,8 +75,8 @@ export default class VMWriter {
      * @param label
      * Writes a VM goto command
      */
-    public writeGoto(label: string) {
-        this.addToOutput(`goto ${label}`);
+    public writeGoto(label: string, labelIdx: number) {
+        this.addToOutput(`goto ${label}_${labelIdx.toString()}`);
     }
 
     /**
@@ -75,8 +84,8 @@ export default class VMWriter {
      * @param label
      * Writes a VM if-goto command
      */
-    public writeIf(label: string) {
-        this.addToOutput(`if-goto ${label}`);
+    public writeIf(label: string, labelIdx: number) {
+        this.addToOutput(`if-goto ${label}_${labelIdx.toString()}`);
     }
 
     /**
