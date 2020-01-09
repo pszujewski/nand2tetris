@@ -470,55 +470,48 @@ export default class CompilationEngine {
     /** Compiles an if statement. Can contain statements
      * Must wrap in <ifStatement>, needs to include possible 'else'
      */
-    private compileIf(): string {
-        let nextXml: string = xml.concat("<ifStatement>");
+    private compileIf(): void {
+        const labelIndex: number = this.vmWriter.getLabelIndex();
 
-        nextXml = this.compileConditional(nextXml);
+        const ifStatementEnd = "if_statement_end";
+        const elseBodyStart = "else_body_start";
+
+        // Skip 'if' keyword token and open paren
+        this.tokenizer.advance();
+        this.tokenizer.advance();
+
+        // Compile expression and 'Not' top of stack value produced
+        this.compileExpression(Symbol.ParenLeft);
+        this.vmWriter.writeArithmetic(VMCommand.Not);
+
+        // Advance past close paren. if ~(conditionalExpression) go-to else-block start
+        this.tokenizer.advance();
+        this.vmWriter.writeIf(elseBodyStart, labelIndex);
+
+        // currentToken == "{" start of statements. Advance to first keyword in 'statements'
+        this.tokenizer.advance();
+        this.compileStatements();
+
+        // The currentToken is now '}' end of if-block. Advance past it.
+        this.tokenizer.advance();
+
+        // Goto L2 ifStatementEnd by default
+        this.vmWriter.writeGoto(ifStatementEnd, labelIndex);
+        this.vmWriter.writeLabel(elseBodyStart, labelIndex);
 
         if (this.tokenizer.getCurrentToken() === Keyword.Else) {
-            // Append 'else' conditional
-            nextXml = this.compileConditional(nextXml);
-        }
-
-        return nextXml.concat("</ifStatement>");
-    }
-
-    private compileConditional(xml: string): string {
-        let nextXml: string;
-
-        // Append the keyword (if or else)
-        nextXml = xml.concat(this.xmlWriter.getKeyword());
-        this.tokenizer.advance();
-
-        if (this.tokenizer.getCurrentToken() === Symbol.ParenRight) {
-            // Open Paren
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            // Skip the 'else' keyword and '{' statments start token.
+            this.tokenizer.advance();
             this.tokenizer.advance();
 
-            // The expression
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-            nextXml = nextXml.concat("</expression>");
-
-            // Close Paren
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
+            // Compile statements to stack and skip '}' 'statements' end-token.
+            this.compileStatements();
             this.tokenizer.advance();
         }
 
-        // Append the '{' signaling start of statements block
-        // and advance to the first keyword in 'statements'
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
-
-        nextXml = nextXml.concat("<statements>");
-        nextXml = this.compileStatements(nextXml);
-        nextXml = nextXml.concat("</statements>");
-
-        // The currentToken is now '}'. Append and advance
-        nextXml = nextXml.concat(this.xmlWriter.getSymbol());
-        this.tokenizer.advance();
-
-        return nextXml;
+        // Regardless, this is the end of the if-statement. Return control to compileStatements()
+        this.vmWriter.writeLabel(ifStatementEnd, labelIndex);
+        return;
     }
 
     /** Compiles an expression. */
