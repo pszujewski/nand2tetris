@@ -608,21 +608,12 @@ export default class CompilationEngine {
 
         // Needs to determine if we are dealing with a `( expression )` where the <term> is the wrapped expression
         if (tokenState.value === Symbol.ParenRight) {
-            let nextXml = xml.concat(this.xmlWriter.getSymbol());
+            // Ignore parens. Compile the expression within the parens. Stop at ")".
             this.tokenizer.advance();
+            this.compileExpression(Symbol.ParenLeft);
 
-            // Compile the expression within the parens. Stop at ")"
-            // DO NOT ADD <term> TAGS HERE!!!!
-            nextXml = nextXml.concat("<expression>");
-            nextXml = this.compileExpression(nextXml, Symbol.ParenLeft);
-            nextXml = nextXml.concat("</expression>");
-
-            // Append the ')' which is a part of this 'term' and advance()
-            // since we appended the currentToken
-            nextXml = nextXml.concat(this.xmlWriter.getSymbol());
             this.tokenizer.advance();
-
-            return nextXml;
+            return;
         }
 
         // Else return <integerConstant> if isIntConst
@@ -645,6 +636,7 @@ export default class CompilationEngine {
         }
 
         if (tokenState.isIdentifier) {
+            // Resolve the identifier and push it to the top of the stack
             const identifierName = this.tokenizer.getIdentifier();
 
             const index: number = this.identifierTable.indexOf(identifierName);
@@ -663,6 +655,7 @@ export default class CompilationEngine {
     }
 
     // Null and False are mapped to the constant 0; True to the constant -1
+    // The 'this' context is identified using the pointer segment at index '0'
     private compileTermKeyword(): void {
         const keyword = this.tokenizer.getKeyword();
 
@@ -676,7 +669,6 @@ export default class CompilationEngine {
                 this.vmWriter.writeArithmetic(VMCommand.Neg);
                 break;
             case Keyword.This:
-                // The 'this' context is identified using the pointer segment at inext '0'
                 this.vmWriter.writePush(Segment.POINTER, 0);
                 break;
             default:
