@@ -240,7 +240,10 @@ export default class CompilationEngine {
                 kind: VariableKind.VAR,
             };
 
+            // Advance to the 'type' and compilethe var dec
+            this.tokenizer.advance();
             this.compileVarDec(localVariable);
+
             // the currentToken will now be pointing at the ';' so advance()
             this.tokenizer.advance();
             return this.compileSubroutineBody();
