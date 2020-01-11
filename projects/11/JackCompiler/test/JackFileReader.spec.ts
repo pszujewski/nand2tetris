@@ -1,9 +1,9 @@
-import { expect } from "chai";
-import JackFileReader from "../src/JackTokenizer/JackFileReader";
+//import { expect } from "chai";
+//import JackFileReader from "../src/JackTokenizer/JackFileReader";
 import JackAnalyzer from "../src/JackAnalyzer";
 
 describe("JackFileReader", () => {
-    let reader: JackFileReader;
+    //let reader: JackFileReader;
 
     // it("Should parse Jack Files into input tokens array", async () => {
     //     let result: string[];
@@ -23,7 +23,7 @@ describe("JackFileReader", () => {
         let JA: JackAnalyzer;
 
         try {
-            JA = new JackAnalyzer("../../../ExpressionLessSquare");
+            JA = new JackAnalyzer("../../../Seven");
             await JA.analyze();
         } catch (err) {
             console.log(err.message);

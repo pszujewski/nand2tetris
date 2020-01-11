@@ -55,6 +55,7 @@ export default class CompilationEngine {
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
+        // OR IF POINTER HAS GONE TOO FAR > length of elements?
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             // Compilation finished
             return;
@@ -72,6 +73,7 @@ export default class CompilationEngine {
 
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
             // The start of the class. We are just begining to compile the body
+            return this.compileClass();
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
@@ -529,11 +531,20 @@ export default class CompilationEngine {
         // "Op" or "Unary Op."
 
         if (SymbolTable.isOp(this.tokenizer)) {
-            const vmOp: VMCommand = SymbolTable.getVMOperation(currentToken);
             this.tokenizer.advance();
-
             this.compileExpression(stopAtToken);
-            return this.vmWriter.writeArithmetic(vmOp);
+
+            if (SymbolTable.isMultiply(currentToken)) {
+                this.vmWriter.writeCall("Math.multiply", 2);
+            } else if (SymbolTable.isDivide(currentToken)) {
+                this.vmWriter.writeCall("Math.divide", 2);
+            } else {
+                const vmOp: VMCommand = SymbolTable.getVMOperation(
+                    currentToken
+                );
+                this.vmWriter.writeArithmetic(vmOp);
+            }
+            return;
         }
 
         // The currentToken must now be the start of a <term>
@@ -625,9 +636,25 @@ export default class CompilationEngine {
 
         // Else return <stringConstant> if isStringConst
         if (tokenState.isStringConst) {
-            const nextXml = xml.concat(this.xmlWriter.getStringConst());
+            const val: string = this.tokenizer.getStringVal();
+            this.vmWriter.writePush(Segment.CONST, val.length);
+
+            // This constructor will return the 'this' pointer for the Str to top of stack
+            this.vmWriter.writeCall("String.new", 1);
+            const chars: string[] = val.split("");
+
+            chars.forEach(c => {
+                const asciiCode: number = c.charCodeAt(0);
+                this.vmWriter.writePush(Segment.CONST, asciiCode);
+
+                this.vmWriter.writeCall("String.appendChar", 2); // method
+                // Pop the void return value off thetop of the stack
+                this.vmWriter.writePop(Segment.TEMP, 2);
+            });
+
+            // Advance past the string
             this.tokenizer.advance();
-            return nextXml;
+            return;
         }
 
         // Else return <keyword> if isKeywordConst

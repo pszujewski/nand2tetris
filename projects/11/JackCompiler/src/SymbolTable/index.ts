@@ -132,6 +132,14 @@ export default class SymbolTable {
         }
     }
 
+    static isMultiply(char: string): boolean {
+        return char === Symbol.Times;
+    }
+
+    static isDivide(char: string): boolean {
+        return char === Symbol.SlashRight;
+    }
+
     static getVMUnaryOp(char: string): VMCommand {
         switch (char) {
             case "~":

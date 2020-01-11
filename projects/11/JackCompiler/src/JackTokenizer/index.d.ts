@@ -9,6 +9,7 @@ export default class JackTokenizer {
     isFirstTokenClassKeyword(): boolean;
     hasMoreTokens(): boolean;
     advance(): void;
+    getTokenAt(idx: number): string;
     private advanceLookAhead;
     lookAhead(): string;
     getTokenType(): TokenType;

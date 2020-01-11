@@ -1,10 +1,12 @@
 import JackTokenizer from "../JackTokenizer";
 export default class CompilationEngine {
     private tokenizer;
-    private xmlWriter;
+    private vmSegment;
+    private identifierTable;
+    private vmWriter;
     constructor(tokenizer: JackTokenizer, writeToPath: string);
-    compile(): void;
-    compileClass(xmlRoot?: string): string;
+    compile(): Promise<void>;
+    compileClass(): void;
     private compileClassVarDec;
     private compileSubroutine;
     private compileParameterList;
@@ -16,9 +18,9 @@ export default class CompilationEngine {
     private compileWhile;
     private compileReturn;
     private compileIf;
-    private compileConditional;
     private compileExpression;
     private compileTerm;
+    private compileTermKeyword;
     private compileSubroutineCall;
     private compileExpressionList;
 }
