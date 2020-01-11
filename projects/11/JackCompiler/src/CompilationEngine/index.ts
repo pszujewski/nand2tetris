@@ -51,11 +51,15 @@ export default class CompilationEngine {
 
     /** Compiles a complete class */
     public compileClass(): void {
+        // base case
+        if (!this.tokenizer.hasMoreTokens()) {
+            return;
+        }
+
         this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
-        // OR IF POINTER HAS GONE TOO FAR > length of elements?
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             // Compilation finished
             return;
@@ -646,10 +650,7 @@ export default class CompilationEngine {
             chars.forEach(c => {
                 const asciiCode: number = c.charCodeAt(0);
                 this.vmWriter.writePush(Segment.CONST, asciiCode);
-
-                this.vmWriter.writeCall("String.appendChar", 2); // method
-                // Pop the void return value off thetop of the stack
-                this.vmWriter.writePop(Segment.TEMP, 2);
+                this.vmWriter.writeCall("String.appendChar", 2); // method returns its 'this'
             });
 
             // Advance past the string

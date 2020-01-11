@@ -23,7 +23,7 @@ export default class JackTokenizer {
 
     /** Returns true if we have more tokens in the input */
     public hasMoreTokens(): boolean {
-        return this.pointer < this.syntacticElements.length;
+        return this.pointer + 1 < this.syntacticElements.length;
     }
 
     /** Gets the next token from the input and makes it the current token. */

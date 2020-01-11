@@ -109,7 +109,7 @@ export default class VMWriter {
     }
 
     public writeLocalsCountToFunctionDefinition(nLocals: number) {
-        this.output.replace(/{nLocals}/, nLocals.toString());
+        this.output = this.output.replace(/{nLocals}/, nLocals.toString());
     }
 
     /**
@@ -127,7 +127,7 @@ export default class VMWriter {
     }
 
     private addToOutput(toAdd: string) {
-        this.output.concat(`${toAdd}\r\n`);
+        this.output = this.output.concat(`${toAdd}\r\n`);
     }
 
     private isValidArithmetic(command: VMCommand): boolean {
