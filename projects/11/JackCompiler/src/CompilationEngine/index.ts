@@ -39,6 +39,7 @@ export default class CompilationEngine {
     public compile(): Promise<void> {
         try {
             if (this.tokenizer.isFirstTokenClassKeyword()) {
+                this.tokenizer.advance(); // advance to first token
                 this.compileClass();
                 return this.vmWriter.close();
             } else {
@@ -56,37 +57,42 @@ export default class CompilationEngine {
             return;
         }
 
-        this.tokenizer.advance();
         const tokenState: CurrentToken = this.tokenizer.getCurrentTokenState();
 
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             // Compilation finished
+            this.tokenizer.advance(); // done
             return;
         }
 
         if (KeywordTable.isClass(tokenState.value)) {
             // Continue compilation. We are compiling the root class
+            this.tokenizer.advance();
             return this.compileClass();
         }
 
         if (tokenState.isIdentifier) {
             this.identifierTable.setNameOfClass(tokenState.value);
+            this.tokenizer.advance();
             return this.compileClass();
         }
 
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyRight) {
             // The start of the class. We are just begining to compile the body
+            this.tokenizer.advance();
             return this.compileClass();
         }
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
             this.compileClassVarDec();
+            this.tokenizer.advance();
             return this.compileClass();
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
             this.compileSubroutine();
+            this.tokenizer.advance();
             return this.compileClass();
         }
 
