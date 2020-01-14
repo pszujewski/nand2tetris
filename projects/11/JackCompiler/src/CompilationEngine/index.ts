@@ -344,7 +344,7 @@ export default class CompilationEngine {
         this.compileSubroutineCall();
 
         // Pop the 'void' constant '0' and 'ignore' by popping to temp (?)
-        this.vmWriter.writePop(Segment.TEMP, 2);
+        this.vmWriter.writePop(Segment.TEMP, 0);
 
         // CurrentToken should now be ";" Close out the 'do' statement
         this.tokenizer.advance();
@@ -376,17 +376,13 @@ export default class CompilationEngine {
             // The identifier is an 'array.' Advance past the bracket symbol (outside the expression)
             this.tokenizer.advance();
 
+            // use compileExpression to push the array index expression to the top of stack
+            // Add them together 'base of array' + index value. Top of the stack now holds the exact memory address we need to manipulate
+            this.compileExpression(Symbol.BracketLeft);
+
             // 'Push' array to set 'that' pointer. This is The memory address of the array's 'base'
             this.vmWriter.writePush(seg, idx);
-
-            // use compileExpression to push the array index expression to the top of stack
-            // Add them together 'base of array' + index value
-            this.compileExpression(Symbol.BracketLeft);
             this.vmWriter.writeArithmetic(VMCommand.Add);
-
-            // Top of the stack now holds the exact memory address we need to manipulate
-            // Pop it to segment 'pointer 1'
-            this.vmWriter.writePop(Segment.POINTER, 1); // 'that' pointer for arrays
 
             // The currentToken is now "]". advance to the '=' symbol
             this.tokenizer.advance();
@@ -394,6 +390,16 @@ export default class CompilationEngine {
             // The currentToken is now "=". Advance.
             this.tokenizer.advance();
             this.compileExpression(Symbol.Semi); // Until currentToken = ";"
+
+            // Pop the 'compiled expression' top stack value to temp
+            this.vmWriter.writePop(Segment.TEMP, 0);
+
+            // Now the top of the stack is the address of the array index calculated earlier
+            // Pop it to segment 'pointer 1'
+            this.vmWriter.writePop(Segment.POINTER, 1); // 'that' pointer for arrays
+
+            // Then push the temp value back on top
+            this.vmWriter.writePush(Segment.TEMP, 0);
 
             // The value to save is now on the top of the stack. 'that 0' gets its address from pointer 1.
             this.vmWriter.writePop(Segment.THAT, 0);
@@ -593,12 +599,12 @@ export default class CompilationEngine {
             const idx: number = this.identifierTable.indexOf(identifier);
             const seg: Segment = this.vmSegment.getFromKind(kind);
 
-            // 'Push' array to set 'that' pointer. This is The memory address of the array's 'base'
-            this.vmWriter.writePush(seg, idx);
-
             // Advance to the expression start and compile the expression between the brackets. Stop at ']'
             this.tokenizer.advance();
             this.compileExpression(Symbol.BracketLeft);
+
+            // 'Push' array to set 'that' pointer. This is The memory address of the array's 'base'
+            this.vmWriter.writePush(seg, idx);
 
             // add together to get correct 'that' pointer and pop it to 'pointer 1' for 'that' segment
             this.vmWriter.writeArithmetic(VMCommand.Add);
