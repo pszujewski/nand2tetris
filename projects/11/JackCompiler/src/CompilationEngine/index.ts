@@ -62,7 +62,6 @@ export default class CompilationEngine {
         // base case
         if (tokenState.isSymbol && tokenState.value === Symbol.CurlyLeft) {
             // Compilation finished
-            this.tokenizer.advance(); // done
             return;
         }
 
@@ -86,13 +85,13 @@ export default class CompilationEngine {
 
         if (KeywordTable.isClassVarDec(tokenState.value)) {
             this.compileClassVarDec();
+            // the current token is the Semi, end of varDec. Advance
             this.tokenizer.advance();
             return this.compileClass();
         }
 
         if (KeywordTable.isSubroutineDec(tokenState.value)) {
             this.compileSubroutine();
-            this.tokenizer.advance();
             return this.compileClass();
         }
 
