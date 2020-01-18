@@ -25,5 +25,6 @@ export default class IdentifierTable {
     exists(name: string): boolean;
     indexOf(name: string): number;
     private getIdentifierRecordFromName;
+    private getIdentifiersList;
 }
 //# sourceMappingURL=IdentifierTable.d.ts.map

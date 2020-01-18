@@ -99,10 +99,10 @@ export default class SymbolTable {
             // Update this to if beforeToken != Parenright then, true this is an Op
             // If the beforeToken is ParenLeft however at this point then this is a negate
             // Unary Op and NOT an OP
-            const isNotParenRight: boolean = beforeToken !== Symbol.ParenRight;
-            if (isNotParenRight) return true;
+            const isParenLeft: boolean = beforeToken === Symbol.ParenLeft;
+            if (isParenLeft) return false;
 
-            return SymbolTable.includes(beforeToken);
+            return !SymbolTable.includes(beforeToken);
         }
 
         // Fallback is to just confirm this is indeed an 'Op' token

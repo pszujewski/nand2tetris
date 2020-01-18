@@ -709,8 +709,8 @@ export default class CompilationEngine {
                 this.vmWriter.writePush(Segment.CONST, 0);
                 break;
             case Keyword.True:
-                this.vmWriter.writePush(Segment.CONST, 1);
-                this.vmWriter.writeArithmetic(VMCommand.Neg);
+                this.vmWriter.writePush(Segment.CONST, 0);
+                this.vmWriter.writeArithmetic(VMCommand.Not);
                 break;
             case Keyword.This:
                 this.vmWriter.writePush(Segment.POINTER, 0);

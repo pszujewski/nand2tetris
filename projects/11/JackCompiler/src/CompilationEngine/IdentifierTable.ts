@@ -175,7 +175,15 @@ export default class IdentifierTable {
     }
 
     public indexOf(name: string): number {
-        return this.getIdentifierRecordFromName(name).index;
+        const kind: VariableKind = this.kindOf(name);
+        const identifiers: Identifier[] = this.getIdentifiersList(kind);
+
+        for (let i = 0; i < identifiers.length; i++) {
+            if (identifiers[i].name === name.trim()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private getIdentifierRecordFromName(
@@ -201,5 +209,22 @@ export default class IdentifierTable {
             },
             index: -1,
         };
+    }
+
+    private getIdentifiersList(kind: VariableKind): Identifier[] {
+        switch (kind) {
+            case VariableKind.FIELD:
+                return this.scope.classLevel.field;
+            case VariableKind.STATIC:
+                return this.scope.classLevel.static;
+            case VariableKind.ARG:
+                return this.scope.subroutineLevel.argument;
+            case VariableKind.VAR:
+                return this.scope.subroutineLevel.varLocal;
+            case VariableKind.NONE:
+                return [];
+            default:
+                throw new Error("Invalid variable kind" + kind);
+        }
     }
 }
