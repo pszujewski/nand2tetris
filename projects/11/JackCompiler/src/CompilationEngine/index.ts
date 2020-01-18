@@ -674,7 +674,9 @@ export default class CompilationEngine {
 
         // Else return <keyword> if isKeywordConst
         if (tokenState.isKeyword) {
-            return this.compileTermKeyword();
+            this.compileTermKeyword();
+            this.tokenizer.advance();
+            return;
         }
 
         if (tokenState.isIdentifier) {
