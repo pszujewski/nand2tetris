@@ -89,18 +89,16 @@ export default class SymbolTable {
         // Make sure the Minus is not actually a UnaryOp
 
         const pointer: number = jackTokenizer.getPointer();
+
         const lastPointer: number = pointer - 1;
+        //const nextPointer: number = pointer + 1;
 
         if (isOp && jackTokenizer.isValidPointerValue(lastPointer)) {
-            // if the 'beforeToken' is a "Symbol" then this must be a "UnaryOp"
             const beforeToken = jackTokenizer.getTokenAtPointer(lastPointer);
-            // If the 'beforeToken' is a "Symbol" then this is NOT an "Op". It is a "UnaryOp"
+            //const nextToken = jackTokenizer.getTokenAtPointer(nextPointer);
 
-            // Update this to if beforeToken != Parenright then, true this is an Op
-            // If the beforeToken is ParenLeft however at this point then this is a negate
-            // Unary Op and NOT an OP
             const isParenLeft: boolean = beforeToken === Symbol.ParenLeft;
-            if (isParenLeft) return false;
+            if (isParenLeft) return true;
 
             return !SymbolTable.includes(beforeToken);
         }
