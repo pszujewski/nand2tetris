@@ -1,1 +1,5 @@
-set RAM[8000] 5;
+set RAM[8000] 23;
+
+repeat {
+    vmstep;
+}
