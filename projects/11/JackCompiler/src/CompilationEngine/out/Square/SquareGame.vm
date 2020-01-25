@@ -15,7 +15,7 @@ function SquareGame.dispose 0
 push argument 0
 pop pointer 0
 push this 0
-call square.dispose 1
+call Square.dispose 1
 pop temp 0
 push pointer 0
 call Memory.deAlloc 1
@@ -31,7 +31,7 @@ eq
 not
 if-goto else_body_start_0
 push this 0
-call square.moveUp 1
+call Square.moveUp 1
 pop temp 0
 goto if_statement_end_0
 label else_body_start_0
@@ -42,7 +42,7 @@ eq
 not
 if-goto else_body_start_1
 push this 0
-call square.moveDown 1
+call Square.moveDown 1
 pop temp 0
 goto if_statement_end_1
 label else_body_start_1
@@ -53,7 +53,7 @@ eq
 not
 if-goto else_body_start_2
 push this 0
-call square.moveLeft 1
+call Square.moveLeft 1
 pop temp 0
 goto if_statement_end_2
 label else_body_start_2
@@ -64,7 +64,7 @@ eq
 not
 if-goto else_body_start_3
 push this 0
-call square.moveRight 1
+call Square.moveRight 1
 pop temp 0
 goto if_statement_end_3
 label else_body_start_3
@@ -92,7 +92,8 @@ not
 if-goto while_end_5
 call Keyboard.keyPressed 0
 pop local 0
-call SquareGame.moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto while_start_5
 label while_end_5
@@ -113,7 +114,7 @@ eq
 not
 if-goto else_body_start_7
 push this 0
-call square.decSize 1
+call Square.decSize 1
 pop temp 0
 goto if_statement_end_7
 label else_body_start_7
@@ -124,7 +125,7 @@ eq
 not
 if-goto else_body_start_8
 push this 0
-call square.incSize 1
+call Square.incSize 1
 pop temp 0
 goto if_statement_end_8
 label else_body_start_8
@@ -178,7 +179,8 @@ not
 if-goto while_end_13
 call Keyboard.keyPressed 0
 pop local 0
-call SquareGame.moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto while_start_13
 label while_end_13

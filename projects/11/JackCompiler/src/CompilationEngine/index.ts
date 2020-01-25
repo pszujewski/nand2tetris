@@ -734,21 +734,41 @@ export default class CompilationEngine {
         const isMethod: boolean =
             isPeriod && this.identifierTable.exists(identifierTokenInCall);
 
+        let isMethodInCurrentClass: boolean = false;
+
         let vmNameOfFunc = "";
 
-        if (isPeriod) {
-            // then it's a method on a class instance or a static function on a class
-            // Do same thing regardless
+        if (isPeriod && !isMethod) {
+            // then it's a static function on a class
             vmNameOfFunc = `${identifierTokenInCall}.`;
             this.tokenizer.advance();
 
             // Append the function | method name identifier to the name
             vmNameOfFunc = vmNameOfFunc.concat(this.tokenizer.getIdentifier());
             this.tokenizer.advance();
+        } else if (isPeriod && isMethod) {
+            // Advance past the period
+            this.tokenizer.advance();
+
+            // Identify the identifier's class 'type'
+            const t: string = this.identifierTable.typeOf(
+                identifierTokenInCall
+            );
+            vmNameOfFunc = `${t}.`;
+
+            // Append the function | method name identifier to the name
+            vmNameOfFunc = vmNameOfFunc.concat(this.tokenizer.getIdentifier());
+            this.tokenizer.advance();
         } else {
-            // it should be currentClass.identifierName
+            // it should be currentClass.identifierName. This is always a method
+            // http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Differentiating-functions-methods-and-constructors-td4026430.html
             const currentClass: string = this.identifierTable.getNameOfClass();
             vmNameOfFunc = `${currentClass}.${identifierTokenInCall}`;
+
+            // Since this is a method we are calling, we must re-push the 'this'
+            // context to 'pointer' segment 0
+            isMethodInCurrentClass = true;
+            this.vmWriter.writePush(Segment.POINTER, 0);
         }
 
         if (this.tokenizer.getCurrentToken() !== Symbol.ParenRight) {
@@ -772,7 +792,7 @@ export default class CompilationEngine {
         }
 
         // compile expression list
-        const initialCt = isMethod ? 1 : 0;
+        const initialCt = isMethod || isMethodInCurrentClass ? 1 : 0;
         const argsCt: number = this.compileExpressionList(initialCt);
 
         // The current token should now be ParenLeft. That's how

@@ -8,7 +8,8 @@ push argument 1
 pop this 1
 push argument 2
 pop this 2
-call Square.draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 push pointer 0
 return
@@ -73,13 +74,15 @@ lt
 and
 not
 if-goto else_body_start_0
-call Square.erase 0
+push pointer 0
+call Square.erase 1
 pop temp 0
 push this 2
 push constant 2
 add
 pop this 2
-call Square.draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 goto if_statement_end_0
 label else_body_start_0
@@ -94,13 +97,15 @@ push constant 2
 gt
 not
 if-goto else_body_start_1
-call Square.erase 0
+push pointer 0
+call Square.erase 1
 pop temp 0
 push this 2
 push constant 2
 sub
 pop this 2
-call Square.draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 goto if_statement_end_1
 label else_body_start_1
@@ -123,7 +128,7 @@ push this 1
 push this 2
 add
 push constant 1
-neg
+sub
 push this 0
 push this 2
 add
@@ -191,7 +196,7 @@ push this 1
 push this 2
 add
 push constant 1
-neg
+sub
 push this 0
 push this 2
 add
@@ -220,7 +225,7 @@ push this 0
 push this 2
 add
 push constant 1
-neg
+sub
 push this 1
 push this 0
 push this 2
@@ -288,7 +293,7 @@ push this 0
 push this 2
 add
 push constant 1
-neg
+sub
 push this 1
 push this 0
 push this 2
