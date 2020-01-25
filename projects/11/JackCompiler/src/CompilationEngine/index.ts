@@ -734,7 +734,7 @@ export default class CompilationEngine {
         const isMethod: boolean =
             isPeriod && this.identifierTable.exists(identifierTokenInCall);
 
-        let isMethodInCurrentClass: boolean = false;
+        let isMethodInCurrentClass = false;
 
         let vmNameOfFunc = "";
 
