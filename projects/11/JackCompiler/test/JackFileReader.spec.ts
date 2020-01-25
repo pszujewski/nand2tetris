@@ -23,7 +23,7 @@ describe("JackFileReader", () => {
         let JA: JackAnalyzer;
 
         try {
-            JA = new JackAnalyzer("../../../Square");
+            JA = new JackAnalyzer("../../../Pong");
             await JA.analyze();
         } catch (err) {
             console.log(err.message);

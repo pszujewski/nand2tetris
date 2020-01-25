@@ -3,9 +3,6 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/11/Pong/Main.jack
 
-/**
- * The main class of the Pong game.
- */
 class Main {
 
     /** Initializes a Pong game and starts running it. */

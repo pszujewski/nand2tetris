@@ -3,9 +3,6 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/11/Pong/PongGame.jack
 
-/**
- * Represents a Pong game.
- */
 class PongGame {
 
     static PongGame instance; // the singelton, a Pong game instance     
@@ -57,8 +54,6 @@ class PongGame {
         return instance;
     }
 
-    /** Starts the game, and andles inputs from the user that control
-     *  the bat's movement direction. */
     method void run() {
         var char key;
 
@@ -96,12 +91,6 @@ class PongGame {
         return;
     }
 
-    /**
-     * Handles ball movement, including bouncing.
-     * If the ball bounces off a wall, finds its new direction.
-     * If the ball bounces off the bat, increases the score by one
-     * and shrinks the bat's size, to make the game more challenging. 
-     */
     method void moveBall() {
         var int bouncingDirection, batLeft, batRight, ballLeft, ballRight;
 
