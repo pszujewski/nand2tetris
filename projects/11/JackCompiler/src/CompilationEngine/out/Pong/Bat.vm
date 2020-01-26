@@ -12,7 +12,8 @@ push argument 3
 pop this 3
 push constant 2
 pop this 4
-call Bat.show 0
+push pointer 0
+call Bat.show 1
 pop temp 0
 push pointer 0
 return
@@ -31,7 +32,8 @@ push constant 0
 not
 call Screen.setColor 1
 pop temp 0
-call Bat.draw 0
+push pointer 0
+call Bat.draw 1
 pop temp 0
 push constant 0
 return
@@ -41,7 +43,8 @@ pop pointer 0
 push constant 0
 call Screen.setColor 1
 pop temp 0
-call Bat.draw 0
+push pointer 0
+call Bat.draw 1
 pop temp 0
 push constant 0
 return
@@ -82,11 +85,13 @@ return
 function Bat.setWidth 0
 push argument 0
 pop pointer 0
-call Bat.hide 0
+push pointer 0
+call Bat.hide 1
 pop temp 0
 push argument 1
 pop this 2
-call Bat.show 0
+push pointer 0
+call Bat.show 1
 pop temp 0
 push constant 0
 return
@@ -188,7 +193,7 @@ push this 0
 push this 2
 add
 push constant 3
-neg
+sub
 push this 1
 push this 0
 push this 2

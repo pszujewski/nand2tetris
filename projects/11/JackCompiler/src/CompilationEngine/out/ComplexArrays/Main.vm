@@ -79,7 +79,7 @@ push that 0
 sub
 push constant 2
 call Main.double 1
-neg
+sub
 push constant 1
 add
 push local 1

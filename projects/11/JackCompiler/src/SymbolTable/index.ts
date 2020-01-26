@@ -90,17 +90,18 @@ export default class SymbolTable {
 
         const pointer: number = jackTokenizer.getPointer();
 
-        const lastPointer: number = pointer - 1;
-        //const nextPointer: number = pointer + 1;
+        const lastPointer = pointer - 1;
 
-        if (isOp && jackTokenizer.isValidPointerValue(lastPointer)) {
+        if (jackTokenizer.isValidPointerValue(lastPointer)) {
             const beforeToken = jackTokenizer.getTokenAtPointer(lastPointer);
-            //const nextToken = jackTokenizer.getTokenAtPointer(nextPointer);
 
-            const isParenLeft: boolean = beforeToken === Symbol.ParenLeft;
-            if (isParenLeft) return true;
+            const unaryOpMarkers: string[] = [
+                Symbol.Comma,
+                Symbol.Equals,
+                Symbol.ParenRight,
+            ];
 
-            return !SymbolTable.includes(beforeToken);
+            return !unaryOpMarkers.includes(beforeToken);
         }
 
         // Fallback is to just confirm this is indeed an 'Op' token
