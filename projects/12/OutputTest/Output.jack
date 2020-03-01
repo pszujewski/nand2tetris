@@ -45,6 +45,25 @@ class Output {
         // Assigns the bitmap for each character in the charachter set.
         // The first parameter is the character index, the next 11 numbers
         // are the values of each row in the frame that represents this character.
+
+        /**
+            From Chapter 4, The Hack computer includes a blackand white screen organized
+            as 256 rows of 512 pixels, with each pixel corresponding to a single bit. If
+            the bit is 1, the pixel inquestion is black. If it's 0 it's white. Each row in the screen
+            is therefore mapped to 32 registers since each register holds one 16-bit word: 32 X 16 = 512 pixels
+            See also chapter 5 section 2.4
+        */
+
+        // For each printable ASCII character, an array holds its bitmap. The array consists
+        // of 11 entries, each corresponding to a row of pixels that render the character's image
+        // in the j-th row of its bitmap.
+        // For Output.create(66,31,51,51,51,31,51,51,51,31,0,0), 66 is the 'id' of this bitmap.
+        // Then 31 represents the first row in the 11 x 8 character 'box.' 31 in 16-bit binary is
+        // 0000000000011111. This is mapped onto the box from Least-Significant Bit (LSB: which is the rightmost
+        // bit) to the Most-Significant Bit (MSB: which is the leftmost bit in the string). So,for the first row
+        // of this bit map, the first 5 pixels will be black, and the remaining 3 will be white.
+        // The last 8 have no significance. 
+
         do Output.create(32,0,0,0,0,0,0,0,0,0,0,0);          //
         do Output.create(33,12,30,30,30,12,12,0,12,12,0,0);  // !
         do Output.create(34,54,54,20,0,0,0,0,0,0,0,0);       // "
@@ -216,13 +235,21 @@ class Output {
             return;
         }
 
+        // From Chapter 5, Figure 5.4:
+        // Each row is in the physical screen is represented by 32 consecutive
+        // 16-bit words (512 bits/pixels per row), starting at the top-left corner of 
+        // the screen. There are 256 rows in total. Thus the pixel at row 'r' from the top and column 'c' from the left 
+        // (0 <= r <= 255, 0 <= c <= 511) reflects the c % 16 bit (counting from LSB to MSB) of the word
+        // found at Screen[r * 32 + c/16], where Screen = RAM[16384]
         let addr = 16384 + ((cursorX / 16) + cursorY);
+        // the addr variable holds the address to the top row of the next 11X8 'box' in the screen 
         let addr_temp = addr;
         let character = Output.getMap(c);
         let i = 0;
         let is_right_segment = (Output.mod(cursorX, 16) > 0);
 
         // print
+        // charHeight = 11, which is total number of rows in this cahracter's 'box'
         while(i < charHeight) {
             if (is_right_segment) {
                 let input_char = character[i] & (-256);

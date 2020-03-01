@@ -16,7 +16,7 @@ class Memory {
     /** Initializes the class. */
     function void init() {
       let ram = 0;
-      let heap = 2048;
+      let heap = 2048;        // where the heap starts
       let freelist = 0;
       let heap[0] = 0;        // next
       let heap[1] = 14335;    // length
